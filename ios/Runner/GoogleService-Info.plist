@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>203852831506-n4neflrv25v941n3ohktpa8ausabfbsi.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.203852831506-n4neflrv25v941n3ohktpa8ausabfbsi</string>
+	<key>API_KEY</key>
+	<string>AIzaSyDaWI345Sli5GRmPLQHNmvBJsIv2qpLjR4</string>
+	<key>GCM_SENDER_ID</key>
+	<string>203852831506</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.taluewfood.taluewapp</string>
+	<key>PROJECT_ID</key>
+	<string>foodfridge-18df3</string>
+	<key>STORAGE_BUCKET</key>
+	<string>foodfridge-18df3.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:203852831506:ios:5f65cebdca0734f88eb1cb</string>
+	<key>DATABASE_URL</key>
+	<string>https://foodfridge-18df3.firebaseio.com</string>
+</dict>
+</plist>
