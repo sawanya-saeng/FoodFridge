@@ -16,7 +16,7 @@ class _findmenu_page extends State<findmenu_page> {
             alignment: Alignment.center,
             color: Color(0xffB15B25),
             child: Text(
-              'หาเมนูอาหาร..',
+              'หาเมนูอาหาร',
               style: TextStyle(color: Colors.white, fontSize: 35),
             )),
         Container(
