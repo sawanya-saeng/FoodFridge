@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import './FridgePageComponents/MeatPage.dart';
 
 class fridge_page extends StatefulWidget {
   @override
@@ -15,6 +16,8 @@ class _fridge_page extends State<fridge_page> {
     super.initState();
     click = 0;
   }
+
+  List<Widget> pages = [meat_page()];
 
   @override
   Widget build(BuildContext context) {
@@ -117,6 +120,11 @@ class _fridge_page extends State<fridge_page> {
             ],
           ),
         ),
+        Expanded(
+          child: Container(
+            child: pages[0],
+          ),
+        )
       ],
     );
   }

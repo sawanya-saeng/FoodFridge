@@ -4,6 +4,7 @@ import 'Pages/LoginPage.dart';
 void main() {
   runApp(
     MaterialApp(
+      title: 'FoodFridge',
       theme: ThemeData(
         fontFamily: 'taluewFont'
       ),
