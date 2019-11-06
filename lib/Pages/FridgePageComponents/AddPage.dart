@@ -221,7 +221,9 @@ class _add_page extends State<add_page> {
                     ),
                     GestureDetector(
                       onTap: (){
-                        confirmData();
+                        confirmData().then((docs){
+                          Navigator.of(context).pop();
+                        });
                       },
                       child: Container(
                         padding: EdgeInsets.only(top: 50),
