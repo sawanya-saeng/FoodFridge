@@ -166,61 +166,78 @@ class _user_page extends State<user_page> {
                           alignment: Alignment.center,
                         ),
                         Container(
-                            child: ListView(
-                          padding: EdgeInsets.all(20),
-                          children: <Widget>[
-                            Container(
-                              child: Row(
-                                children: <Widget>[
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      border: Border.all(color: Colors.black),
-                                    ),
-                                    height: 120,
-                                    width: 160,
-                                    child: Image.asset('assets/write.png',fit: BoxFit.cover,),
-                                  ),
-                                  Expanded(
-                                    child: Container(
-                                      padding: EdgeInsets.only(left: 15),
-                                      child: Column(
-                                        children: <Widget>[
-                                          Container(
-                                            child: Text(
-                                              'ผัดเต้าหู้มะเขือเทศ',
-                                              style: TextStyle(
-                                                  color: Color(0xff914d1f),
-                                                  fontSize: 30),
-                                            ),
-                                          ),
-                                          Container(
-                                            child: Row(
-                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                              children: <Widget>[
-                                                Expanded(
-                                                  child: Container(
-                                                    alignment: Alignment.center,
-                                                    height: 40,
-                                                    color: Color(0xff914d1f),
-                                                    child: Text("วิธีการทำ",style: TextStyle(color: Colors.white,fontSize: 20),),
-                                                  ),
-                                                ),
-                                                Container(
-                                                  margin: EdgeInsets.only(left: 10),
-                                                  child: Icon(Icons.restore_from_trash,size: 50,color: Colors.lightGreen,),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ],
+                          child: ListView(
+                            padding: EdgeInsets.all(20),
+                            children: <Widget>[
+                              Container(
+                                child: Row(
+                                  children: <Widget>[
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        border: Border.all(color: Colors.black),
+                                      ),
+                                      height: 120,
+                                      width: 160,
+                                      child: Image.asset(
+                                        'assets/write.png',
+                                        fit: BoxFit.cover,
                                       ),
                                     ),
-                                  ),
-                                ],
+                                    Expanded(
+                                      child: Container(
+                                        padding: EdgeInsets.only(left: 15),
+                                        child: Column(
+                                          children: <Widget>[
+                                            Container(
+                                              child: Text(
+                                                'ผัดเต้าหู้มะเขือเทศ',
+                                                style: TextStyle(
+                                                    color: Color(0xff914d1f),
+                                                    fontSize: 30),
+                                              ),
+                                            ),
+                                            Container(
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: <Widget>[
+                                                  Expanded(
+                                                    child: Container(
+                                                      alignment:
+                                                          Alignment.center,
+                                                      height: 40,
+                                                      color: Color(0xff914d1f),
+                                                      child: Text(
+                                                        "วิธีการทำ",
+                                                        style: TextStyle(
+                                                            color: Colors.white,
+                                                            fontSize: 20),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  Container(
+                                                    margin: EdgeInsets.only(
+                                                        left: 10),
+                                                    child: Icon(
+                                                      Icons.restore_from_trash,
+                                                      size: 50,
+                                                      color: Colors.lightGreen,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            )
-                          ],
-                        ))
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                   ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:taluewapp/Pages/ExploredMenuPage.dart';
 import 'package:taluewapp/Pages/ChoosePage.dart';
 import 'MainPage.dart';
 
@@ -108,6 +109,14 @@ class _findmenu_page extends State<findmenu_page> {
                 ),
               ],
             ),
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.only(left: 15,right: 15,bottom: 25,top: 25),
+                child: Container(
+                  child: explored_page(),
+                ),
+              ),
+            )
           ],
         ),
       ],

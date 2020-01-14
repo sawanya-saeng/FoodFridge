@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:taluewapp/Pages/ChooseComponent/MeatChoosePage.dart';
 
 class choose_page extends StatefulWidget {
   @override
@@ -15,7 +16,7 @@ class _choose_page extends State<choose_page> {
     click = 0;
   }
 
-  List<Widget> pages = [];
+  List<Widget> pages = [meat_choose_page()];
 
   @override
   Widget build(BuildContext context) {
@@ -46,15 +47,33 @@ class _choose_page extends State<choose_page> {
                     style: TextStyle(color: Colors.white, fontSize: 35),
                   ),
                 ),
-                GestureDetector(
-                  onTap: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: Container(
-                    child: Icon(
-                      Icons.arrow_back_ios,
-                      color: Colors.white,
-                    ),
+                Container(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: Container(
+                          child: Icon(
+                            Icons.arrow_back_ios,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: (){
+                          Navigator.of(context).pop();
+                        },
+                        child: Container(
+                          child: Icon(
+                            Icons.check_circle,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -155,7 +174,7 @@ class _choose_page extends State<choose_page> {
             ),
             Expanded(
               child: Container(
-//                child: pages[0],
+                child: pages[0],
               ),
             )
           ],
