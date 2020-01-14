@@ -27,6 +27,7 @@ dependencies:
   firebase_auth: ^0.14.0+5
   flutter_cupertino_date_picker: ^1.0.12
   cloud_firestore: ^0.12.9+5
+  image_picker: ^0.6.2
 
 dev_dependencies:
   flutter_test:

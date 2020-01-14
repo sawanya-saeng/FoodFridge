@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:taluewapp/Pages/ChoosePage.dart';
 import 'MainPage.dart';
 
 class findmenu_page extends StatefulWidget {
@@ -41,7 +42,7 @@ class _findmenu_page extends State<findmenu_page> {
                             onTap: () {
                               Navigator.push(context,
                                   MaterialPageRoute(builder: (context) {
-                                return main_page();
+                                return choose_page();
                               }));
                             },
                             child: Container(
