@@ -18,11 +18,7 @@ class _meat_page extends State<meat_page> {
   Future getMeat() async {
     FirebaseUser user = await _auth.currentUser();
     List<DocumentSnapshot> tmp;
-//    await _db.collection('Fridge').where('uid', isEqualTo: user.uid).getDocuments().then((docs){
-//      tmp = docs.documents;
-//    });
-    _db
-        .collection('Fridge')
+    _db.collection('Fridge')
         .where('uid', isEqualTo: user.uid)
         .snapshots()
         .listen((docs) {
@@ -38,6 +34,21 @@ class _meat_page extends State<meat_page> {
     // TODO: implement initState
     super.initState();
     getMeat();
+  }
+
+
+  calculateDate(DateTime date1){
+
+    int date1Day = date1.day;
+    int date1Month = date1.month;
+    int date1Year = date1.year;
+
+    int date2Day = DateTime.now().day;
+    int date2Month = DateTime.now().month;
+    int date2Year = DateTime.now().year;
+
+    return date2Day - date1Day;
+
   }
 
   @override
@@ -136,23 +147,28 @@ class _meat_page extends State<meat_page> {
                                         color: Color(0xffFFA733),
                                         alignment: Alignment.center,
                                         child: Text(
-                                          '11 วัน',
+                                          '${6} วัน',
                                           style: TextStyle(
                                               fontSize: 25,
                                               color: Colors.white),
                                         ),
 //                                child: Text(ingres[index].data['date'].toDate().toString()),
                                       ),
-                                      Container(
-                                        alignment: Alignment.center,
-                                        height: 30,
-                                        child: Text(
-                                          '${ingres[index].data['date'].toDate().day.toString()}/${ingres[index].data['date'].toDate().month.toString()}/${ingres[index].data['date'].toDate().year.toString()}',
-                                          style: TextStyle(
-                                              fontSize: 15,
-                                              color: Colors.white),
+                                      GestureDetector(
+                                        onTap: (){
+                                          calculateDate(ingres[index].data['date'].toDate());
+                                        },
+                                        child: Container(
+                                          alignment: Alignment.center,
+                                          height: 30,
+                                          child: Text(
+                                            '${ingres[index].data['date'].toDate().day.toString()}/${ingres[index].data['date'].toDate().month.toString()}/${ingres[index].data['date'].toDate().year.toString()}',
+                                            style: TextStyle(
+                                                fontSize: 15,
+                                                color: Colors.white),
+                                          ),
+                                          color: Color(0xffFC9002),
                                         ),
-                                        color: Color(0xffFC9002),
                                       ),
                                     ]),
                               ),

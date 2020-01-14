@@ -6,6 +6,16 @@ class user_page extends StatefulWidget {
 }
 
 class _user_page extends State<user_page> {
+  int _currentPage = 0;
+
+  PageController _scrollController;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _scrollController = PageController(initialPage: 0);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,8 +31,146 @@ class _user_page extends State<user_page> {
             )),
         Container(
           alignment: Alignment.center,
-          height: 50,
+          color: Colors.white,
+          height: 160,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Container(
+                alignment: Alignment.center,
+                height: 100,
+                decoration: BoxDecoration(
+                    shape: BoxShape.circle, color: Colors.blueGrey),
+                child: Icon(
+                  Icons.people,
+                  color: Colors.white,
+                ),
+              ),
+              Container(
+                child: Text('Name',
+                    style: TextStyle(color: Colors.black, fontSize: 25)),
+              ),
+            ],
+          ),
         ),
+        Expanded(
+          child: Container(
+            color: Color(0xffFCFCFC),
+            child: Column(
+              children: <Widget>[
+                Container(
+                  child: Row(
+                    children: <Widget>[
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _currentPage = 0;
+                              _scrollController.animateToPage(0,
+                                  duration: Duration(milliseconds: 300),
+                                  curve: Curves.easeIn);
+                            });
+                          },
+                          child: AnimatedContainer(
+                            duration: Duration(milliseconds: 300),
+                            decoration: BoxDecoration(
+                                color: _currentPage == 0
+                                    ? Color(0xffFCFCFC)
+                                    : Color(0xffE0E0E0),
+                                border: Border(
+                                  top: BorderSide(color: Colors.grey),
+                                  right: BorderSide(color: Colors.grey),
+                                  left: BorderSide(color: Colors.grey),
+                                )),
+                            alignment: Alignment.center,
+                            height: 40,
+                            child: Text(
+                              'สูตรอาหารของคุณ',
+                              style:
+                                  TextStyle(color: Colors.black, fontSize: 25),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _currentPage = 1;
+                              _scrollController.animateToPage(1,
+                                  duration: Duration(milliseconds: 300),
+                                  curve: Curves.easeIn);
+                            });
+                          },
+                          child: AnimatedContainer(
+                            duration: Duration(milliseconds: 300),
+                            decoration: BoxDecoration(
+                                color: _currentPage == 1
+                                    ? Color(0xfffcfcfc)
+                                    : Color(0xffE0E0E0),
+                                border: Border(
+                                  top: BorderSide(color: Colors.grey),
+                                  right: BorderSide(color: Colors.grey),
+                                  left: BorderSide(color: Colors.grey),
+                                )),
+                            alignment: Alignment.center,
+                            height: 40,
+                            child: Text(
+                              'เมนูอาหารที่บันทึกไว้',
+                              style:
+                                  TextStyle(color: Colors.black, fontSize: 25),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: Container(
+                    alignment: Alignment.center,
+                    child: PageView(
+                      onPageChanged: (int index){
+                        setState(() {
+                          _currentPage = index;
+                        });
+                      },
+                      controller: _scrollController,
+                      children: <Widget>[
+                        Container(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              Container(
+                                height: 200,
+                                child: Image.asset('assets/write.png'),
+                              ),
+                              Container(
+                                child: Text(
+                                  'เขียนสูตรอาหารเลย',
+                                  style: TextStyle(
+                                      color: Color(0xffA5A5A5), fontSize: 25),
+                                ),
+                              ),
+                            ],
+                          ),
+                          alignment: Alignment.center,
+                        ),
+                        Container(
+                            alignment: Alignment.center,
+                            child: Text(
+                              'ไม่มี',
+                              style:
+                                  TextStyle(color: Color(0xffA5A5A5), fontSize: 30),
+                            )),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        )
       ],
     );
   }

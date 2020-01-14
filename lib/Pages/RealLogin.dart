@@ -13,7 +13,7 @@ final GoogleSignIn _googleSignIn = GoogleSignIn();
 final FirebaseAuth _auth = FirebaseAuth.instance;
 
 Future logInWithGoogle() async {
-  _googleSignIn.signOut();
+//  _googleSignIn.signOut();
   final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
   final GoogleSignInAuthentication googleSignInAuthentication =
       await googleUser.authentication;
