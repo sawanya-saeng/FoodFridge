@@ -40,14 +40,14 @@ class _explored_page extends State<explored_page> {
                       duration: Duration(milliseconds: 300),
                       decoration: BoxDecoration(
                           color: _currentPage == 0
-                              ? Color(0xffffffff)
-                              : Color(0xffFC9002),
+                              ? Color(0xffFC9002)
+                              : Color(0xffffffff),
                           border: Border.all(color: Color(0xffFC9002))),
                       alignment: Alignment.center,
                       height: 55,
                       child: Text(
-                        'สูตรอาหารของคุณ',
-                        style: TextStyle(color:  _currentPage == 0 ? Color(0xffFC9002): Colors.white, fontSize: 25),
+                        'เมนูอาหารที่สามารถทำได้',
+                        style: TextStyle(color:  _currentPage == 0 ? Colors.white: Color(0xffFC9002), fontSize: 20),
                       ),
                     ),
                   ),
@@ -66,14 +66,14 @@ class _explored_page extends State<explored_page> {
                       duration: Duration(milliseconds: 300),
                       decoration: BoxDecoration(
                           color: _currentPage == 1
-                              ? Color(0xffffffff)
-                              : Color(0xffFC9002),
+                              ? Color(0xffFC9002)
+                              : Color(0xffffffff),
                           border: Border.all(color: Color(0xffFC9002))),
                       alignment: Alignment.center,
                       height: 55,
                       child: Text(
-                        'เมนูอาหารที่บันทึกไว้',
-                        style: TextStyle(color: _currentPage == 1 ? Color(0xffFC9002): Colors.white, fontSize: 25),
+                        'เมนูอาหารที่เทียบเคียง',
+                        style: TextStyle(color: _currentPage == 1 ? Colors.white: Color(0xffFC9002), fontSize: 20),
                       ),
                     ),
                   ),

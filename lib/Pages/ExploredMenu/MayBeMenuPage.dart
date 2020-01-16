@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:taluewapp/Pages/HowToPage.dart';
 
 class maybe_page extends StatefulWidget {
   @override
@@ -6,7 +7,6 @@ class maybe_page extends StatefulWidget {
 }
 
 class _maybe_page extends State<maybe_page> {
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -23,7 +23,7 @@ class _maybe_page extends State<maybe_page> {
                   height: 120,
                   width: 160,
                   child: Image.asset(
-                    'assets/write.png',
+                    'assets/menu1.jpg',
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -36,27 +36,30 @@ class _maybe_page extends State<maybe_page> {
                           child: Text(
                             'ผัดเต้าหู้มะเขือเทศ',
                             style: TextStyle(
-                                color: Color(0xff914d1f),
-                                fontSize: 30),
+                                color: Color(0xff914d1f), fontSize: 30),
                           ),
                         ),
                         Container(
                           child: Row(
-                            mainAxisAlignment:
-                            MainAxisAlignment
-                                .spaceBetween,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: <Widget>[
                               Expanded(
-                                child: Container(
-                                  alignment:
-                                  Alignment.center,
-                                  height: 40,
-                                  color: Color(0xff914d1f),
-                                  child: Text(
-                                    "วิธีการทำ",
-                                    style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 20),
+                                child: GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(context,
+                                        MaterialPageRoute(builder: (context) {
+                                      return howto_page();
+                                    }));
+                                  },
+                                  child: Container(
+                                    alignment: Alignment.center,
+                                    height: 40,
+                                    color: Color(0xff914d1f),
+                                    child: Text(
+                                      "วิธีการทำ",
+                                      style: TextStyle(
+                                          color: Colors.white, fontSize: 20),
+                                    ),
                                   ),
                                 ),
                               ),

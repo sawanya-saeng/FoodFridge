@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:taluewapp/Pages/AddMenu.dart';
+import './AddMenu.dart';
 
 class user_page extends StatefulWidget {
   @override
@@ -42,10 +42,7 @@ class _user_page extends State<user_page> {
                 height: 100,
                 decoration: BoxDecoration(
                     shape: BoxShape.circle, color: Colors.blueGrey),
-                child: Icon(
-                  Icons.people,
-                  color: Colors.white,
-                ),
+                child: Image.asset('assets/user.png'),
               ),
               Container(
                 child: Text('Name',
@@ -179,7 +176,7 @@ class _user_page extends State<user_page> {
                                       height: 120,
                                       width: 160,
                                       child: Image.asset(
-                                        'assets/write.png',
+                                        'assets/menu1.jpg',
                                         fit: BoxFit.cover,
                                       ),
                                     ),
@@ -220,9 +217,9 @@ class _user_page extends State<user_page> {
                                                     margin: EdgeInsets.only(
                                                         left: 10),
                                                     child: Icon(
-                                                      Icons.restore_from_trash,
+                                                      Icons.delete,
                                                       size: 50,
-                                                      color: Colors.lightGreen,
+                                                      color: Colors.green,
                                                     ),
                                                   ),
                                                 ],

@@ -23,7 +23,7 @@ class _cando_page extends State<cando_page> {
                   height: 120,
                   width: 160,
                   child: Image.asset(
-                    'assets/write.png',
+                    'assets/menu1.jpg',
                     fit: BoxFit.cover,
                   ),
                 ),
