@@ -1,13 +1,21 @@
 import 'package:flutter/material.dart';
 import './FridgePageComponents/AddPage.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class howto_page extends StatefulWidget {
+  String menu_id;
+  howto_page(this.menu_id);
   @override
-  _howto_page createState() => _howto_page();
+  _howto_page createState() => _howto_page(this.menu_id);
 }
 
 class _howto_page extends State<howto_page> {
+  String menu_id;
+  _howto_page(this.menu_id);
   int _currentPage = 0;
+  final _db = Firestore.instance;
+  final _storage = FirebaseStorage.instance;
 
   PageController _scrollController;
 
@@ -34,11 +42,55 @@ class _howto_page extends State<howto_page> {
     },
   ];
 
+  Map<String, dynamic> menuDetail;
+  List<List<dynamic>> mainIngredients;
+  List<List<dynamic>> optionIngredients;
+  String mainImage;
+
+  Future getImage()async{
+    String tmp;
+    tmp = await _storage.ref().child('Menu').child(this.menu_id).child('menupic.jpg').getDownloadURL();
+    setState(() {
+      mainImage = tmp;
+    });
+  }
+
+
+  Future getMenuDetail()async{
+    print(this.menu_id);
+    await _db.collection('Menu').document(this.menu_id).get().then((data){
+      List<List<dynamic>> tmp1 = [];
+      List<List<dynamic>> tmp2 = [];
+
+      data.data['Ingredients']['Main'].forEach((key, value){
+        List<dynamic> tmp = [];
+        tmp.add(key);
+        tmp.add(value);
+        tmp1.add(tmp);
+      });
+
+      data.data['Ingredients']['Optional'].forEach((key, value){
+        List<dynamic> tmp = [];
+        tmp.add(key);
+        tmp.add(value);
+        tmp2.add(tmp);
+      });
+
+      setState(() {
+        menuDetail = data.data;
+        mainIngredients = tmp1;
+        optionIngredients = tmp2;
+      });
+    });
+  }
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     _scrollController = PageController(initialPage: 0);
+    getImage();
+    getMenuDetail();
   }
 
   Future deleteIngredientManual() async {
@@ -327,10 +379,10 @@ class _howto_page extends State<howto_page> {
                   Container(
                     alignment: Alignment.center,
                     height: 180,
-                    child: Image.asset('assets/menu1.jpg'),
+                    child: mainImage == null ? CircularProgressIndicator() : Image.network(mainImage),
                   ),
                   Container(
-                    child: Text('ผัดเต้าหู้มะเขือเทศ',
+                    child: Text(menuDetail == null ? '':menuDetail['Name'],
                         style: TextStyle(color: Colors.black, fontSize: 25)),
                   ),
                 ],
@@ -451,36 +503,85 @@ class _howto_page extends State<howto_page> {
                           controller: _scrollController,
                           children: <Widget>[
                             Container(
-                              padding: EdgeInsets.only(left: 35, top: 25),
                               child: Column(
                                 children: <Widget>[
-                                  Container(
-                                    child: Row(
-                                      children: <Widget>[
-                                        Container(
-                                          padding: EdgeInsets.only(right: 85),
-                                          child: Text(
-                                            'เต้าหู้ \n'
-                                            'ไข่ \n'
-                                            'มะเขือเทศ\n'
-                                            'ซอส\n',
-                                            style: TextStyle(
-                                                color: Colors.black,
-                                                fontSize: 25),
+                                  Expanded(
+                                    child: Container(
+                                      padding: EdgeInsets.only(left: 35, top: 25, right: 35),
+                                      child: ListView(
+                                        padding: EdgeInsets.zero,
+                                        children: <Widget>[
+                                          Column(
+                                            children: <Widget>[
+                                              Container(
+                                                alignment: Alignment.centerLeft,
+                                                child: Text('Main'),
+                                              ),
+                                              Container(
+                                                margin: EdgeInsets.only(bottom: 15),
+                                                child: Column(
+                                                  children: List.generate(mainIngredients == null ? 0 : mainIngredients.length, (int index){
+                                                    return Row(
+                                                      mainAxisAlignment: MainAxisAlignment
+                                                          .start,
+                                                      children: <Widget>[
+                                                        Container(
+                                                          width: 150,
+                                                          padding: EdgeInsets.only(
+                                                              right: 85),
+                                                          child: Text(
+                                                              mainIngredients[index][0]
+                                                          ),
+                                                        ),
+                                                        Container(
+                                                          width: 50,
+                                                          alignment: Alignment.centerRight,
+                                                          child: Text(
+                                                              mainIngredients[index][1]
+                                                                  .toString()
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    );
+                                                  }),
+                                                ),
+                                              ),
+                                              Container(
+                                                alignment: Alignment.centerLeft,
+                                                child: Text('Optional'),
+                                              ),
+                                              Container(
+                                                child: Column(
+                                                  children: List.generate(optionIngredients == null ? 0 : optionIngredients.length, (int index){
+                                                    return Row(
+                                                      mainAxisAlignment: MainAxisAlignment
+                                                          .start,
+                                                      children: <Widget>[
+                                                        Container(
+                                                          width: 150,
+                                                          padding: EdgeInsets.only(
+                                                              right: 85),
+                                                          child: Text(
+                                                              optionIngredients[index][0]
+                                                          ),
+                                                        ),
+                                                        Container(
+                                                          width: 50,
+                                                          alignment: Alignment.centerRight,
+                                                          child: Text(
+                                                              optionIngredients[index][1]
+                                                                  .toString()
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    );
+                                                  }),
+                                                ),
+                                              ),
+                                            ],
                                           ),
-                                        ),
-                                        Container(
-                                          child: Text(
-                                            '2 ชิ้น \n'
-                                            '2 ฟอง \n'
-                                            '2 ลูก \n'
-                                            '2 ช้อนโต๊ะ \n',
-                                            style: TextStyle(
-                                                color: Colors.black,
-                                                fontSize: 25),
-                                          ),
-                                        ),
-                                      ],
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -491,22 +592,26 @@ class _howto_page extends State<howto_page> {
                                 padding: EdgeInsets.all(20),
                                 children: <Widget>[
                                   Container(
-                                    child: Row(children: <Widget>[
-                                      Container(
-                                        padding: EdgeInsets.only(
-                                            left: 15, top: 15, right: 15),
-                                        child: Text(
-                                          '1. ตั้งกะทะใส่น้ำมันลงไปให้ร้อน\n'
-                                          '2. ใส่กะเทียมผัดพอเหลืองหอม\n'
-                                          '3. ใส่เต้าหู้ลงไปผัด ปรุงรสด้วยซอสเห็ดหอม \n'
-                                          '4. ใส่มะเขือเทศ ต้นหอมผัดพอเฉา แล้วปิดไฟทันที\n',
-                                          style: TextStyle(
-                                              color: Colors.black,
-                                              fontSize: 19),
-                                        ),
-                                      ),
-                                    ]),
-                                  ),
+                                    child: Column(
+                                      children: List.generate(menuDetail == null ? 0 : menuDetail['Seasoning'].length, (int index){
+                                        return Container(
+                                          child: Row(children: <Widget>[
+                                            Container(
+                                              padding: EdgeInsets.only(
+                                                  left: 15, top: 15, right: 15),
+                                              child: Text(
+                                                "${index+1}. ${menuDetail['Seasoning'][index]}",
+                                                style: TextStyle(
+                                                    color: Colors.black,
+                                                    fontSize: 19),
+                                              ),
+                                            ),
+                                          ],
+                                          ),
+                                        );
+                                      }),
+                                    ),
+                                  )
                                 ],
                               ),
                             ),

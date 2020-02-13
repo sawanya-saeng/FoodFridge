@@ -18,11 +18,12 @@ class _meat_page extends State<meat_page> {
   Future getMeat() async {
     FirebaseUser user = await _auth.currentUser();
     List<DocumentSnapshot> tmp;
-    _db.collection('Fridge')
-        .where('uid', isEqualTo: user.uid)
-        .snapshots()
-        .listen((docs) {
+    _db.collection('Fridge').where('uid', isEqualTo: user.uid).snapshots().listen((docs) {
       tmp = docs.documents;
+      print(tmp);
+      tmp.forEach((data){
+        print(data.data);
+      });
       setState(() {
         ingres = tmp;
       });

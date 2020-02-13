@@ -64,7 +64,7 @@ class _choose_page extends State<choose_page> {
                       ),
                       GestureDetector(
                         onTap: (){
-                          Navigator.of(context).pop();
+                          Navigator.of(context).pop({"isSearched": true});
                         },
                         child: Container(
                           child: Icon(

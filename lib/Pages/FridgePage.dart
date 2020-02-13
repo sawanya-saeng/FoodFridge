@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:taluewapp/Pages/FridgePageComponents/FruitPage.dart';
+import 'package:taluewapp/Pages/FridgePageComponents/OthersPage.dart';
+import 'package:taluewapp/Pages/FridgePageComponents/VegetablePage.dart';
+import 'package:taluewapp/Pages/FridgePageComponents/WaterPage.dart';
 import './FridgePageComponents/MeatPage.dart';
 
 class fridge_page extends StatefulWidget {
@@ -10,6 +14,8 @@ int click;
 
 class _fridge_page extends State<fridge_page> {
 
+  PageController _pageController = PageController(initialPage: 0);
+
   @override
   void initState() {
     // TODO: implement initState
@@ -17,7 +23,6 @@ class _fridge_page extends State<fridge_page> {
     click = 0;
   }
 
-  List<Widget> pages = [meat_page()];
 
   @override
   Widget build(BuildContext context) {
@@ -42,6 +47,7 @@ class _fridge_page extends State<fridge_page> {
                   onTap: (){
                     setState(() {
                       click = 0;
+                      _pageController.animateToPage(0, duration: Duration(milliseconds: 300), curve: Curves.ease);
                     });
                   },
                   child: AnimatedContainer(
@@ -58,6 +64,7 @@ class _fridge_page extends State<fridge_page> {
                   onTap: (){
                     setState(() {
                       click = 1;
+                      _pageController.animateToPage(1, duration: Duration(milliseconds: 300), curve: Curves.ease);
                     });
                   },
                   child: AnimatedContainer(
@@ -74,6 +81,7 @@ class _fridge_page extends State<fridge_page> {
                   onTap: (){
                     setState(() {
                       click = 2;
+                      _pageController.animateToPage(2, duration: Duration(milliseconds: 300), curve: Curves.ease);
                     });
                   },
                   child: AnimatedContainer(
@@ -90,6 +98,7 @@ class _fridge_page extends State<fridge_page> {
                   onTap: (){
                     setState(() {
                       click = 3;
+                      _pageController.animateToPage(3, duration: Duration(milliseconds: 300), curve: Curves.ease);
                     });
                   },
                   child: AnimatedContainer(
@@ -106,6 +115,7 @@ class _fridge_page extends State<fridge_page> {
                   onTap: (){
                     setState(() {
                       click = 4;
+                      _pageController.animateToPage(4, duration: Duration(milliseconds: 300), curve: Curves.ease);
                     });
                   },
                   child: AnimatedContainer(
@@ -122,7 +132,16 @@ class _fridge_page extends State<fridge_page> {
         ),
         Expanded(
           child: Container(
-            child: pages[0],
+            child: PageView(
+              controller: _pageController,
+              children: <Widget>[
+                meat_page(),
+                veget_page(),
+                fruit_page(),
+                water_page(),
+                others_page()
+              ],
+            ),
           ),
         )
       ],

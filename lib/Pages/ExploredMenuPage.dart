@@ -91,7 +91,7 @@ class _explored_page extends State<explored_page> {
                 ],
               ),
             ),
-          ),
+          )
         ],
       ),
     );

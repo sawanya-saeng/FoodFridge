@@ -48,7 +48,7 @@ class _maybe_page extends State<maybe_page> {
                                   onTap: () {
                                     Navigator.push(context,
                                         MaterialPageRoute(builder: (context) {
-                                      return howto_page();
+                                      return howto_page('123');
                                     }));
                                   },
                                   child: Container(

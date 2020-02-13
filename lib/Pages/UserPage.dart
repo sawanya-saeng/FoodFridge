@@ -200,6 +200,7 @@ class _user_page extends State<user_page> {
                                                         .spaceBetween,
                                                 children: <Widget>[
                                                   Expanded(
+
                                                     child: Container(
                                                       alignment:
                                                           Alignment.center,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:taluewapp/Pages/ExploredMenuPage.dart';
 import 'package:taluewapp/Pages/ChoosePage.dart';
+import 'package:taluewapp/Pages/ShowAllMenu.dart';
 import 'MainPage.dart';
 
 class findmenu_page extends StatefulWidget {
@@ -10,7 +11,7 @@ class findmenu_page extends StatefulWidget {
 
 class _findmenu_page extends State<findmenu_page> {
   double _navHeight = 0.0;
-
+  bool isSearched = false;
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -40,11 +41,15 @@ class _findmenu_page extends State<findmenu_page> {
                       children: <Widget>[
                         Expanded(
                           child: GestureDetector(
-                            onTap: () {
-                              Navigator.push(context,
+                            onTap: () async{
+                              var result = await Navigator.push(context,
                                   MaterialPageRoute(builder: (context) {
                                 return choose_page();
                               }));
+                              print(result);
+                              setState(() {
+                                isSearched = result['isSearched'];
+                              });
                             },
                             child: Container(
                               color: Color(0xff8B451A),
@@ -113,7 +118,7 @@ class _findmenu_page extends State<findmenu_page> {
               child: Padding(
                 padding: EdgeInsets.only(left: 15,right: 15,bottom: 25,top: 25),
                 child: Container(
-                  child: explored_page(),
+                  child: isSearched ? explored_page() : showall_page(),
                 ),
               ),
             )
