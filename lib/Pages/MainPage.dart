@@ -39,6 +39,7 @@ class _main_page extends State<main_page> {
 
     // TODO: implement build
     return Scaffold(
+      resizeToAvoidBottomPadding: false,
       body: Container(
           color: Color(0xffFCFCFC),
           child: Column(

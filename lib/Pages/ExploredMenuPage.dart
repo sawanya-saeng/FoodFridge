@@ -3,11 +3,17 @@ import 'package:taluewapp/Pages/ExploredMenu/CanDoMenuPage.dart';
 import 'package:taluewapp/Pages/ExploredMenu/MayBeMenuPage.dart';
 
 class explored_page extends StatefulWidget {
+  List<dynamic> canDo;
+  List<dynamic> maybeDo;
+  explored_page(this.canDo, this.maybeDo);
   @override
-  _explored_page createState() => _explored_page();
+  _explored_page createState() => _explored_page(this.canDo, this.maybeDo);
 }
 
 class _explored_page extends State<explored_page> {
+  List<dynamic> canDo;
+  List<dynamic> maybeDo;
+  _explored_page(this.canDo, this.maybeDo);
   int _currentPage = 0;
   PageController _scrollController;
 
@@ -15,7 +21,7 @@ class _explored_page extends State<explored_page> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    _scrollController = new PageController(initialPage: 0);
+    _scrollController = new PageController(initialPage: 0, keepPage: true);
   }
 
   @override
@@ -86,8 +92,8 @@ class _explored_page extends State<explored_page> {
               child: PageView(
                 controller: _scrollController,
                 children: <Widget>[
-                  cando_page(),
-                  maybe_page()
+                  cando_page(this.canDo),
+                  maybe_page(this.maybeDo)
                 ],
               ),
             ),

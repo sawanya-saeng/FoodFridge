@@ -14,6 +14,7 @@ class showall_page extends StatefulWidget {
 class _showall_page extends State<showall_page> {
   int _currentPage = 0;
   PageController _scrollController;
+  TextEditingController _searchController = new TextEditingController();
   final _db = Firestore.instance;
   final _storage = FirebaseStorage.instance;
   List<Map<String,dynamic>> allMenu;
@@ -61,32 +62,19 @@ class _showall_page extends State<showall_page> {
             child: Row(
               children: <Widget>[
                 Expanded(
-                  child: GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        _currentPage = 0;
-                        _scrollController.animateToPage(0,
-                            duration: Duration(milliseconds: 300),
-                            curve: Curves.easeIn);
-                      });
-                    },
-                    child: AnimatedContainer(
-                      duration: Duration(milliseconds: 300),
-                      decoration: BoxDecoration(
-                          color: _currentPage == 0
-                              ? Color(0xffFC9002)
-                              : Color(0xffffffff),
-                          border: Border.all(color: Color(0xffFC9002))),
-                      alignment: Alignment.center,
-                      height: 55,
-                      child: Text(
-                        "Let's Searched",
-                        style: TextStyle(
-                            color: _currentPage == 0
-                                ? Colors.white
-                                : Color(0xffFC9002),
-                            fontSize: 20),
-                      ),
+                  child: Container(
+                    padding: EdgeInsets.only(left: 10),
+                    alignment: Alignment.centerLeft,
+                    decoration: BoxDecoration(
+                        color: Colors.white,
+                        border: Border.all(color: Colors.grey),
+                        borderRadius:
+                        BorderRadius.all(Radius.circular(8))),
+                    height: 40,
+                    child: TextField(
+                      controller: _searchController,
+                      decoration: InputDecoration.collapsed(
+                          hintText: "Search"),
                     ),
                   ),
                 ),
@@ -100,7 +88,7 @@ class _showall_page extends State<showall_page> {
                 padding: EdgeInsets.only(top: 15),
                 itemCount: allMenu == null ? 0 : allMenu.length,
                 itemBuilder: (context, index) {
-                  return Container(
+                  return _searchController.text.isEmpty ? Container(
                     margin: EdgeInsets.only(bottom: 15),
                     child: Row(
                       children: <Widget>[
@@ -163,7 +151,70 @@ class _showall_page extends State<showall_page> {
                         ),
                       ],
                     ),
-                  );
+                  ): allMenu[index]['Name'].contains(_searchController.text) ? Container(
+                    margin: EdgeInsets.only(bottom: 15),
+                    child: Row(
+                      children: <Widget>[
+                        Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.black),
+                          ),
+                          height: 120,
+                          width: 160,
+                          child: allMenu[index]['image'] == null ? Icon(Icons.error_outline) : Image.network(
+                            allMenu[index]['image'],
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        Expanded(
+                          child: Container(
+                            padding: EdgeInsets.only(left: 15),
+                            child: Column(
+                              children: <Widget>[
+                                Container(
+                                  child: Text(
+                                    allMenu[index]['Name'],
+                                    style: TextStyle(
+                                        color: Color(0xff914d1f), fontSize: 30),
+                                  ),
+                                ),
+                                Container(
+                                  child: Row(
+                                    mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                    children: <Widget>[
+                                      Expanded(
+                                        child: GestureDetector(
+                                          onTap: () {
+                                            Navigator.push(context,
+                                                MaterialPageRoute(
+                                                    builder: (context) {
+                                                      return howto_page(allMenu[index]['menu_id']);
+                                                    }));
+                                          },
+                                          child: Container(
+                                            alignment: Alignment.center,
+                                            height: 40,
+                                            color: Color(0xff914d1f),
+                                            child: Text(
+                                              "วิธีการทำ",
+                                              style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 20),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ):Container();
                 },
               ),
             ),
@@ -173,3 +224,8 @@ class _showall_page extends State<showall_page> {
     );
   }
 }
+
+
+// a = "Singhtaluew"
+// b = "ZYS"
+// a.contains(b) //True //False

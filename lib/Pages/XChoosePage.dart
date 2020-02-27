@@ -4,12 +4,12 @@ import 'package:taluewapp/Pages/ChooseComponent/XMeatChoosePage.dart';
 import 'package:taluewapp/Services/Ingredient.dart';
 import 'package:provider/provider.dart';
 
-class choose_page extends StatefulWidget {
+class xchoose_page extends StatefulWidget {
   @override
-  _choose_page createState() => _choose_page();
+  _xchoose_page createState() => _xchoose_page();
 }
 
-class _choose_page extends State<choose_page> {
+class _xchoose_page extends State<xchoose_page> {
   int click;
   Ingredient _ingredient;
   bool isLoaded = false;
@@ -29,7 +29,7 @@ class _choose_page extends State<choose_page> {
     }
   }
 
-  List<Widget> pages = [meat_choose_page(), xmeat_choose_page()];
+  List<Widget> pages = [xmeat_choose_page()];
 
 
   @override
@@ -111,7 +111,7 @@ class _choose_page extends State<choose_page> {
                         color: click == 0 ? Color(0xffE5E5E5) : Colors.white,
                         child: Text('เนื้อ',
                             style:
-                                TextStyle(color: Colors.black, fontSize: 25)),
+                            TextStyle(color: Colors.black, fontSize: 25)),
                       ),
                     ),
                   ),
@@ -128,7 +128,7 @@ class _choose_page extends State<choose_page> {
                         color: click == 1 ? Color(0xffE5E5E5) : Colors.white,
                         child: Text('ผัก',
                             style:
-                                TextStyle(color: Colors.black, fontSize: 25)),
+                            TextStyle(color: Colors.black, fontSize: 25)),
                       ),
                     ),
                   ),
@@ -145,7 +145,7 @@ class _choose_page extends State<choose_page> {
                         color: click == 2 ? Color(0xffE5E5E5) : Colors.white,
                         child: Text('ผลไม้',
                             style:
-                                TextStyle(color: Colors.black, fontSize: 25)),
+                            TextStyle(color: Colors.black, fontSize: 25)),
                       ),
                     ),
                   ),
@@ -162,7 +162,7 @@ class _choose_page extends State<choose_page> {
                         color: click == 3 ? Color(0xffE5E5E5) : Colors.white,
                         child: Text('น้ำ',
                             style:
-                                TextStyle(color: Colors.black, fontSize: 25)),
+                            TextStyle(color: Colors.black, fontSize: 25)),
                       ),
                     ),
                   ),
@@ -179,7 +179,7 @@ class _choose_page extends State<choose_page> {
                         color: click == 4 ? Color(0xffE5E5E5) : Colors.white,
                         child: Text('อื่นๆ',
                             style:
-                                TextStyle(color: Colors.black, fontSize: 25)),
+                            TextStyle(color: Colors.black, fontSize: 25)),
                       ),
                     ),
                   ),
@@ -188,7 +188,7 @@ class _choose_page extends State<choose_page> {
             ),
             Expanded(
               child: Container(
-                child: pages[0]
+                  child: pages[0]
               ),
             )
           ],

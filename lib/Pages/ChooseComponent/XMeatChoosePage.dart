@@ -5,14 +5,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:taluewapp/Services/Ingredient.dart';
 import 'package:provider/provider.dart';
 
-class meat_choose_page extends StatefulWidget {
+class xmeat_choose_page extends StatefulWidget {
   @override
-  _meat_choose_page createState() => _meat_choose_page();
+  _xmeat_choose_page createState() => _xmeat_choose_page();
 }
 
 int click;
 
-class _meat_choose_page extends State<meat_choose_page> {
+class _xmeat_choose_page extends State<xmeat_choose_page> {
   FirebaseAuth _auth = FirebaseAuth.instance;
   Firestore _db = Firestore.instance;
   List<DocumentSnapshot> ingres;
@@ -34,7 +34,7 @@ class _meat_choose_page extends State<meat_choose_page> {
     });
   }
 
-  Map<String, String> ingredientToFind = {};
+  List<Map<String, String>> ingredientToFind = [];
 
   @override
   void initState() {
@@ -97,9 +97,9 @@ class _meat_choose_page extends State<meat_choose_page> {
                                     height: 18,
                                     width: 18,
                                     decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      shape: BoxShape.circle,
-                                      border: Border.all(color: Colors.red)
+                                        color: Colors.white,
+                                        shape: BoxShape.circle,
+                                        border: Border.all(color: Colors.red)
                                     ),
                                   ),
                                 ],
@@ -150,13 +150,14 @@ class _meat_choose_page extends State<meat_choose_page> {
                           return GestureDetector(
                             onTap: (){
                               setState(() {
-                                ingredientToFind.clear();
-                                ingredientToFind.addAll({
+                                //ingredientToFind.clear();
+                                ingredientToFind.add({
                                   'name': ingres[index]['name'],
                                   'num': ingres[index]['num'],
                                   'unit': ingres[index]['unit']
                                 });
                                 _ingredient.setIngredient(ingredientToFind);
+                                print(ingredientToFind);
                               });
                             },
                             child: Container(
@@ -180,7 +181,7 @@ class _meat_choose_page extends State<meat_choose_page> {
                                                   height: 18,
                                                   width: 18,
                                                   decoration: BoxDecoration(
-                                                      color: ingredientToFind['name'] == ingres[index]['name'] ? Colors.red : Colors.white,
+                                                      color: 'asd' == ingres[index]['name'] ? Colors.red : Colors.white,
                                                       shape: BoxShape.circle,
                                                       border: Border.all(color: Colors.red)
                                                   ),

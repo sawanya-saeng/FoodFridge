@@ -43,8 +43,8 @@ class _howto_page extends State<howto_page> {
   ];
 
   Map<String, dynamic> menuDetail;
-  List<List<dynamic>> mainIngredients;
-  List<List<dynamic>> optionIngredients;
+  List<dynamic> mainIngredients;
+  List<dynamic> optionIngredients;
   String mainImage;
 
   Future getImage()async{
@@ -59,27 +59,26 @@ class _howto_page extends State<howto_page> {
   Future getMenuDetail()async{
     print(this.menu_id);
     await _db.collection('Menu').document(this.menu_id).get().then((data){
-      List<List<dynamic>> tmp1 = [];
-      List<List<dynamic>> tmp2 = [];
-
-      data.data['Ingredients']['Main'].forEach((key, value){
-        List<dynamic> tmp = [];
-        tmp.add(key);
-        tmp.add(value);
-        tmp1.add(tmp);
-      });
-
-      data.data['Ingredients']['Optional'].forEach((key, value){
-        List<dynamic> tmp = [];
-        tmp.add(key);
-        tmp.add(value);
-        tmp2.add(tmp);
-      });
+//      List<List<dynamic>> tmp2 = [];
+//
+//      data.data['Ingredients']['Main'].forEach((key, value){
+//        List<dynamic> tmp = [];
+//        tmp.add(key);
+//        tmp.add(value);
+//        tmp1.add(tmp);
+//      });
+//
+//      data.data['Ingredients']['Optional'].forEach((key, value){
+//        List<dynamic> tmp = [];
+//        tmp.add(key);
+//        tmp.add(value);
+//        tmp2.add(tmp);
+//      });
 
       setState(() {
         menuDetail = data.data;
-        mainIngredients = tmp1;
-        optionIngredients = tmp2;
+        mainIngredients = data.data['Ingredients']['Main'];
+        optionIngredients = data.data['Ingredients']['Optional'];
       });
     });
   }
@@ -88,6 +87,7 @@ class _howto_page extends State<howto_page> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    print(this.menu_id);
     _scrollController = PageController(initialPage: 0);
     getImage();
     getMenuDetail();
@@ -331,6 +331,9 @@ class _howto_page extends State<howto_page> {
   Widget build(BuildContext context) {
     double _safeTop = MediaQuery.of(context).padding.top;
     return Scaffold(
+      //Here
+      resizeToAvoidBottomPadding: false,
+      //
       body: Container(
         child: Column(
           children: <Widget>[
@@ -482,7 +485,7 @@ class _howto_page extends State<howto_page> {
                                 alignment: Alignment.center,
                                 height: 40,
                                 child: Text(
-                                  'ให้คะแนน',
+                                  'คอมเมนท์',
                                   style: TextStyle(
                                       color: Colors.black, fontSize: 25),
                                 ),
@@ -515,30 +518,35 @@ class _howto_page extends State<howto_page> {
                                             children: <Widget>[
                                               Container(
                                                 alignment: Alignment.centerLeft,
-                                                child: Text('Main'),
+                                                child: Text(
+                                                  'Main',
+                                                  style: TextStyle(
+                                                    color: Colors.black, fontSize: 23),
+                                                ),
                                               ),
                                               Container(
                                                 margin: EdgeInsets.only(bottom: 15),
                                                 child: Column(
                                                   children: List.generate(mainIngredients == null ? 0 : mainIngredients.length, (int index){
                                                     return Row(
-                                                      mainAxisAlignment: MainAxisAlignment
-                                                          .start,
+                                                      mainAxisAlignment: MainAxisAlignment.start,
                                                       children: <Widget>[
                                                         Container(
-                                                          width: 150,
+                                                          width: 200,
                                                           padding: EdgeInsets.only(
                                                               right: 85),
                                                           child: Text(
-                                                              mainIngredients[index][0]
+                                                              mainIngredients[index]['name'],style: TextStyle(
+                                                              color: Colors.black, fontSize: 17),
                                                           ),
                                                         ),
                                                         Container(
-                                                          width: 50,
+                                                          width: 75,
                                                           alignment: Alignment.centerRight,
                                                           child: Text(
-                                                              mainIngredients[index][1]
-                                                                  .toString()
+                                                              '${mainIngredients[index]['num']
+                                                                  .toString()} ${mainIngredients[index]['unit']}',style: TextStyle(
+                                                              color: Colors.black, fontSize: 17),
                                                           ),
                                                         ),
                                                       ],
@@ -548,7 +556,10 @@ class _howto_page extends State<howto_page> {
                                               ),
                                               Container(
                                                 alignment: Alignment.centerLeft,
-                                                child: Text('Optional'),
+                                                child: Text('Optional' ,
+                                                  style: TextStyle(
+                                                    color: Colors.black, fontSize: 23),
+                                                ),
                                               ),
                                               Container(
                                                 child: Column(
@@ -558,21 +569,60 @@ class _howto_page extends State<howto_page> {
                                                           .start,
                                                       children: <Widget>[
                                                         Container(
-                                                          width: 150,
+                                                          width: 200,
                                                           padding: EdgeInsets.only(
                                                               right: 85),
                                                           child: Text(
-                                                              optionIngredients[index][0]
+                                                              optionIngredients[index]['name'],
+                                                            style: TextStyle(
+                                                              color: Colors.black, fontSize: 17),
                                                           ),
                                                         ),
                                                         Container(
-                                                          width: 50,
+                                                          width: 75,
                                                           alignment: Alignment.centerRight,
                                                           child: Text(
-                                                              optionIngredients[index][1]
-                                                                  .toString()
+                                                            '${optionIngredients[index]['num']
+                                                                .toString()} กรัม',style: TextStyle(
+                                                              color: Colors.black, fontSize: 17),
                                                           ),
                                                         ),
+                                                      ],
+                                                    );
+                                                  }),
+                                                ),
+                                              ),
+                                              Container(
+                                                alignment: Alignment.centerLeft,
+                                                child: Text('' ,
+                                                  style: TextStyle(
+                                                      color: Colors.black, fontSize: 23),
+                                                ),
+                                              ),
+                                              Container(
+                                                alignment: Alignment.centerLeft,
+                                                child: Text('Seasoning' ,
+                                                  style: TextStyle(
+                                                      color: Colors.black, fontSize: 23),
+                                                ),
+                                              ),
+                                              Container(
+                                                child: Column(
+                                                  children: List.generate(menuDetail == null ? 0 : menuDetail['Seasoning'].length, (int index){
+                                                    return Row(
+                                                      mainAxisAlignment: MainAxisAlignment
+                                                          .start,
+                                                      children: <Widget>[
+                                                        Container(
+                                                          padding: EdgeInsets.only(
+                                                              right: 1),
+                                                          child: Text(
+                                                            "${index+1}. ${menuDetail['Seasoning'][index]}",
+                                                            style: TextStyle(
+                                                                color: Colors.black, fontSize: 15),
+                                                          ),
+                                                        ),
+
                                                       ],
                                                     );
                                                   }),
@@ -587,23 +637,26 @@ class _howto_page extends State<howto_page> {
                                 ],
                               ),
                             ),
+
+
                             Container(
                               child: ListView(
                                 padding: EdgeInsets.all(20),
                                 children: <Widget>[
                                   Container(
                                     child: Column(
-                                      children: List.generate(menuDetail == null ? 0 : menuDetail['Seasoning'].length, (int index){
+                                      children: List.generate(menuDetail == null ? 0 : menuDetail['Howto'].length, (int index){
                                         return Container(
                                           child: Row(children: <Widget>[
                                             Container(
+                                              width: 350,
                                               padding: EdgeInsets.only(
                                                   left: 15, top: 15, right: 15),
                                               child: Text(
-                                                "${index+1}. ${menuDetail['Seasoning'][index]}",
+                                                "${menuDetail['Howto'][index]}",
                                                 style: TextStyle(
                                                     color: Colors.black,
-                                                    fontSize: 19),
+                                                    fontSize: 18),
                                               ),
                                             ),
                                           ],
@@ -615,6 +668,9 @@ class _howto_page extends State<howto_page> {
                                 ],
                               ),
                             ),
+
+                            ////////////////// COMMENT //////////////////
+
                             Container(
                               padding:
                                   EdgeInsets.only(left: 20, top: 20, right: 20),
@@ -623,65 +679,68 @@ class _howto_page extends State<howto_page> {
                                   Container(
                                     decoration: BoxDecoration(
                                         border: Border(
-                                      bottom:
+                                      top:
                                           BorderSide(color: Color(0xffEDEDED)),
                                     )),
                                     height: 50,
                                     child: Row(
                                       children: <Widget>[
-                                        Container(
-                                          padding: EdgeInsets.only(
-                                              bottom: 5, top: 5),
+                                        Expanded(
                                           child: Container(
-                                            alignment: Alignment.center,
+                                            padding: EdgeInsets.only(left: 10),
+                                            alignment: Alignment.centerLeft,
                                             decoration: BoxDecoration(
-                                                shape: BoxShape.circle,
-                                                color: Colors.blueGrey),
-                                            width: 80,
-                                            child: Icon(
-                                              Icons.people,
-                                              color: Colors.white,
+                                                color: Colors.white,
+                                                border: Border.all(color: Colors.grey),
+                                                borderRadius:
+                                                BorderRadius.all(Radius.circular(8))),
+                                            height: 50,
+                                            child: TextField(
+                                              decoration: InputDecoration.collapsed(
+                                                  hintText: "พิมพ์ข้อความของคุณ"),
                                             ),
                                           ),
                                         ),
-                                        Container(
-                                          padding: EdgeInsets.only(right: 85),
-                                          child: Text(
-                                            'taluew',
-                                            style: TextStyle(
-                                                color: Colors.blueGrey,
-                                                fontSize: 20),
+
+                                      ],
+                                    ),
+                                  ),
+
+
+                                  Container(
+                                    height: 50,
+                                    child: Row(
+                                      children: <Widget>[
+                                        Expanded(
+                                          child: GestureDetector(
+                                            onTap: () {
+                                              Navigator.push(context,
+                                                  MaterialPageRoute(builder: (context) {
+                                                    return howto_page('123');
+                                                  }));
+                                            },
+                                            child: Container(
+                                              alignment: Alignment.center,
+                                              height: 30,
+                                              color: Colors.grey,
+                                              child: Text(
+                                                "Send",
+                                                style: TextStyle(
+                                                    color: Colors.white, fontSize: 20),
+                                              ),
+                                            ),
                                           ),
-                                        ),
-                                        Container(
-                                          child: Icon(Icons.star,
-                                              color: Colors.yellow),
-                                        ),
-                                        Container(
-                                          child: Icon(Icons.star,
-                                              color: Colors.yellow),
-                                        ),
-                                        Container(
-                                          child: Icon(Icons.star,
-                                              color: Colors.yellow),
-                                        ),
-                                        Container(
-                                          child: Icon(Icons.star,
-                                              color: Colors.yellow),
-                                        ),
-                                        Container(
-                                          child: Icon(Icons.star,
-                                              color: Colors.yellow),
                                         ),
                                       ],
                                     ),
                                   ),
+
                                   Container(
                                     decoration: BoxDecoration(
                                         border: Border(
-                                      bottom:
+                                          top:
                                           BorderSide(color: Color(0xffEDEDED)),
-                                    )),
+                                        )),
                                     height: 50,
                                     child: Row(
                                       children: <Widget>[
@@ -709,21 +768,33 @@ class _howto_page extends State<howto_page> {
                                                 fontSize: 20),
                                           ),
                                         ),
+
+                                      ],
+                                    ),
+                                  ),
+
+
+                                  Container(
+                                    height: 50,
+                                    child: Row(
+                                      children: <Widget>[
                                         Container(
-                                          child: Icon(Icons.star,
-                                              color: Colors.yellow),
-                                        ),
-                                        Container(
-                                          child: Icon(Icons.star,
-                                              color: Colors.yellow),
-                                        ),
-                                        Container(
-                                          child: Icon(Icons.star,
-                                              color: Colors.yellow),
+                                          padding: EdgeInsets.only(left:80 ,right: 85),
+                                          child: Text(
+                                            'น่ากินมากเลยค่าาาาาาา',
+                                            style: TextStyle(
+                                                color: Colors.black,
+                                                fontSize: 20),
+                                          ),
                                         ),
                                       ],
                                     ),
                                   ),
+
+
+
+
+
                                 ],
                               ),
                             ),
