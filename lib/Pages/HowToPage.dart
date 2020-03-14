@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:taluewapp/Pages/MainPage.dart';
 import './FridgePageComponents/AddPage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class howto_page extends StatefulWidget {
   String menu_id;
@@ -16,36 +18,89 @@ class _howto_page extends State<howto_page> {
   int _currentPage = 0;
   final _db = Firestore.instance;
   final _storage = FirebaseStorage.instance;
-
+  final _auth = FirebaseAuth.instance;
   PageController _scrollController;
-
-  List<Map<String, dynamic>> demoData1 = [
-    {
-      "name": "ไก่",
-      "value": new TextEditingController(text: "2"),
-      "unit": "กรัม"
-    },
-    {
-      "name": "ไข่",
-      "value": new TextEditingController(text: "4"),
-      "unit": "ฟอง"
-    },
-    {
-      "name": "หมู",
-      "value": new TextEditingController(text: "1"),
-      "unit": "กิโล"
-    },
-    {
-      "name": "ผัก",
-      "value": new TextEditingController(text: "1"),
-      "unit": "เม็ด"
-    },
-  ];
 
   Map<String, dynamic> menuDetail;
   List<dynamic> mainIngredients;
   List<dynamic> optionIngredients;
+  List<dynamic> allIngredients;
+  List<dynamic> fridgeIngredients;
   String mainImage;
+
+  double grumToUnit(num, unit){
+    double base = 1;
+
+    if(unit == 'ฟอง'){
+      base = 50;
+    }
+
+    if(unit == 'กิโล'){
+      base = 100;
+    }
+
+    if(unit == 'ช้อนโต๊ะ'){
+      base = 12.5;
+    }
+
+    return num/base;
+  }
+
+  bool checkMainIngredient(){
+    return true;
+  }
+
+  Future deleteIngredientFromFridge()async {
+    print(allIngredients);
+    print(fridgeIngredients);
+    if (checkMainIngredient()) {
+      for(int i=0; i<allIngredients.length; i++){
+        for(int j=0; j<fridgeIngredients.length; j++){
+          if(allIngredients[i]['name'] == fridgeIngredients[j]['name']){
+            String unit = fridgeIngredients[j]['unit'];
+            double net1 = toGrum(double.parse(allIngredients[i]['num'].toString()), allIngredients[i]['unit']);
+            double net2 = toGrum(double.parse(fridgeIngredients[j]['num'].toString()), fridgeIngredients[j]['unit']);
+            double newValue = net2 < net1 ? 0 : net2 - net1;
+
+            print("main : ");
+            print(allIngredients[i]['name']);
+            print(net1);
+
+            print("fridge : ");
+            print(fridgeIngredients[j]['name']);
+            print(net2);
+
+            print("result: ");
+            print(newValue);
+
+            print("********");
+            print(unit);
+
+            print("Store");
+            print(grumToUnit(newValue, unit));
+
+            if(newValue == 0) {
+              DocumentSnapshot tmp = await _db.collection('Fridge').document(fridgeIngredients[j]['id']).get();
+              await _db.collection('Fridge').document(fridgeIngredients[j]['id']).delete();
+              await _db.collection('Bin').add(tmp.data);
+
+            }else{
+                await _db.collection('Fridge').document(fridgeIngredients[j]['id']).updateData({
+                  'num': newValue
+                });
+            }
+
+            continue;
+          }
+        }
+      }
+
+      Navigator.of(context).popUntil((route) => route.isFirst);
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context){
+        return main_page();
+      }));
+    }
+  }
 
   Future getImage()async{
     String tmp;
@@ -55,30 +110,86 @@ class _howto_page extends State<howto_page> {
     });
   }
 
+  Future getIngredientFromFridge() async{
+    FirebaseUser user = await _auth.currentUser();
+    List<dynamic> tmp = List<dynamic>();
+    await _db.collection('Fridge').where('uid', isEqualTo: user.uid).getDocuments().then((docs){
+      docs.documents.forEach((data){
+        var tmpMap = data.data;
+        tmpMap['id'] = data.documentID;
+        tmp.add(tmpMap);
+      });
+    });
+
+    setState(() {
+      fridgeIngredients = tmp;
+      print(fridgeIngredients);
+    });
+  }
+
+  double toGrum(double num, String unit) {
+    double base=1;
+
+    if(unit == "กิโล"){
+      base = 1000;
+    }
+    if(unit == "ฟอง"){
+      base = 50;
+    }
+    if(unit == "ช้อนโต๊"){
+      base = 12.5;
+    }
+
+    return num*base;
+  }
+
+  Map<String, dynamic> checkIngredients(list, item){
+    double net1 = 0;
+    double net2 = 0;
+    for(int i=0; i<list.length; i++){
+      if(item['name'] == list[i]['name']){
+        net1 = toGrum(double.parse(list[i]['num'].toString()), list[i]['unit']);
+        net2 = toGrum(double.parse(item['num'].toString()), item['unit']);
+
+        if(net1 >= net2){
+          return {
+            "isHas": true,
+            "num": '0'
+          };
+        }else{
+          return {
+            "isHas": false,
+            "num": list[i]['num']
+          };
+        }
+      }
+    }
+
+    return {
+      "isHas": false,
+      "num": '0'
+    };
+  }
 
   Future getMenuDetail()async{
-    print(this.menu_id);
     await _db.collection('Menu').document(this.menu_id).get().then((data){
-//      List<List<dynamic>> tmp2 = [];
-//
-//      data.data['Ingredients']['Main'].forEach((key, value){
-//        List<dynamic> tmp = [];
-//        tmp.add(key);
-//        tmp.add(value);
-//        tmp1.add(tmp);
-//      });
-//
-//      data.data['Ingredients']['Optional'].forEach((key, value){
-//        List<dynamic> tmp = [];
-//        tmp.add(key);
-//        tmp.add(value);
-//        tmp2.add(tmp);
-//      });
-
       setState(() {
+        List<dynamic> tmpMap = List<dynamic>();
         menuDetail = data.data;
-        mainIngredients = data.data['Ingredients']['Main'];
-        optionIngredients = data.data['Ingredients']['Optional'];
+        tmpMap = data.data['Ingredients']['Main'];
+        for(int i=0; i<tmpMap.length; i++){
+          tmpMap[i]['type'] = 'main';
+          tmpMap[i]['value'] = new TextEditingController(text: tmpMap[i]['num'].toString());
+        }
+        mainIngredients = tmpMap;
+        tmpMap = data.data['Ingredients']['Optional'];
+        for(int i=0; i<tmpMap.length; i++){
+          tmpMap[i]['type'] = 'optional';
+          tmpMap[i]['value'] = new TextEditingController(text: tmpMap[i]['num'].toString());
+        }
+        optionIngredients = tmpMap;
+        allIngredients = mainIngredients+optionIngredients;
+        print(allIngredients);
       });
     });
   }
@@ -91,6 +202,7 @@ class _howto_page extends State<howto_page> {
     _scrollController = PageController(initialPage: 0);
     getImage();
     getMenuDetail();
+    getIngredientFromFridge();
   }
 
   Future deleteIngredientManual() async {
@@ -110,7 +222,7 @@ class _howto_page extends State<howto_page> {
                   Expanded(
                     child: Container(
                       child: ListView.builder(
-                        itemCount: demoData1.length,
+                        itemCount: allIngredients == null ? 0 : allIngredients.length,
                         itemBuilder: (BuildContext context, int index) {
                           return Container(
                             margin: EdgeInsets.only(bottom: 15),
@@ -120,7 +232,7 @@ class _howto_page extends State<howto_page> {
                                   flex: 1,
                                   child: Container(
                                     child: Text(
-                                        "${index + 1}. ${demoData1[index]["name"]}"),
+                                        "${index + 1}. ${allIngredients[index]["name"]}"),
                                   ),
                                 ),
                                 Expanded(
@@ -133,10 +245,10 @@ class _howto_page extends State<howto_page> {
                                           onTap: () {
                                             setState(() {
                                               int tmp = int.parse(
-                                                  demoData1[index]["value"]
+                                                  allIngredients[index]["value"]
                                                       .text);
-                                              tmp++;
-                                              demoData1[index]["value"].text =
+                                              tmp--;
+                                              allIngredients[index]["value"].text =
                                                   tmp.toString();
                                             });
                                           },
@@ -145,9 +257,10 @@ class _howto_page extends State<howto_page> {
                                             decoration: BoxDecoration(
                                                 border: Border.all(
                                                     color: Colors.grey)),
-                                            child: Icon(Icons.add),
+                                            child: Icon(Icons.remove),
                                           ),
                                         ),
+
                                         Container(
                                             height: 25,
                                             width: 80,
@@ -160,17 +273,17 @@ class _howto_page extends State<howto_page> {
                                               decoration:
                                                   InputDecoration.collapsed(
                                                       hintText: null),
-                                              controller: demoData1[index]
+                                              controller: allIngredients[index]
                                                   ["value"],
                                             )),
                                         GestureDetector(
                                           onTap: () {
                                             setState(() {
                                               int tmp = int.parse(
-                                                  demoData1[index]["value"]
+                                                  allIngredients[index]["value"]
                                                       .text);
-                                              tmp--;
-                                              demoData1[index]["value"].text =
+                                              tmp++;
+                                              allIngredients[index]["value"].text =
                                                   tmp.toString();
                                             });
                                           },
@@ -179,14 +292,14 @@ class _howto_page extends State<howto_page> {
                                             decoration: BoxDecoration(
                                                 border: Border.all(
                                                     color: Colors.grey)),
-                                            child: Icon(Icons.remove),
+                                            child: Icon(Icons.add),
                                           ),
                                         ),
                                         Container(
                                           width: 40,
                                           margin: EdgeInsets.only(left: 15),
                                           child: Text(
-                                              "${demoData1[index]["unit"]}"),
+                                              "${allIngredients[index]["unit"]}"),
                                         ),
                                       ],
                                     ),
@@ -211,10 +324,11 @@ class _howto_page extends State<howto_page> {
                             child: Icon(Icons.not_interested),
                           ),
                         ),
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.of(context).pop();
-                          },
+
+                          GestureDetector(
+                            onTap: () {
+                              deleteIngredientFromFridge();
+                            },
                           child: Container(
                             child: Icon(Icons.check_circle),
                           ),
@@ -246,7 +360,7 @@ class _howto_page extends State<howto_page> {
                   Expanded(
                     child: Container(
                       child: ListView.builder(
-                        itemCount: demoData1.length,
+                        itemCount: allIngredients == null ? 0 : allIngredients.length,
                         itemBuilder: (BuildContext context, int index) {
                           return Container(
                             margin: EdgeInsets.only(bottom: 15),
@@ -255,8 +369,7 @@ class _howto_page extends State<howto_page> {
                                 Expanded(
                                   flex: 1,
                                   child: Container(
-                                    child: Text(
-                                        "${index + 1}. ${demoData1[index]["name"]}"),
+                                    child: Text("${index + 1}. ${allIngredients[index]["name"]}"),
                                   ),
                                 ),
                                 Expanded(
@@ -272,19 +385,22 @@ class _howto_page extends State<howto_page> {
                                                 border: Border.all(
                                                     color: Colors.grey)),
                                             alignment: Alignment.center,
-                                            child: TextField(
+                                            child: checkIngredients(fridgeIngredients, allIngredients[index])['isHas'] ? TextField(
+                                              enabled: false,
                                               textAlign: TextAlign.center,
-                                              decoration:
-                                                  InputDecoration.collapsed(
-                                                      hintText: null),
-                                              controller: demoData1[index]
-                                                  ["value"],
-                                            )),
+                                              decoration: InputDecoration.collapsed(hintText: null), controller: allIngredients[index]["value"],):
+                                                TextField(
+                                                  textAlign: TextAlign.center,
+                                                  decoration: InputDecoration.collapsed(hintText: null),
+                                                  controller: new TextEditingController(text: '${checkIngredients(fridgeIngredients, allIngredients[index])['num']}'),
+                                                  style: TextStyle(color: Colors.redAccent),
+                                                )
+                                        ),
                                         Container(
                                           width: 40,
                                           margin: EdgeInsets.only(left: 15),
                                           child: Text(
-                                              "${demoData1[index]["unit"]}"),
+                                              "${allIngredients[index]["unit"]}"),
                                         ),
                                       ],
                                     ),
@@ -311,7 +427,7 @@ class _howto_page extends State<howto_page> {
                         ),
                         GestureDetector(
                           onTap: () {
-                            Navigator.of(context).pop();
+                            deleteIngredientFromFridge();
                           },
                           child: Container(
                             child: Icon(Icons.check_circle),
@@ -573,7 +689,7 @@ class _howto_page extends State<howto_page> {
                                                           padding: EdgeInsets.only(
                                                               right: 85),
                                                           child: Text(
-                                                              optionIngredients[index]['name'],
+                                                            optionIngredients[index] == '-' ? '' :optionIngredients[index]['name'],
                                                             style: TextStyle(
                                                               color: Colors.black, fontSize: 17),
                                                           ),
@@ -582,8 +698,8 @@ class _howto_page extends State<howto_page> {
                                                           width: 75,
                                                           alignment: Alignment.centerRight,
                                                           child: Text(
-                                                            '${optionIngredients[index]['num']
-                                                                .toString()} กรัม',style: TextStyle(
+                                                            '${optionIngredients[index] == '-'?'':optionIngredients[index]['num']
+                                                                .toString()} ${optionIngredients[index]['unit']}',style: TextStyle(
                                                               color: Colors.black, fontSize: 17),
                                                           ),
                                                         ),
@@ -735,61 +851,8 @@ class _howto_page extends State<howto_page> {
                                     ),
                                   ),
 
-                                  Container(
-                                    decoration: BoxDecoration(
-                                        border: Border(
-                                          top:
-                                          BorderSide(color: Color(0xffEDEDED)),
-                                        )),
-                                    height: 50,
-                                    child: Row(
-                                      children: <Widget>[
-                                        Container(
-                                          padding: EdgeInsets.only(
-                                              bottom: 5, top: 5),
-                                          child: Container(
-                                            alignment: Alignment.center,
-                                            decoration: BoxDecoration(
-                                                shape: BoxShape.circle,
-                                                color: Colors.blueGrey),
-                                            width: 80,
-                                            child: Icon(
-                                              Icons.people,
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                        ),
-                                        Container(
-                                          padding: EdgeInsets.only(right: 85),
-                                          child: Text(
-                                            'taluew',
-                                            style: TextStyle(
-                                                color: Colors.blueGrey,
-                                                fontSize: 20),
-                                          ),
-                                        ),
-
-                                      ],
-                                    ),
-                                  ),
 
 
-                                  Container(
-                                    height: 50,
-                                    child: Row(
-                                      children: <Widget>[
-                                        Container(
-                                          padding: EdgeInsets.only(left:80 ,right: 85),
-                                          child: Text(
-                                            'น่ากินมากเลยค่าาาาาาา',
-                                            style: TextStyle(
-                                                color: Colors.black,
-                                                fontSize: 20),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
 
 
 

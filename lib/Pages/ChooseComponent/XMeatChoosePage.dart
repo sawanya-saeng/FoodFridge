@@ -23,8 +23,10 @@ class _xmeat_choose_page extends State<xmeat_choose_page> {
   Future getMeat() async {
     FirebaseUser user = await _auth.currentUser();
     List<DocumentSnapshot> tmp;
-    _db.collection('Fridge')
+    _db
+        .collection('Fridge')
         .where('uid', isEqualTo: user.uid)
+   //     .where('type', isEqualTo:'meat')
         .snapshots()
         .listen((docs) {
       tmp = docs.documents;
@@ -36,6 +38,24 @@ class _xmeat_choose_page extends State<xmeat_choose_page> {
 
   List<Map<String, String>> ingredientToFind = [];
 
+  Map<String, dynamic> checkIngredients(ingredientToFind, name) {
+    bool isHas = false;
+    int index = 0;
+
+    for (int i = 0; i < ingredientToFind.length ; i++) {
+      if(name == ingredientToFind[i]['name']){
+        isHas = true;
+        index = i;
+        break;
+      }
+    }
+
+    return {
+      "isHas": isHas,
+      "index": index
+    };
+  }
+
   @override
   void initState() {
     // TODO: implement initState
@@ -44,15 +64,15 @@ class _xmeat_choose_page extends State<xmeat_choose_page> {
   }
 
   @override
-  void didChangeDependencies(){
+  void didChangeDependencies() {
     super.didChangeDependencies();
-    if(!isLoaded){
+    if (!isLoaded) {
       _ingredient = Provider.of<Ingredient>(context);
       isLoaded = true;
     }
   }
 
-  calculateDate(DateTime date1){
+  calculateDate(DateTime date1) {
     int date1Day = date1.day;
     int date1Month = date1.month;
     int date1Year = date1.year;
@@ -62,7 +82,6 @@ class _xmeat_choose_page extends State<xmeat_choose_page> {
     int date2Year = DateTime.now().year;
 
     return date2Day - date1Day;
-
   }
 
   @override
@@ -70,226 +89,258 @@ class _xmeat_choose_page extends State<xmeat_choose_page> {
     // TODO: implement build
     return Padding(
       padding: EdgeInsets.all(20),
-      child: ingres != null ? ingres.length != 0 ? Container(
-          child: Column(
-            children: <Widget>[
-              Container(
-                padding: EdgeInsets.only(bottom: 1),
-                height: 50,
-                child: Row(
+      child: ingres != null
+          ? ingres.length != 0
+              ? Container(
+                  child: Column(
                   children: <Widget>[
-                    Expanded(
-                      flex: 4,
-                      child: Container(
-                        color: Color(0xffC3C3C3),
-                        alignment: Alignment.center,
-                        child: Row(
-                          children: <Widget>[
-                            Container(
-                              padding: EdgeInsets.only(left: 20,right: 20),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
+                    Container(
+                      padding: EdgeInsets.only(bottom: 1),
+                      height: 50,
+                      child: Row(
+                        children: <Widget>[
+                          Expanded(
+                            flex: 4,
+                            child: Container(
+                              color: Color(0xffC3C3C3),
+                              alignment: Alignment.center,
+                              child: Row(
                                 children: <Widget>[
                                   Container(
-                                    child: Text("All",style: TextStyle(color: Colors.white,fontSize: 20),),
+                                    padding:
+                                        EdgeInsets.only(left: 20, right: 20),
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: <Widget>[
+                                        Container(
+                                          child: Text(
+                                            "All",
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 20),
+                                          ),
+                                        ),
+                                        Container(
+                                          height: 18,
+                                          width: 18,
+                                          decoration: BoxDecoration(
+                                              color: Colors.white,
+                                              shape: BoxShape.circle,
+                                              border: Border.all(
+                                                  color: Colors.red)),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                   Container(
-                                    height: 18,
-                                    width: 18,
-                                    decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        shape: BoxShape.circle,
-                                        border: Border.all(color: Colors.red)
+                                    child: Text(
+                                      'วัตถุดิบ',
+                                      style: TextStyle(fontSize: 25),
                                     ),
                                   ),
                                 ],
                               ),
                             ),
+                          ),
+                          Expanded(
+                            flex: 2,
+                            child: Container(
+                              color: Color(0xffE58200),
+                              alignment: Alignment.center,
+                              child: Text(
+                                'คงเหลือ',
+                                style: TextStyle(
+                                    fontSize: 25, color: Colors.white),
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            flex: 2,
+                            child: Container(
+                              color: Color(0xffE58200),
+                              alignment: Alignment.center,
+                              child: Text(
+                                'วันที่เหลือ',
+                                style: TextStyle(
+                                    fontSize: 25, color: Colors.white),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: Container(
+                          child: ListView.builder(
+                              padding: EdgeInsets.zero,
+                              itemCount: ingres == null ? 0 : ingres.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                return GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      if(checkIngredients(ingredientToFind, ingres[index]['name'])['isHas']){
+                                        int indexToDelete = checkIngredients(ingredientToFind, ingres[index]['name'])['index'];
+                                        ingredientToFind.removeAt(indexToDelete);
+                                      }else{
+                                        ingredientToFind.add({
+                                          'name': ingres[index]['name'],
+                                          'num': ingres[index]['num'],
+                                          'unit': ingres[index]['unit']
+                                        });
+                                      }
+                                      _ingredient.setIngredients(ingredientToFind);
+                                      print(ingredientToFind);
+                                    });
+                                  },
+                                  child: Container(
+                                    height: 100,
+                                    color: Colors.green,
+                                    child: Row(
+                                      children: <Widget>[
+                                        Expanded(
+                                          flex: 4,
+                                          child: Container(
+                                            color: Color(0xffECECEC),
+                                            alignment: Alignment.center,
+                                            child: Row(
+                                              children: <Widget>[
+                                                Container(
+                                                  padding: EdgeInsets.only(
+                                                      left: 20, right: 20),
+                                                  child: Column(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .center,
+                                                    children: <Widget>[
+                                                      Container(
+                                                        height: 18,
+                                                        width: 18,
+                                                        decoration: BoxDecoration(
+                                                            color: checkIngredients(ingredientToFind, ingres[index].data['name'])['isHas']
+                                                                ? Colors.red
+                                                                : Colors.white,
+                                                            shape:
+                                                                BoxShape.circle,
+                                                            border: Border.all(
+                                                                color: Colors
+                                                                    .red)),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                                Container(
+                                                  child: Text(
+                                                    ingres[index].data['name'],
+                                                    style:
+                                                        TextStyle(fontSize: 25),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                        Expanded(
+                                          flex: 2,
+                                          child: Container(
+                                            color: Color(0xffFC9002),
+                                            alignment: Alignment.center,
+                                            child: Text(
+                                              ingres[index].data['num'] +
+                                                  ' ' +
+                                                  ingres[index].data['unit'],
+                                              style: TextStyle(
+                                                  fontSize: 25,
+                                                  color: Colors.white),
+                                            ),
+                                          ),
+                                        ),
+                                        Expanded(
+                                          flex: 2,
+                                          child: Container(
+                                            child: Stack(
+                                                alignment:
+                                                    Alignment.bottomCenter,
+                                                children: <Widget>[
+                                                  Container(
+                                                    color: Color(0xffFFA733),
+                                                    alignment: Alignment.center,
+                                                    child: Text(
+                                                      '${6} วัน',
+                                                      style: TextStyle(
+                                                          fontSize: 25,
+                                                          color: Colors.white),
+                                                    ),
+//                                child: Text(ingres[index].data['date'].toDate().toString()),
+                                                  ),
+                                                  GestureDetector(
+                                                    onTap: () {
+                                                      calculateDate(
+                                                          ingres[index]
+                                                              .data['date']
+                                                              .toDate());
+                                                    },
+                                                    child: Container(
+                                                      alignment:
+                                                          Alignment.center,
+                                                      height: 30,
+                                                      child: Text(
+                                                        '${ingres[index].data['date'].toDate().day.toString()}/${ingres[index].data['date'].toDate().month.toString()}/${ingres[index].data['date'].toDate().year.toString()}',
+                                                        style: TextStyle(
+                                                            fontSize: 15,
+                                                            color:
+                                                                Colors.white),
+                                                      ),
+                                                      color: Color(0xffFC9002),
+                                                    ),
+                                                  ),
+                                                ]),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              })),
+                    ),
+                  ],
+                ))
+              : Column(
+                  children: <Widget>[
+                    Expanded(
+                      child: Container(
+                          alignment: Alignment.center,
+                          child: Text(
+                            "ไม่มีวัตถุดิบ",
+                            style: TextStyle(fontSize: 25),
+                          )),
+                    ),
+                    GestureDetector(
+                      child: Container(
+                        alignment: Alignment.center,
+                        height: 100,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
                             Container(
-                              child: Text('วัตถุดิบ',
+                              child: Icon(
+                                Icons.add,
+                                size: 25,
+                              ),
+                            ),
+                            Container(
+                              child: Text(
+                                "เพิ่ม",
                                 style: TextStyle(fontSize: 25),
                               ),
                             ),
                           ],
                         ),
                       ),
-                    ),
-                    Expanded(
-                      flex: 2,
-                      child: Container(
-                        color: Color(0xffE58200),
-                        alignment: Alignment.center,
-                        child: Text('คงเหลือ',
-                          style: TextStyle(
-                              fontSize: 25, color: Colors.white),
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      flex: 2,
-                      child: Container(
-                        color: Color(0xffE58200),
-                        alignment: Alignment.center,
-                        child: Text(
-                          'วันที่เหลือ',
-                          style: TextStyle(
-                              fontSize: 25,
-                              color: Colors.white),
-                        ),
-                      ),
-                    ),
+                    )
                   ],
-                ),
-              ),
-              Expanded(
-                child: Container(
-                    child: ListView.builder(
-                        padding: EdgeInsets.zero,
-                        itemCount: ingres == null ? 0 : ingres.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          return GestureDetector(
-                            onTap: (){
-                              setState(() {
-                                //ingredientToFind.clear();
-                                ingredientToFind.add({
-                                  'name': ingres[index]['name'],
-                                  'num': ingres[index]['num'],
-                                  'unit': ingres[index]['unit']
-                                });
-                                _ingredient.setIngredient(ingredientToFind);
-                                print(ingredientToFind);
-                              });
-                            },
-                            child: Container(
-                              height: 100,
-                              color: Colors.green,
-                              child: Row(
-                                children: <Widget>[
-                                  Expanded(
-                                    flex: 4,
-                                    child: Container(
-                                      color: Color(0xffECECEC),
-                                      alignment: Alignment.center,
-                                      child: Row(
-                                        children: <Widget>[
-                                          Container(
-                                            padding: EdgeInsets.only(left: 20,right: 20),
-                                            child: Column(
-                                              mainAxisAlignment: MainAxisAlignment.center,
-                                              children: <Widget>[
-                                                Container(
-                                                  height: 18,
-                                                  width: 18,
-                                                  decoration: BoxDecoration(
-                                                      color: 'asd' == ingres[index]['name'] ? Colors.red : Colors.white,
-                                                      shape: BoxShape.circle,
-                                                      border: Border.all(color: Colors.red)
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                          Container(
-                                            child: Text(
-                                              ingres[index].data['name'],
-                                              style: TextStyle(fontSize: 25),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                  Expanded(
-                                    flex: 2,
-                                    child: Container(
-                                      color: Color(0xffFC9002),
-                                      alignment: Alignment.center,
-                                      child: Text(
-                                        ingres[index].data['num'] +
-                                            ' ' +
-                                            ingres[index].data['unit'],
-                                        style: TextStyle(
-                                            fontSize: 25, color: Colors.white),
-                                      ),
-                                    ),
-                                  ),
-                                  Expanded(
-                                    flex: 2,
-                                    child: Container(
-                                      child: Stack(
-                                          alignment: Alignment.bottomCenter,
-                                          children: <Widget>[
-                                            Container(
-                                              color: Color(0xffFFA733),
-                                              alignment: Alignment.center,
-                                              child: Text(
-                                                '${6} วัน',
-                                                style: TextStyle(
-                                                    fontSize: 25,
-                                                    color: Colors.white),
-                                              ),
-//                                child: Text(ingres[index].data['date'].toDate().toString()),
-                                            ),
-                                            GestureDetector(
-                                              onTap: (){
-                                                calculateDate(ingres[index].data['date'].toDate());
-                                              },
-                                              child: Container(
-                                                alignment: Alignment.center,
-                                                height: 30,
-                                                child: Text(
-                                                  '${ingres[index].data['date'].toDate().day.toString()}/${ingres[index].data['date'].toDate().month.toString()}/${ingres[index].data['date'].toDate().year.toString()}',
-                                                  style: TextStyle(
-                                                      fontSize: 15,
-                                                      color: Colors.white),
-                                                ),
-                                                color: Color(0xffFC9002),
-                                              ),
-                                            ),
-                                          ]),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        })),
-              ),
-            ],
-          )
-      ):Column(
-        children: <Widget>[
-          Expanded(
-            child: Container(
-                alignment: Alignment.center,
-                child: Text("ไม่มีวัตถุดิบ",style: TextStyle(fontSize: 25),)
-            ),
-          ),
-          GestureDetector(
-            child: Container(
-              alignment: Alignment.center,
-              height: 100,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Container(
-                    child: Icon(
-                      Icons.add,
-                      size: 25,
-                    ),
-                  ),
-                  Container(
-                    child: Text(
-                      "เพิ่ม",
-                      style: TextStyle(fontSize: 25),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          )
-        ],
-      ):Container(),
+                )
+          : Container(),
     );
   }
 }

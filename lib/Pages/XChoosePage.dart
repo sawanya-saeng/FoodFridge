@@ -4,6 +4,11 @@ import 'package:taluewapp/Pages/ChooseComponent/XMeatChoosePage.dart';
 import 'package:taluewapp/Services/Ingredient.dart';
 import 'package:provider/provider.dart';
 
+import 'ChooseComponent/XFruitChoosePage.dart';
+import 'ChooseComponent/XOthersChoosePage.dart';
+import 'ChooseComponent/XVegetableChoosePage.dart';
+import 'ChooseComponent/XWaterChoosePage.dart';
+
 class xchoose_page extends StatefulWidget {
   @override
   _xchoose_page createState() => _xchoose_page();
@@ -13,6 +18,8 @@ class _xchoose_page extends State<xchoose_page> {
   int click;
   Ingredient _ingredient;
   bool isLoaded = false;
+
+  PageController _pageController = PageController(initialPage: 0);
 
   @override
   void initState() {
@@ -28,8 +35,6 @@ class _xchoose_page extends State<xchoose_page> {
       _ingredient = Provider.of<Ingredient>(context);
     }
   }
-
-  List<Widget> pages = [xmeat_choose_page()];
 
 
   @override
@@ -103,6 +108,7 @@ class _xchoose_page extends State<xchoose_page> {
                       onTap: () {
                         setState(() {
                           click = 0;
+                          _pageController.animateToPage(0, duration: Duration(milliseconds: 300), curve: Curves.ease);
                         });
                       },
                       child: AnimatedContainer(
@@ -120,6 +126,7 @@ class _xchoose_page extends State<xchoose_page> {
                       onTap: () {
                         setState(() {
                           click = 1;
+                          _pageController.animateToPage(1, duration: Duration(milliseconds: 300), curve: Curves.ease);
                         });
                       },
                       child: AnimatedContainer(
@@ -137,6 +144,7 @@ class _xchoose_page extends State<xchoose_page> {
                       onTap: () {
                         setState(() {
                           click = 2;
+                          _pageController.animateToPage(2, duration: Duration(milliseconds: 300), curve: Curves.ease);
                         });
                       },
                       child: AnimatedContainer(
@@ -154,6 +162,7 @@ class _xchoose_page extends State<xchoose_page> {
                       onTap: () {
                         setState(() {
                           click = 3;
+                          _pageController.animateToPage(3, duration: Duration(milliseconds: 300), curve: Curves.ease);
                         });
                       },
                       child: AnimatedContainer(
@@ -171,6 +180,7 @@ class _xchoose_page extends State<xchoose_page> {
                       onTap: () {
                         setState(() {
                           click = 4;
+                          _pageController.animateToPage(4, duration: Duration(milliseconds: 300), curve: Curves.ease);
                         });
                       },
                       child: AnimatedContainer(
@@ -188,7 +198,16 @@ class _xchoose_page extends State<xchoose_page> {
             ),
             Expanded(
               child: Container(
-                  child: pages[0]
+                  child: PageView(
+                    controller: _pageController,
+                    children: <Widget>[
+                      xmeat_choose_page(),
+//                      xvegetable_choose_page(),
+//                      xfruit_choose_page(),
+//                      xwater_choose_page(),
+//                      xothers_choose_page()
+                    ],
+                  ),
               ),
             )
           ],

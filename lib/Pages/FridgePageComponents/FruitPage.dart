@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'AddPage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:intl/intl.dart';
+import 'package:date_calc/date_calc.dart';
 
 class fruit_page extends StatefulWidget {
   @override
@@ -14,12 +16,15 @@ class _fruit_page extends State<fruit_page> {
   FirebaseAuth _auth = FirebaseAuth.instance;
   Firestore _db = Firestore.instance;
   List<DocumentSnapshot> ingres;
+  final format = DateFormat('yyyy-MM-dd');
+
 
   Future getMeat() async {
     FirebaseUser user = await _auth.currentUser();
     List<DocumentSnapshot> tmp;
     _db.collection('Fridge')
         .where('uid', isEqualTo: user.uid)
+        .where('type' , isEqualTo: 'fruit')
         .snapshots()
         .listen((docs) {
       tmp = docs.documents;
@@ -34,21 +39,29 @@ class _fruit_page extends State<fruit_page> {
     // TODO: implement initState
     super.initState();
     getMeat();
+    calculateDate('2020-01-17');
   }
 
 
-  calculateDate(DateTime date1){
+  calculateDate(String date1){
+    List<String> dateList = date1.split('-');
+    if(DateTime.now().year > int.parse(dateList[0])){
+      return 0;
+    }
 
-    int date1Day = date1.day;
-    int date1Month = date1.month;
-    int date1Year = date1.year;
+    if(DateTime.now().month > int.parse(dateList[1])){
+      return 0;
+    }
 
-    int date2Day = DateTime.now().day;
-    int date2Month = DateTime.now().month;
-    int date2Year = DateTime.now().year;
+    if(DateTime.now().day > int.parse(dateList[2])){
+      return 0;
+    }
 
-    return date2Day - date1Day;
+    DateCalc date = DateCalc.fromDateTime(new DateTime.now());
+    int diff = date.differenceValue(date: DateTime(int.parse(dateList[0]), int.parse(dateList[1]), int.parse(dateList[2])+1), type: DateType.day);
 
+    print(diff);
+    return diff;
   }
 
   @override
@@ -147,7 +160,7 @@ class _fruit_page extends State<fruit_page> {
                                           color: Color(0xffFFA733),
                                           alignment: Alignment.center,
                                           child: Text(
-                                            '${6} วัน',
+                                            '${calculateDate(format.format(ingres[index]['date'].toDate()))} วัน',
                                             style: TextStyle(
                                                 fontSize: 25,
                                                 color: Colors.white),
@@ -181,7 +194,7 @@ class _fruit_page extends State<fruit_page> {
             GestureDetector(
               onTap: () {
                 Navigator.push(context, MaterialPageRoute(builder: (context) {
-                  return add_page();
+                  return add_page('fruit');
                 }));
               },
               child: Container(
@@ -219,7 +232,7 @@ class _fruit_page extends State<fruit_page> {
         GestureDetector(
           onTap: (){
             Navigator.push(context, MaterialPageRoute(builder: (context){
-              return add_page();
+              return add_page('fruit');
             }));
           },
           child: Container(

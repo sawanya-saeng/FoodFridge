@@ -81,7 +81,10 @@ class _cando_page extends State<cando_page> with TickerProviderStateMixin{
   @override
   Widget build(BuildContext context) {
     double _width = MediaQuery.of(context).size.width;
-    return isLoaded ? _loadingProgress.getSubWidget(context) : Container(
+    return isLoaded ? _loadingProgress.getSubWidget(context) : this.canDo.length == 0 ? Container(
+      child: Text("ไม่มี"),
+      alignment: Alignment.center,
+    ) : Container(
       child: ListView.builder(
         padding: EdgeInsets.only(top: 15),
         itemCount: menuImages == null ? 0 : menuImages.length,

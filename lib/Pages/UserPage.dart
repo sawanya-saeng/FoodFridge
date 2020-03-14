@@ -1,22 +1,79 @@
 import 'package:flutter/material.dart';
 import './AddMenu.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:taluewapp/Services/loadingScreenService.dart';
 
 class user_page extends StatefulWidget {
   @override
   _user_page createState() => _user_page();
 }
 
-class _user_page extends State<user_page> {
+class _user_page extends State<user_page> with TickerProviderStateMixin{
   int _currentPage = 0;
-
   PageController _scrollController;
+  TextEditingController _searchController = new TextEditingController();
+  final _db = Firestore.instance;
+  final _storage = FirebaseStorage.instance;
+  List<Map<String,dynamic>> allMenu;
+  LoadingProgress _loadingProgress;
+  AnimationController _animationController;
+  bool isLoaded;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    _scrollController = PageController(initialPage: 0);
+    isLoaded = true;
+    _animationController = new AnimationController(vsync: this, duration: Duration(seconds: 10));
+    _loadingProgress = new LoadingProgress(_animationController);
+    _scrollController = new PageController(initialPage: 0);
+    getFavMenu();
   }
+
+
+
+  Future getFavMenu()async{
+    List<Map<String,dynamic>> tmp = List<Map<String,dynamic>>();
+    var map_tmp;
+    setState(() {
+      _loadingProgress.setProgressText('กำลังโหลดเมนู');
+      _loadingProgress.setProgress(0);
+    });
+    await _db.collection('Menu').getDocuments().then((docs){
+      docs.documents.forEach((data){
+        map_tmp = data.data;
+        map_tmp['menu_id'] = data.documentID;
+        tmp.add(map_tmp);
+      });
+    });
+    setState(() {
+      _loadingProgress.setProgressText('กำลังโหลดรูปภาพ');
+      _loadingProgress.setProgress(100);
+    });
+
+    for(int i=0;i<tmp.length;i++){
+      setState(() {
+        _loadingProgress.setProgressText('กำลังโหลดรูปภาพ ${i+1}/${tmp.length}');
+        _loadingProgress.setProgress((((i+1)*tmp.length)/100)+100);
+      });
+      String url = await _storage.ref().child('Menu').child(tmp[i]['menu_id']).child('menupic.jpg').getDownloadURL().catchError((e){
+        return null;
+      });
+      tmp[i]['image'] = url;
+    }
+
+    setState(() {
+      print('Ok');
+      allMenu = tmp;
+      print(allMenu);
+      isLoaded = false;
+    });
+  }
+
+
+
+
 
   @override
   Widget build(BuildContext context) {

@@ -5,14 +5,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:taluewapp/Services/Ingredient.dart';
 import 'package:provider/provider.dart';
 
-class meat_choose_page extends StatefulWidget {
+class vegetable_choose_page extends StatefulWidget {
   @override
-  _meat_choose_page createState() => _meat_choose_page();
+  _vegetable_choose_page createState() => _vegetable_choose_page();
 }
 
 int click;
 
-class _meat_choose_page extends State<meat_choose_page> {
+class _vegetable_choose_page extends State<vegetable_choose_page> {
   FirebaseAuth _auth = FirebaseAuth.instance;
   Firestore _db = Firestore.instance;
   List<DocumentSnapshot> ingres;
@@ -25,7 +25,7 @@ class _meat_choose_page extends State<meat_choose_page> {
     List<DocumentSnapshot> tmp;
     _db.collection('Fridge')
         .where('uid', isEqualTo: user.uid)
-        .where('type', isEqualTo:'meat')
+        .where('type', isEqualTo:'vegetable')
         .snapshots()
         .listen((docs) {
       tmp = docs.documents;
@@ -98,9 +98,9 @@ class _meat_choose_page extends State<meat_choose_page> {
                                     height: 18,
                                     width: 18,
                                     decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      shape: BoxShape.circle,
-                                      border: Border.all(color: Colors.red)
+                                        color: Colors.white,
+                                        shape: BoxShape.circle,
+                                        border: Border.all(color: Colors.red)
                                     ),
                                   ),
                                 ],

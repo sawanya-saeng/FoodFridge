@@ -2,13 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_cupertino_date_picker/flutter_cupertino_date_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:platform_alert_dialog/platform_alert_dialog.dart';
 
 class add_page extends StatefulWidget {
-  _add_page createState() => _add_page();
+  String type;
+  add_page(this.type);
+  _add_page createState() => _add_page(this.type);
 }
 
 
 class _add_page extends State<add_page> {
+  String type;
+  _add_page(this.type);
+
   String unitValue = 'กรัม';
   String dateNow = '';
   DateTime dateTime;
@@ -25,16 +31,56 @@ class _add_page extends State<add_page> {
     double _safeTop = MediaQuery.of(context).padding.top;
     double _safeBottom = MediaQuery.of(context).padding.bottom;
 
+    Future errorDialog(String msg) async {
+      await showDialog<void>(
+        context: context,
+        builder: (BuildContext context) {
+          return PlatformAlertDialog(
+            title: Text('เดี๋ยวก่อน!'),
+            content: SingleChildScrollView(
+              child: ListBody(
+                children: <Widget>[
+                  Text(msg),
+                ],
+              ),
+            ),
+            actions: <Widget>[
+              PlatformDialogAction(
+                child: Text('ตกลง'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              )
+            ],
+          );
+        },
+      );
+    }
+
     Future confirmData()async{
+      if(_name.text.isEmpty){
+        await errorDialog('กรุณาใส่ชื่อวัตถุดิบ');
+        return;
+      }
+
+      if(_num.text.isEmpty){
+        await errorDialog('กรุณาใส่จำนวนวัตถุดิบ');
+        return;
+      }
+
+
+
       FirebaseUser user = await _auth.currentUser();
       await _db.collection('Fridge').add({
         'name' : _name.text,
         'num' : _num.text,
         'unit' : unitValue,
         'date' : dateTime,
-        'uid' : user.uid
+        'uid' : user.uid,
+        'type' : this.type
       });
-      print('Ok!!!');
+
+      Navigator.of(context).pop();
     }
 
     return Scaffold(
@@ -154,7 +200,7 @@ class _add_page extends State<add_page> {
                             padding: EdgeInsets.only(left: 15),
                             alignment: Alignment.center,
                             height: 30,
-                            width: 80,
+                            width: 100,
                             decoration: BoxDecoration(
                                 color: Colors.white,
                                 border: Border.all(color: Color(0xffB15B25))
@@ -167,7 +213,7 @@ class _add_page extends State<add_page> {
                                   unitValue = value;
                                 });
                               },
-                              items: <String>['กรัม','กิโล','ตัน'].map<DropdownMenuItem<String>>((String value){
+                              items: <String>['กรัม', 'กิโล', 'ฟอง', 'ช้อนโต๊ะ' , 'ถ้วย'].map<DropdownMenuItem<String>>((String value){
                                 return DropdownMenuItem<String>(value: value, child: Text(value),);
                               }).toList(),
                             )
@@ -221,9 +267,7 @@ class _add_page extends State<add_page> {
                     ),
                     GestureDetector(
                       onTap: (){
-                        confirmData().then((docs){
-                          Navigator.of(context).pop();
-                        });
+                        confirmData();
                       },
                       child: Container(
                         padding: EdgeInsets.only(top: 50),

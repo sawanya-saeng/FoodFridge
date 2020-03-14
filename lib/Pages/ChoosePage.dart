@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:taluewapp/Pages/ChooseComponent/FruitChoosePage.dart';
 import 'package:taluewapp/Pages/ChooseComponent/MeatChoosePage.dart';
+import 'package:taluewapp/Pages/ChooseComponent/OthersChoosePage.dart';
+import 'package:taluewapp/Pages/ChooseComponent/VegetableChoosePage.dart';
+import 'package:taluewapp/Pages/ChooseComponent/WaterChoosePage.dart';
 import 'package:taluewapp/Pages/ChooseComponent/XMeatChoosePage.dart';
 import 'package:taluewapp/Services/Ingredient.dart';
 import 'package:provider/provider.dart';
@@ -13,6 +17,9 @@ class _choose_page extends State<choose_page> {
   int click;
   Ingredient _ingredient;
   bool isLoaded = false;
+
+
+  PageController _pageController = PageController(initialPage: 0);
 
   @override
   void initState() {
@@ -29,8 +36,7 @@ class _choose_page extends State<choose_page> {
     }
   }
 
-  List<Widget> pages = [meat_choose_page(), xmeat_choose_page()];
-
+  List<Widget> pages = [meat_choose_page()];
 
   @override
   Widget build(BuildContext context) {
@@ -103,6 +109,7 @@ class _choose_page extends State<choose_page> {
                       onTap: () {
                         setState(() {
                           click = 0;
+                          _pageController.animateToPage(0, duration: Duration(milliseconds: 300), curve: Curves.ease);
                         });
                       },
                       child: AnimatedContainer(
@@ -120,6 +127,7 @@ class _choose_page extends State<choose_page> {
                       onTap: () {
                         setState(() {
                           click = 1;
+                          _pageController.animateToPage(1, duration: Duration(milliseconds: 300), curve: Curves.ease);
                         });
                       },
                       child: AnimatedContainer(
@@ -137,6 +145,7 @@ class _choose_page extends State<choose_page> {
                       onTap: () {
                         setState(() {
                           click = 2;
+                          _pageController.animateToPage(2, duration: Duration(milliseconds: 300), curve: Curves.ease);
                         });
                       },
                       child: AnimatedContainer(
@@ -154,6 +163,7 @@ class _choose_page extends State<choose_page> {
                       onTap: () {
                         setState(() {
                           click = 3;
+                          _pageController.animateToPage(3, duration: Duration(milliseconds: 300), curve: Curves.ease);
                         });
                       },
                       child: AnimatedContainer(
@@ -171,6 +181,7 @@ class _choose_page extends State<choose_page> {
                       onTap: () {
                         setState(() {
                           click = 4;
+                          _pageController.animateToPage(4, duration: Duration(milliseconds: 300), curve: Curves.ease);
                         });
                       },
                       child: AnimatedContainer(
@@ -188,7 +199,16 @@ class _choose_page extends State<choose_page> {
             ),
             Expanded(
               child: Container(
-                child: pages[0]
+                child: PageView(
+                  controller: _pageController,
+                  children: <Widget>[
+                    meat_choose_page(),
+                    vegetable_choose_page(),
+                    fruit_choose_page(),
+                    water_choose_page(),
+                    others_choose_page()
+                  ],
+                ),
               ),
             )
           ],

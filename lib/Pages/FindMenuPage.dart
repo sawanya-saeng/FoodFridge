@@ -35,11 +35,40 @@ class _findmenu_page extends State<findmenu_page> {
     }
   }
 
+  bool checkMainIngredients(list, name){
+    bool isHas = false;
+
+    for(int i=0; i<list.length; i++){
+      if(name == list[i]){
+        isHas = true;
+      }
+    }
+
+    return isHas;
+  }
+
+  double toGrum(double num, String unit) {
+    double base=1;
+
+    if(unit == "กิโล"){
+      base = 1000;
+    }
+    if(unit == "ฟอง"){
+      base = 50;
+    }
+    if(unit == "ช้อนโต๊"){
+      base = 12.5;
+    }
+
+    return num*base;
+  }
+
   Future loadMenuFromMainIngredient()async{
     FirebaseUser user = await _auth.currentUser();
     List<dynamic> tmp = [];
     List<dynamic> allMenu = [];
-
+    canDo = [];
+    maybeDo = [];
     List<List<bool>> mainBool = [];
     List<List<bool>> optionBool = [];
     List<dynamic> notHaveMainIngredients = [];
@@ -65,19 +94,24 @@ class _findmenu_page extends State<findmenu_page> {
       List<dynamic> tmp_haveMainIngredients = [];
       List<dynamic> tmp_haveOptionalIngredients = [];
 
-      for(int i=0;i<allMenu[k].data['Ingredients']['Main'].length;i++){
+      // menu main = fridge
+      for(int i=0; i<allMenu[k].data['Ingredients']['Main'].length;i++){
         bool isHas = false;
         bool isPushed = false;
-        if(allMenu[k].data['Ingredients']['Main'][i]['name'] == _ingredient.getIngredient()['name']){
-          if(allMenu[k].data['Ingredients']['Main'][i]['num'] <= int.parse(_ingredient.getIngredient()['num'])){
-            isHas = true;
-            tmp_haveMainIngredients.add(allMenu[k].data['Ingredients']['Main'][i]['name']);
-          }else{
-            tmp_notHaveMainIngredients.add([allMenu[k].data['Ingredients']['Main'][i]['name'], allMenu[k].data['Ingredients']['Main'][i]['num'] - int.parse(_ingredient.getIngredient()['num']), 'กรัม']);
-            isPushed = true;
+        for(int j=0; j<tmp.length; j++){
+          if(allMenu[k].data['Ingredients']['Main'][i]['name'] == tmp[j]['name']){
+            double net1 = toGrum(double.parse(allMenu[k].data['Ingredients']['Main'][i]['num'].toString()), allMenu[k].data['Ingredients']['Main'][i]['unit']);
+            double net2 = toGrum(double.parse(tmp[j]['num']), tmp[j]['unit']);
+
+            if(net1 <= net2){
+              isHas = true;
+              tmp_haveMainIngredients.add(allMenu[k].data['Ingredients']['Main'][i]['name']);
+            }else{
+              tmp_notHaveMainIngredients.add([allMenu[k].data['Ingredients']['Main'][i]['name'], allMenu[k].data['Ingredients']['Main'][i]['num'] - int.parse(tmp[j]['num']), 'กรัม']);
+              isPushed = true;
+            }
           }
         }
-
         if(isHas){
           tmp_mainBool.add(true);
         }else{
@@ -88,14 +122,43 @@ class _findmenu_page extends State<findmenu_page> {
         }
       }
 
-      //
+      // menu optional = fridge
+      if(allMenu[k].data['Ingredients']['Optional'] != null){
+          for(int i=0; i<allMenu[k].data['Ingredients']['Optional'].length;i++){
+            bool isHas = false;
+            bool isPushed = false;
+            if(allMenu[k].data['Ingredients']['Optional'][i] == '-'){
+              break;
+            }
+            for(int j=0; j<tmp.length; j++){
+              if(allMenu[k].data['Ingredients']['Optional'][i]['name'] == tmp[j]['name']){
+                double net1 = toGrum(double.parse(allMenu[k].data['Ingredients']['Optional'][i]['num'].toString()), allMenu[k].data['Ingredients']['Optional'][i]['unit']);
+                double net2 = toGrum(double.parse(tmp[j]['num']), tmp[j]['unit']);
 
-      //
+                if(net1 <= net2){
+                  isHas = true;
+                  tmp_haveOptionalIngredients.add(allMenu[k].data['Ingredients']['Optional'][i]['name']);
+                }else{
+                  tmp_notHaveOptionalIngredients.add([allMenu[k].data['Ingredients']['Optional'][i]['name'], allMenu[k].data['Ingredients']['Optional'][i]['num'] - int.parse(tmp[j]['num']), 'กรัม']);
+                  isPushed = true;
+                }
+              }
+            }
+            if(isHas){
+              tmp_optionBool.add(true);
+            }else{
+              tmp_optionBool.add(false);
+              if(!isPushed){
+                tmp_notHaveOptionalIngredients.add([allMenu[k].data['Ingredients']['Optional'][i]['name'], allMenu[k].data['Ingredients']['Optional'][i]['num'], 'กรัม']);
+              }
+            }
+          }
+      }
 
       mainBool.add(tmp_mainBool);
       optionBool.add(tmp_optionBool);
       notHaveMainIngredients.add(tmp_notHaveMainIngredients);
-      notHaveOptionalIngredients.add(tmp_haveOptionalIngredients);
+      notHaveOptionalIngredients.add(tmp_notHaveOptionalIngredients);
       haveMainIngredients.add(tmp_haveMainIngredients);
       haveOptionalIngredients.add(tmp_haveOptionalIngredients);
     }
@@ -104,19 +167,312 @@ class _findmenu_page extends State<findmenu_page> {
       if(isAllfalse(mainBool[i])){
         continue;
       }else{
-        if(isHasfalse(mainBool[i])){
+        if((isHasfalse(mainBool[i])) || (isHasfalse(optionBool[i]))){
+          if(!checkMainIngredients(haveMainIngredients[i], _ingredient.getIngredient()['name'])){
+            continue;
+          }
+
           setState(() {
-            maybeDo.add(allMenu[i].documentID);
+            maybeDo.add({
+              "menu_id": allMenu[i].documentID,
+              "haveMain": haveMainIngredients[i],
+              "haveOpt": haveOptionalIngredients[i],
+              "notMain": notHaveMainIngredients[i],
+              "notOpt": notHaveOptionalIngredients[i]
+            });
           });
         }else{
+          if(!checkMainIngredients(haveMainIngredients[i], _ingredient.getIngredient()['name'])){
+            continue;
+          }
+
           setState(() {
             canDo.add(allMenu[i].documentID);
           });
         }
       }
     }
-//    print(canDo);
-//    print(maybeDo);
+  }
+
+  Future loadMenuFromManual()async{
+    FirebaseUser user = await _auth.currentUser();
+    List<dynamic> tmp = [];
+    List<dynamic> allMenu = [];
+    canDo = [];
+    maybeDo = [];
+    List<List<bool>> mainBool = [];
+    List<List<bool>> optionBool = [];
+    List<dynamic> notHaveMainIngredients = [];
+    List<dynamic> notHaveOptionalIngredients = [];
+    List<dynamic> haveMainIngredients = [];
+    List<dynamic> haveOptionalIngredients = [];
+
+    tmp = _ingredient.getIngredients();
+
+    await _db.collection('Menu').getDocuments().then((docs){
+      allMenu = docs.documents;
+    });
+
+    for(int k=0;k<allMenu.length;k++){
+      List<bool> tmp_mainBool = [];
+      List<bool> tmp_optionBool = [];
+      List<dynamic> tmp_notHaveMainIngredients = [];
+      List<dynamic> tmp_notHaveOptionalIngredients = [];
+      List<dynamic> tmp_haveMainIngredients = [];
+      List<dynamic> tmp_haveOptionalIngredients = [];
+
+      // menu main = fridge
+      for(int i=0; i<allMenu[k].data['Ingredients']['Main'].length;i++){
+        bool isHas = false;
+        bool isPushed = false;
+        for(int j=0; j<tmp.length; j++){
+          if(allMenu[k].data['Ingredients']['Main'][i]['name'] == tmp[j]['name']){
+            double net1 = toGrum(double.parse(allMenu[k].data['Ingredients']['Main'][i]['num'].toString()), allMenu[k].data['Ingredients']['Main'][i]['unit']);
+            double net2 = toGrum(double.parse(tmp[j]['num']), tmp[j]['unit']);
+
+            if(net1 <= net2){
+              isHas = true;
+              tmp_haveMainIngredients.add(allMenu[k].data['Ingredients']['Main'][i]['name']);
+            }else{
+              tmp_notHaveMainIngredients.add([allMenu[k].data['Ingredients']['Main'][i]['name'], allMenu[k].data['Ingredients']['Main'][i]['num'] - int.parse(tmp[j]['num']), 'กรัม']);
+              isPushed = true;
+            }
+          }
+        }
+        if(isHas){
+          tmp_mainBool.add(true);
+        }else{
+          tmp_mainBool.add(false);
+          if(!isPushed){
+            tmp_notHaveMainIngredients.add([allMenu[k].data['Ingredients']['Main'][i]['name'], allMenu[k].data['Ingredients']['Main'][i]['num'], 'กรัม']);
+          }
+        }
+      }
+
+      // menu optional = fridge
+      if(allMenu[k].data['Ingredients']['Optional'] != null){
+        for(int i=0; i<allMenu[k].data['Ingredients']['Optional'].length;i++){
+          bool isHas = false;
+          bool isPushed = false;
+          if(allMenu[k].data['Ingredients']['Optional'][i] == '-'){
+            break;
+          }
+          for(int j=0; j<tmp.length; j++){
+            if(allMenu[k].data['Ingredients']['Optional'][i]['name'] == tmp[j]['name']){
+              double net1 = toGrum(double.parse(allMenu[k].data['Ingredients']['Optional'][i]['num'].toString()), allMenu[k].data['Ingredients']['Optional'][i]['unit']);
+              double net2 = toGrum(double.parse(tmp[j]['num']), tmp[j]['unit']);
+
+              if(net1 <= net2){
+                isHas = true;
+                tmp_haveOptionalIngredients.add(allMenu[k].data['Ingredients']['Optional'][i]['name']);
+              }else{
+                tmp_notHaveOptionalIngredients.add([allMenu[k].data['Ingredients']['Optional'][i]['name'], allMenu[k].data['Ingredients']['Optional'][i]['num'] - int.parse(tmp[j]['num']), 'กรัม']);
+                isPushed = true;
+              }
+            }
+          }
+          if(isHas){
+            tmp_optionBool.add(true);
+          }else{
+            tmp_optionBool.add(false);
+            if(!isPushed){
+              tmp_notHaveOptionalIngredients.add([allMenu[k].data['Ingredients']['Optional'][i]['name'], allMenu[k].data['Ingredients']['Optional'][i]['num'], 'กรัม']);
+            }
+          }
+        }
+      }
+
+      mainBool.add(tmp_mainBool);
+      optionBool.add(tmp_optionBool);
+      notHaveMainIngredients.add(tmp_notHaveMainIngredients);
+      notHaveOptionalIngredients.add(tmp_notHaveOptionalIngredients);
+      haveMainIngredients.add(tmp_haveMainIngredients);
+      haveOptionalIngredients.add(tmp_haveOptionalIngredients);
+    }
+
+    for(int i=0;i<allMenu.length;i++){
+      print(tmp);
+      print(haveMainIngredients[i]);
+      print(haveOptionalIngredients[i]);
+      print(mainBool[i]);
+      print(optionBool[i]);
+      if(isAllfalse(mainBool[i])){
+        continue;
+      }else{
+        if((isHasfalse(mainBool[i])) || (isHasfalse(optionBool[i]))){
+          if(isHasfalse(mainBool[i])){
+            continue;
+          }
+          bool isHas = false;
+          for(int j=0;j<tmp.length;j++){
+            if(checkMainIngredients(haveMainIngredients[i], tmp[j]['name'])){
+              isHas = true;
+            }
+          }
+
+          if(!isHas){
+            continue;
+          }
+
+          setState(() {
+            maybeDo.add({
+              "menu_id": allMenu[i].documentID,
+              "haveMain": haveMainIngredients[i],
+              "haveOpt": haveOptionalIngredients[i],
+              "notMain": notHaveMainIngredients[i],
+              "notOpt": notHaveOptionalIngredients[i]
+            });
+          });
+        }else{
+          if(!checkMainIngredients(haveMainIngredients[i], _ingredient.getIngredient()['name'])){
+            continue;
+          }
+
+          setState(() {
+            canDo.add(allMenu[i].documentID);
+          });
+        }
+      }
+    }
+//    FirebaseUser user = await _auth.currentUser();
+//    List<dynamic> tmp = [];
+//    List<dynamic> allMenu = [];
+//    canDo = [];
+//    maybeDo = [];
+//    List<List<bool>> mainBool = [];
+//    List<List<bool>> optionBool = [];
+//    List<dynamic> notHaveMainIngredients = [];
+//    List<dynamic> notHaveOptionalIngredients = [];
+//    List<dynamic> haveMainIngredients = [];
+//    List<dynamic> haveOptionalIngredients = [];
+//
+////    await _db.collection('Fridge').where('uid' ,isEqualTo: user.uid).getDocuments().then((docs){
+////      docs.documents.forEach((data){
+////        tmp.add(data.data);
+////      });
+////    });
+////
+////    print(tmp);
+////    print(_ingredient.getIngredients());
+//
+//    tmp = _ingredient.getIngredients();
+//
+//    await _db.collection('Menu').getDocuments().then((docs){
+//      allMenu = docs.documents;
+//    });
+//
+//    for(int k=0;k<allMenu.length;k++){
+//      List<bool> tmp_mainBool = [];
+//      List<bool> tmp_optionBool = [];
+//      List<dynamic> tmp_notHaveMainIngredients = [];
+//      List<dynamic> tmp_notHaveOptionalIngredients = [];
+//      List<dynamic> tmp_haveMainIngredients = [];
+//      List<dynamic> tmp_haveOptionalIngredients = [];
+//
+//      // menu main = fridge
+//      for(int i=0; i<allMenu[k].data['Ingredients']['Main'].length;i++){
+//        bool isHas = false;
+//        bool isPushed = false;
+//        for(int j=0; j<tmp.length; j++){
+//          if(allMenu[k].data['Ingredients']['Main'][i]['name'] == tmp[j]['name']){
+//            if(allMenu[k].data['Ingredients']['Main'][i]['num'] <= int.parse(tmp[j]['num'])){
+//              isHas = true;
+//              tmp_haveMainIngredients.add(allMenu[k].data['Ingredients']['Main'][i]['name']);
+//            }else{
+//              tmp_notHaveMainIngredients.add([allMenu[k].data['Ingredients']['Main'][i]['name'], allMenu[k].data['Ingredients']['Main'][i]['num'] - int.parse(tmp[j]['num']), 'กรัม']);
+//              isPushed = true;
+//            }
+//          }
+//        }
+//        if(isHas){
+//          tmp_mainBool.add(true);
+//        }else{
+//          tmp_mainBool.add(false);
+//          if(!isPushed){
+//            tmp_notHaveMainIngredients.add([allMenu[k].data['Ingredients']['Main'][i]['name'], allMenu[k].data['Ingredients']['Main'][i]['num'], 'กรัม']);
+//          }
+//        }
+//      }
+//
+//      // menu optional = fridge
+//      if(allMenu[k].data['Ingredients']['Optional'] != null){
+//        for(int i=0; i<allMenu[k].data['Ingredients']['Optional'].length;i++){
+//          bool isHas = false;
+//          bool isPushed = false;
+//          if(allMenu[k].data['Ingredients']['Optional'][i] == '-'){
+//            break;
+//          }
+//          for(int j=0; j<tmp.length; j++){
+//            if(allMenu[k].data['Ingredients']['Optional'][i]['name'] == tmp[j]['name']){
+//              if(allMenu[k].data['Ingredients']['Optional'][i]['num'] <= int.parse(tmp[j]['num'])){
+//                isHas = true;
+//                tmp_haveOptionalIngredients.add(allMenu[k].data['Ingredients']['Optional'][i]['name']);
+//              }else{
+//                tmp_notHaveOptionalIngredients.add([allMenu[k].data['Ingredients']['Optional'][i]['name'], allMenu[k].data['Ingredients']['Optional'][i]['num'] - int.parse(tmp[j]['num']), 'กรัม']);
+//                isPushed = true;
+//              }
+//            }
+//          }
+//          if(isHas){
+//            tmp_optionBool.add(true);
+//          }else{
+//            tmp_optionBool.add(false);
+//            if(!isPushed){
+//              tmp_notHaveOptionalIngredients.add([allMenu[k].data['Ingredients']['Optional'][i]['name'], allMenu[k].data['Ingredients']['Optional'][i]['num'], 'กรัม']);
+//            }
+//          }
+//        }
+//      }
+//
+//      mainBool.add(tmp_mainBool);
+//      optionBool.add(tmp_optionBool);
+//      notHaveMainIngredients.add(tmp_notHaveMainIngredients);
+//      notHaveOptionalIngredients.add(tmp_notHaveOptionalIngredients);
+//      haveMainIngredients.add(tmp_haveMainIngredients);
+//      haveOptionalIngredients.add(tmp_haveOptionalIngredients);
+//    }
+//
+//    for(int i=0;i<allMenu.length;i++){
+//      if((isAllfalse(mainBool[i]))){
+//        continue;
+//      }else{
+//        if(isHasfalse(mainBool[i])){
+//          bool isHas = false;
+//          for(int i=0;i<tmp.length;i++){
+//            print(_ingredient.getIngredients());
+//            print(haveMainIngredients[i]);
+//            print(tmp[i]['name']);
+//            if(checkMainIngredients(haveMainIngredients[i], tmp[i]['name'])){
+//              isHas = true;
+//            }
+//          }
+//
+//          for(int i=0;i<tmp.length;i++){
+//            if(checkMainIngredients(haveOptionalIngredients[i], tmp[i]['name'])){
+//              isHas = true;
+//            }
+//          }
+//
+//          if(!isHas){
+//            continue;
+//          }
+//
+//          setState(() {
+//            maybeDo.add({
+//              "menu_id": allMenu[i].documentID,
+//              "haveMain": haveMainIngredients[i],
+//              "haveOpt": haveOptionalIngredients[i],
+//              "notMain": notHaveMainIngredients[i],
+//              "notOpt": notHaveOptionalIngredients[i]
+//            });
+//          });
+//        }else{
+//          setState(() {
+//            canDo.add(allMenu[i].documentID);
+//          });
+//        }
+//      }
+//    }
   }
 
   bool isHasfalse(dynamic a){
@@ -172,12 +528,16 @@ class _findmenu_page extends State<findmenu_page> {
                         Expanded(
                           child: GestureDetector(
                             onTap: () async{
+                              setState(() {
+                                isSearched = false;
+                              });
                               var result = await Navigator.push(context,
                                   MaterialPageRoute(builder: (context) {
                                 return choose_page();
                               }));
                               if(result != null){
                                 loadMenuFromMainIngredient().then((a){
+                                  print("result: ");
                                   print(result);
                                   setState(() {
                                     isSearched = true;
@@ -200,12 +560,15 @@ class _findmenu_page extends State<findmenu_page> {
                         Expanded(
                           child: GestureDetector(
                             onTap: () async{
+                              setState(() {
+                                isSearched = false;
+                              });
                               var result = await Navigator.push(context,
                                   MaterialPageRoute(builder: (context) {
                                     return xchoose_page();
                                   }));
                               if(result != null){
-                                loadMenuFromMainIngredient().then((a){
+                                loadMenuFromManual().then((a){
                                   print(result);
                                   setState(() {
                                     isSearched = true;

@@ -5,14 +5,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:taluewapp/Services/Ingredient.dart';
 import 'package:provider/provider.dart';
 
-class meat_choose_page extends StatefulWidget {
+class xwater_choose_page extends StatefulWidget {
   @override
-  _meat_choose_page createState() => _meat_choose_page();
+  _xwater_choose_page createState() => _xwater_choose_page();
 }
 
 int click;
 
-class _meat_choose_page extends State<meat_choose_page> {
+class _xwater_choose_page extends State<xwater_choose_page> {
   FirebaseAuth _auth = FirebaseAuth.instance;
   Firestore _db = Firestore.instance;
   List<DocumentSnapshot> ingres;
@@ -23,9 +23,10 @@ class _meat_choose_page extends State<meat_choose_page> {
   Future getMeat() async {
     FirebaseUser user = await _auth.currentUser();
     List<DocumentSnapshot> tmp;
-    _db.collection('Fridge')
+    _db
+        .collection('Fridge')
         .where('uid', isEqualTo: user.uid)
-        .where('type', isEqualTo:'meat')
+        .where('type', isEqualTo:'water')
         .snapshots()
         .listen((docs) {
       tmp = docs.documents;
@@ -35,7 +36,25 @@ class _meat_choose_page extends State<meat_choose_page> {
     });
   }
 
-  Map<String, String> ingredientToFind = {};
+  List<Map<String, String>> ingredientToFind = [];
+
+  Map<String, dynamic> checkIngredients(ingredientToFind, name) {
+    bool isHas = false;
+    int index = 0;
+
+    for (int i = 0; i < ingredientToFind.length ; i++) {
+      if(name == ingredientToFind[i]['name']){
+        isHas = true;
+        index = i;
+        break;
+      }
+    }
+
+    return {
+      "isHas": isHas,
+      "index": index
+    };
+  }
 
   @override
   void initState() {
@@ -45,15 +64,15 @@ class _meat_choose_page extends State<meat_choose_page> {
   }
 
   @override
-  void didChangeDependencies(){
+  void didChangeDependencies() {
     super.didChangeDependencies();
-    if(!isLoaded){
+    if (!isLoaded) {
       _ingredient = Provider.of<Ingredient>(context);
       isLoaded = true;
     }
   }
 
-  calculateDate(DateTime date1){
+  calculateDate(DateTime date1) {
     int date1Day = date1.day;
     int date1Month = date1.month;
     int date1Year = date1.year;
@@ -63,7 +82,6 @@ class _meat_choose_page extends State<meat_choose_page> {
     int date2Year = DateTime.now().year;
 
     return date2Day - date1Day;
-
   }
 
   @override
@@ -71,7 +89,9 @@ class _meat_choose_page extends State<meat_choose_page> {
     // TODO: implement build
     return Padding(
       padding: EdgeInsets.all(20),
-      child: ingres != null ? ingres.length != 0 ? Container(
+      child: ingres != null
+          ? ingres.length != 0
+          ? Container(
           child: Column(
             children: <Widget>[
               Container(
@@ -87,27 +107,35 @@ class _meat_choose_page extends State<meat_choose_page> {
                         child: Row(
                           children: <Widget>[
                             Container(
-                              padding: EdgeInsets.only(left: 20,right: 20),
+                              padding:
+                              EdgeInsets.only(left: 20, right: 20),
                               child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
+                                mainAxisAlignment:
+                                MainAxisAlignment.center,
                                 children: <Widget>[
                                   Container(
-                                    child: Text("All",style: TextStyle(color: Colors.white,fontSize: 20),),
+                                    child: Text(
+                                      "All",
+                                      style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 20),
+                                    ),
                                   ),
                                   Container(
                                     height: 18,
                                     width: 18,
                                     decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      shape: BoxShape.circle,
-                                      border: Border.all(color: Colors.red)
-                                    ),
+                                        color: Colors.white,
+                                        shape: BoxShape.circle,
+                                        border: Border.all(
+                                            color: Colors.red)),
                                   ),
                                 ],
                               ),
                             ),
                             Container(
-                              child: Text('วัตถุดิบ',
+                              child: Text(
+                                'วัตถุดิบ',
                                 style: TextStyle(fontSize: 25),
                               ),
                             ),
@@ -120,7 +148,8 @@ class _meat_choose_page extends State<meat_choose_page> {
                       child: Container(
                         color: Color(0xffE58200),
                         alignment: Alignment.center,
-                        child: Text('คงเหลือ',
+                        child: Text(
+                          'คงเหลือ',
                           style: TextStyle(
                               fontSize: 25, color: Colors.white),
                         ),
@@ -134,8 +163,7 @@ class _meat_choose_page extends State<meat_choose_page> {
                         child: Text(
                           'วันที่เหลือ',
                           style: TextStyle(
-                              fontSize: 25,
-                              color: Colors.white),
+                              fontSize: 25, color: Colors.white),
                         ),
                       ),
                     ),
@@ -149,15 +177,20 @@ class _meat_choose_page extends State<meat_choose_page> {
                         itemCount: ingres == null ? 0 : ingres.length,
                         itemBuilder: (BuildContext context, int index) {
                           return GestureDetector(
-                            onTap: (){
+                            onTap: () {
                               setState(() {
-                                ingredientToFind.clear();
-                                ingredientToFind.addAll({
-                                  'name': ingres[index]['name'],
-                                  'num': ingres[index]['num'],
-                                  'unit': ingres[index]['unit']
-                                });
-                                _ingredient.setIngredient(ingredientToFind);
+                                if(checkIngredients(ingredientToFind, ingres[index]['name'])['isHas']){
+                                  int indexToDelete = checkIngredients(ingredientToFind, ingres[index]['name'])['index'];
+                                  ingredientToFind.removeAt(indexToDelete);
+                                }else{
+                                  ingredientToFind.add({
+                                    'name': ingres[index]['name'],
+                                    'num': ingres[index]['num'],
+                                    'unit': ingres[index]['unit']
+                                  });
+                                }
+                                _ingredient.setIngredients(ingredientToFind);
+                                print(ingredientToFind);
                               });
                             },
                             child: Container(
@@ -173,18 +206,25 @@ class _meat_choose_page extends State<meat_choose_page> {
                                       child: Row(
                                         children: <Widget>[
                                           Container(
-                                            padding: EdgeInsets.only(left: 20,right: 20),
+                                            padding: EdgeInsets.only(
+                                                left: 20, right: 20),
                                             child: Column(
-                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              mainAxisAlignment:
+                                              MainAxisAlignment
+                                                  .center,
                                               children: <Widget>[
                                                 Container(
                                                   height: 18,
                                                   width: 18,
                                                   decoration: BoxDecoration(
-                                                      color: ingredientToFind['name'] == ingres[index]['name'] ? Colors.red : Colors.white,
-                                                      shape: BoxShape.circle,
-                                                      border: Border.all(color: Colors.red)
-                                                  ),
+                                                      color: checkIngredients(ingredientToFind, ingres[index].data['name'])['isHas']
+                                                          ? Colors.red
+                                                          : Colors.white,
+                                                      shape:
+                                                      BoxShape.circle,
+                                                      border: Border.all(
+                                                          color: Colors
+                                                              .red)),
                                                 ),
                                               ],
                                             ),
@@ -192,7 +232,8 @@ class _meat_choose_page extends State<meat_choose_page> {
                                           Container(
                                             child: Text(
                                               ingres[index].data['name'],
-                                              style: TextStyle(fontSize: 25),
+                                              style:
+                                              TextStyle(fontSize: 25),
                                             ),
                                           ),
                                         ],
@@ -205,11 +246,12 @@ class _meat_choose_page extends State<meat_choose_page> {
                                       color: Color(0xffFC9002),
                                       alignment: Alignment.center,
                                       child: Text(
-                                        ingres[index].data['num'].toString() +
+                                        ingres[index].data['num'] +
                                             ' ' +
                                             ingres[index].data['unit'],
                                         style: TextStyle(
-                                            fontSize: 25, color: Colors.white),
+                                            fontSize: 25,
+                                            color: Colors.white),
                                       ),
                                     ),
                                   ),
@@ -217,7 +259,8 @@ class _meat_choose_page extends State<meat_choose_page> {
                                     flex: 2,
                                     child: Container(
                                       child: Stack(
-                                          alignment: Alignment.bottomCenter,
+                                          alignment:
+                                          Alignment.bottomCenter,
                                           children: <Widget>[
                                             Container(
                                               color: Color(0xffFFA733),
@@ -231,17 +274,22 @@ class _meat_choose_page extends State<meat_choose_page> {
 //                                child: Text(ingres[index].data['date'].toDate().toString()),
                                             ),
                                             GestureDetector(
-                                              onTap: (){
-                                                calculateDate(ingres[index].data['date'].toDate());
+                                              onTap: () {
+                                                calculateDate(
+                                                    ingres[index]
+                                                        .data['date']
+                                                        .toDate());
                                               },
                                               child: Container(
-                                                alignment: Alignment.center,
+                                                alignment:
+                                                Alignment.center,
                                                 height: 30,
                                                 child: Text(
                                                   '${ingres[index].data['date'].toDate().day.toString()}/${ingres[index].data['date'].toDate().month.toString()}/${ingres[index].data['date'].toDate().year.toString()}',
                                                   style: TextStyle(
                                                       fontSize: 15,
-                                                      color: Colors.white),
+                                                      color:
+                                                      Colors.white),
                                                 ),
                                                 color: Color(0xffFC9002),
                                               ),
@@ -256,14 +304,16 @@ class _meat_choose_page extends State<meat_choose_page> {
                         })),
               ),
             ],
-          )
-      ):Column(
+          ))
+          : Column(
         children: <Widget>[
           Expanded(
             child: Container(
                 alignment: Alignment.center,
-                child: Text("ไม่มีวัตถุดิบ",style: TextStyle(fontSize: 25),)
-            ),
+                child: Text(
+                  "ไม่มีวัตถุดิบ",
+                  style: TextStyle(fontSize: 25),
+                )),
           ),
           GestureDetector(
             child: Container(
@@ -289,7 +339,8 @@ class _meat_choose_page extends State<meat_choose_page> {
             ),
           )
         ],
-      ):Container(),
+      )
+          : Container(),
     );
   }
 }

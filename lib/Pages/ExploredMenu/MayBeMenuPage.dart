@@ -37,6 +37,7 @@ class _maybe_page extends State<maybe_page> with TickerProviderStateMixin{
     List<dynamic> tmp_menuDetail = [];
 
     setState(() {
+      isLoaded = true;
       _loadingProgress.setProgress(0);
       _loadingProgress.setProgressText('กำลังโหลดเมนู');
     });
@@ -46,7 +47,7 @@ class _maybe_page extends State<maybe_page> with TickerProviderStateMixin{
         _loadingProgress.setProgress((i*100)/this.maybeDo.length);
         _loadingProgress.setProgressText('กำลังโหลดเมนู ${i}/${this.maybeDo.length}');
       });
-      await _db.collection('Menu').document(this.maybeDo[i]).get().then((data){
+      await _db.collection('Menu').document(this.maybeDo[i]['menu_id']).get().then((data){
         tmp_menuDetail.add(data.data);
       });
     }
@@ -61,7 +62,7 @@ class _maybe_page extends State<maybe_page> with TickerProviderStateMixin{
         _loadingProgress.setProgress(((i*100)/this.maybeDo.length)+100);
         _loadingProgress.setProgressText('กำลังโหลดรูป ${i}/${this.maybeDo.length}');
       });
-      String url = await _storage.ref().child('Menu').child(this.maybeDo[i]).child('menupic.jpg').getDownloadURL().catchError((e){
+      String url = await _storage.ref().child('Menu').child(this.maybeDo[i]['menu_id']).child('menupic.jpg').getDownloadURL().catchError((e){
         return null;
       });
       tmp_menuImages.add(url);
@@ -71,8 +72,6 @@ class _maybe_page extends State<maybe_page> with TickerProviderStateMixin{
       menuDetail = tmp_menuDetail;
       menuImages = tmp_menuImages;
       isLoaded = false;
-      print(menuDetail.length);
-      print(menuImages.length);
     });
   }
 
@@ -122,7 +121,7 @@ class _maybe_page extends State<maybe_page> with TickerProviderStateMixin{
                                     Navigator.push(context,
                                         MaterialPageRoute(
                                             builder: (context) {
-                                              return howto_page(this.maybeDo[index]);
+                                              return howto_page(this.maybeDo[index]['menu_id']);
                                             }));
                                   },
                                   child: Container(
@@ -139,6 +138,72 @@ class _maybe_page extends State<maybe_page> with TickerProviderStateMixin{
                                 ),
                               ),
                             ],
+                          ),
+                        ),
+                        Container(
+                          child: Text("-------- วัตถุดิบที่ขาด --------",style: TextStyle(
+                              color: Color(0xff914d1f), fontSize: 13)),
+                        ),
+                        Container(
+
+                          child: Column(
+                            children: List.generate(this.maybeDo[index]['notMain'].length, (i){
+                              return Container(
+                                child: Row(
+                                  children: <Widget>[
+                                    Container(
+                                      child: Text(this.maybeDo[index]['notMain'][i][0],style: TextStyle(
+                                    fontSize: 12)),
+                                    ),
+                                    Container(
+                                      child: Text(" "),
+                                    ),
+                                    Container(
+                                      child: Text(this.maybeDo[index]['notMain'][i][1].toString(),style: TextStyle(
+                              color: Color(0xffC41C0D), fontSize: 12)),
+                                    ),
+                                    Container(
+                                      child: Text(" "),
+                                    ),
+                                    Container(
+                                      child: Text(this.maybeDo[index]['notMain'][i][2],style: TextStyle(
+                               fontSize: 12)),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }),
+                          ),
+                        ),
+                        Divider(),
+                        Container(
+                          child: Column(
+                            children: List.generate(this.maybeDo[index]['notOpt'].length, (i){
+                              return Container(
+                                child: Row(
+                                  children: <Widget>[
+                                    Container(
+                                      child: Text(this.maybeDo[index]['notOpt'][i][0],style: TextStyle(
+                                     fontSize: 12)),
+                                    ),
+                                    Container(
+                                      child: Text(" "),
+                                    ),
+                                    Container(
+                                      child: Text(this.maybeDo[index]['notOpt'][i][1].toString(),style: TextStyle(
+                              color: Color(0xffC41C0D), fontSize: 12)),
+                                    ),
+                                    Container(
+                                      child: Text(" "),
+                                    ),
+                                    Container(
+                                      child: Text(this.maybeDo[index]['notOpt'][i][2],style: TextStyle(
+                               fontSize: 12)),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }),
                           ),
                         ),
                       ],

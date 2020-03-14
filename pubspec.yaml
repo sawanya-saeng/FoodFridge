@@ -30,6 +30,9 @@ dependencies:
   image_picker: ^0.6.2
   firebase_storage: ^3.0.10
   provider:
+  platform_alert_dialog: ^1.0.0+2
+  intl: ^0.16.1
+  date_calc: ^0.1.0
 
 dev_dependencies:
   flutter_test:

@@ -3,6 +3,8 @@ import 'package:taluewapp/Pages/FridgePage.dart';
 import 'package:taluewapp/Pages/FindMenuPage.dart';
 import 'package:taluewapp/Pages/ExpirePage.dart';
 import 'package:taluewapp/Pages/BinPage.dart';
+import 'package:taluewapp/Pages/FridgePageComponents/FruitPage.dart';
+import 'package:taluewapp/Pages/HowToPage.dart';
 import 'package:taluewapp/Pages/UserPage.dart';
 
 class main_page extends StatefulWidget {

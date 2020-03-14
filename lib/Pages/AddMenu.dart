@@ -286,6 +286,7 @@ class _add_menu extends State<add_menu> {
                                   });
                                 });
                               },
+
                               child: Container(
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
