@@ -44,15 +44,16 @@ class _others_page extends State<others_page> {
 
   calculateDate(String date1){
     List<String> dateList = date1.split('-');
+
     if(DateTime.now().year > int.parse(dateList[0])){
       return 0;
     }
 
-    if(DateTime.now().month > int.parse(dateList[1])){
+    if(DateTime.now().month > int.parse(dateList[1]) && DateTime.now().year > int.parse(dateList[0])){
       return 0;
     }
 
-    if(DateTime.now().day > int.parse(dateList[2])){
+    if(DateTime.now().day > int.parse(dateList[2]) && DateTime.now().month > int.parse(dateList[1]) && DateTime.now().year > int.parse(dateList[0])){
       return 0;
     }
 

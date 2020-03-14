@@ -38,28 +38,27 @@ class _veget_page extends State<veget_page> {
     // TODO: implement initState
     super.initState();
     getMeat();
-    calculateDate('2020-01-17');
   }
 
 
   calculateDate(String date1){
     List<String> dateList = date1.split('-');
+
     if(DateTime.now().year > int.parse(dateList[0])){
       return 0;
     }
 
-    if(DateTime.now().month > int.parse(dateList[1])){
+    if(DateTime.now().month > int.parse(dateList[1]) && DateTime.now().year == int.parse(dateList[0])){
       return 0;
     }
 
-    if(DateTime.now().day > int.parse(dateList[2])){
+    if(DateTime.now().day > int.parse(dateList[2]) && DateTime.now().month == int.parse(dateList[1]) && DateTime.now().year == int.parse(dateList[0])){
       return 0;
     }
 
     DateCalc date = DateCalc.fromDateTime(new DateTime.now());
     int diff = date.differenceValue(date: DateTime(int.parse(dateList[0]), int.parse(dateList[1]), int.parse(dateList[2])+1), type: DateType.day);
 
-    print(diff);
     return diff;
   }
 
