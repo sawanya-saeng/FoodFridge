@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:taluewapp/Services/loadingScreenService.dart';
 import 'AddPage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import 'package:date_calc/date_calc.dart';
+import 'package:platform_alert_dialog/platform_alert_dialog.dart';
+import 'package:taluewapp/Services/loadingScreenService.dart';
 
 class meat_page extends StatefulWidget {
   @override
@@ -11,20 +14,20 @@ class meat_page extends StatefulWidget {
 }
 int click;
 
-class _meat_page extends State<meat_page> {
+class _meat_page extends State<meat_page> with TickerProviderStateMixin{
   FirebaseAuth _auth = FirebaseAuth.instance;
   Firestore _db = Firestore.instance;
   List<DocumentSnapshot> ingres;
+  LoadingProgress _loadingProgress;
+  AnimationController _animationController;
+  bool isLoading = false;
+
   final format = DateFormat('yyyy-MM-dd');
 
   Future getMeat() async {
     FirebaseUser user = await _auth.currentUser();
     List<DocumentSnapshot> tmp;
-    _db.collection('Fridge')
-        .where('uid', isEqualTo: user.uid)
-        .where('type', isEqualTo:'meat')
-        .orderBy('date', descending: true)
-        .snapshots().listen((docs) {
+    _db.collection('Fridge').where('uid', isEqualTo: user.uid).where('type', isEqualTo:'meat').orderBy('date', descending: true).snapshots().listen((docs) {
       tmp = docs.documents;
       setState(() {
         ingres = tmp;
@@ -32,10 +35,23 @@ class _meat_page extends State<meat_page> {
     });
   }
 
+  Future deleteItem(String itemId) async{
+    setState(() {
+      isLoading = true;
+    });
+    await _db.collection('Fridge').document(itemId).delete();
+    Navigator.of(context).pop();
+    setState(() {
+      isLoading = false;
+    });
+  }
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    _animationController = new AnimationController(vsync: this, duration: Duration(seconds: 10));
+    _loadingProgress = new LoadingProgress(_animationController);
     getMeat();
   }
 
@@ -64,7 +80,7 @@ class _meat_page extends State<meat_page> {
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
-    return ingres != null ? ingres.length != 0 ? Container(
+    return isLoading ? _loadingProgress.getSubWidget(context) : ingres != null ? ingres.length != 0 ? Container(
       child: Column(
         children: <Widget>[
           Container(
@@ -115,74 +131,104 @@ class _meat_page extends State<meat_page> {
                     padding: EdgeInsets.zero,
                     itemCount: ingres == null ? 0 : ingres.length,
                     itemBuilder: (BuildContext context, int index) {
-                      return Container(
-                        margin: EdgeInsets.only(bottom: 10),
-                        height: 100,
-                        color: Colors.green,
-                        child: Row(
-                          children: <Widget>[
-                            Expanded(
-                              flex: 4,
-                              child: Container(
-                                color: Color(0xffFCFCFC),
-                                alignment: Alignment.center,
-                                child: Text(
-                                  ingres[index].data['name'],
-                                  style: TextStyle(fontSize: 25),
+                      return GestureDetector(
+                        onLongPress: (){
+                          showDialog(context: context,builder: (context){
+                            return PlatformAlertDialog(
+                              title: Text('ยืนยันการลบหรือไม่?'),
+                              content: SingleChildScrollView(
+                                child: ListBody(
+                                  children: <Widget>[
+                                    Text('หากลบวัตถุดิบจะเอากลับมาไม่ได้แล้วนะ!!'),
+                                  ],
                                 ),
                               ),
-                            ),
-                            Expanded(
-                              flex: 2,
-                              child: Container(
-                                color: Color(0xffFC9002),
-                                alignment: Alignment.center,
-                                child: Text(
-                                  ingres[index].data['num'].toString() +
-                                      ' ' +
-                                      ingres[index].data['unit'],
-                                  style: TextStyle(
-                                      fontSize: 25, color: Colors.white),
+                              actions: <Widget>[
+                                PlatformDialogAction(
+                                  child: Text('ยกเลิก'),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                ),
+                                PlatformDialogAction(
+                                  child: Text('ตกลง'),
+                                  onPressed: () {
+                                    deleteItem(ingres[index].documentID);
+                                  },
+                                )
+                              ],
+                            );
+                          });
+                        },
+                        child: Container(
+                          margin: EdgeInsets.only(bottom: 10),
+                          height: 100,
+                          color: Colors.green,
+                          child: Row(
+                            children: <Widget>[
+                              Expanded(
+                                flex: 4,
+                                child: Container(
+                                  color: Color(0xffFCFCFC),
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    ingres[index].data['name'],
+                                    style: TextStyle(fontSize: 25),
+                                  ),
                                 ),
                               ),
-                            ),
-                            Expanded(
-                              flex: 2,
-                              child: Container(
-                                child: Stack(
-                                    alignment: Alignment.bottomCenter,
-                                    children: <Widget>[
-                                      Container(
-                                        color: Color(0xffFFA733),
-                                        alignment: Alignment.center,
-                                        child: Text(
-                                          '${calculateDate(format.format(ingres[index]['date'].toDate()))} วัน',
-                                          style: TextStyle(
-                                              fontSize: 25,
-                                              color: Colors.white),
-                                        ),
-//                                child: Text(ingres[index].data['date'].toDate().toString()),
-                                      ),
-                                      GestureDetector(
-                                        onTap: (){
-                                          calculateDate(format.format(ingres[index].data['date'].toDate()));
-                                        },
-                                        child: Container(
+                              Expanded(
+                                flex: 2,
+                                child: Container(
+                                  color: Color(0xffFC9002),
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    ingres[index].data['num'].toString() +
+                                        ' ' +
+                                        ingres[index].data['unit'],
+                                    style: TextStyle(
+                                        fontSize: 25, color: Colors.white),
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                flex: 2,
+                                child: Container(
+                                  child: Stack(
+                                      alignment: Alignment.bottomCenter,
+                                      children: <Widget>[
+                                        Container(
+                                          color: Color(0xffFFA733),
                                           alignment: Alignment.center,
-                                          height: 30,
                                           child: Text(
-                                            '${ingres[index].data['date'].toDate().day.toString()}/${ingres[index].data['date'].toDate().month.toString()}/${ingres[index].data['date'].toDate().year.toString()}',
+                                            '${calculateDate(format.format(ingres[index]['date'].toDate()))} วัน',
                                             style: TextStyle(
-                                                fontSize: 15,
+                                                fontSize: 25,
                                                 color: Colors.white),
                                           ),
-                                          color: Color(0xffFC9002),
+//                                child: Text(ingres[index].data['date'].toDate().toString()),
                                         ),
-                                      ),
-                                    ]),
+                                        GestureDetector(
+                                          onTap: (){
+                                            calculateDate(format.format(ingres[index].data['date'].toDate()));
+                                          },
+                                          child: Container(
+                                            alignment: Alignment.center,
+                                            height: 30,
+                                            child: Text(
+                                              '${ingres[index].data['date'].toDate().day.toString()}/${ingres[index].data['date'].toDate().month.toString()}/${ingres[index].data['date'].toDate().year.toString()}',
+                                              style: TextStyle(
+                                                  fontSize: 15,
+                                                  color: Colors.white),
+                                            ),
+                                            color: Color(0xffFC9002),
+                                          ),
+                                        ),
+                                      ]),
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       );
                     })),
@@ -254,6 +300,43 @@ class _meat_page extends State<meat_page> {
           ),
         )
       ],
-    ):Container();
+    ):Column(
+      children: <Widget>[
+        Expanded(
+          child: Container(
+              alignment: Alignment.center,
+              child: Text("ไม่มีวัตถุดิบ",style: TextStyle(fontSize: 25),)
+          ),
+        ),
+        GestureDetector(
+          onTap: (){
+            Navigator.push(context, MaterialPageRoute(builder: (context){
+              return add_page('meat');
+            }));
+          },
+          child: Container(
+            alignment: Alignment.center,
+            height: 100,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Container(
+                  child: Icon(
+                    Icons.add,
+                    size: 25,
+                  ),
+                ),
+                Container(
+                  child: Text(
+                    "เพิ่ม",
+                    style: TextStyle(fontSize: 25),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        )
+      ],
+    );
   }
 }

@@ -134,6 +134,11 @@ class _fridge_page extends State<fridge_page> {
           child: Container(
             child: PageView(
               controller: _pageController,
+              onPageChanged: (int index){
+                setState(() {
+                  click = index;
+                });
+              },
               children: <Widget>[
                 meat_page(),
                 veget_page(),
