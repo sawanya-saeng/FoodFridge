@@ -131,7 +131,7 @@ class _findmenu_page extends State<findmenu_page> {
             for(int j=0; j<tmp.length; j++){
               if(allMenu[k].data['Ingredients']['Optional'][i]['name'] == tmp[j]['name']){
                 double net1 = toGrum(double.parse(allMenu[k].data['Ingredients']['Optional'][i]['num'].toString()), allMenu[k].data['Ingredients']['Optional'][i]['unit']);
-                double net2 = toGrum(double.parse(tmp[j]['num']), tmp[j]['unit']);
+                double net2 = toGrum(double.parse(tmp[j]['num'].toString()), tmp[j]['unit']);
 
                 if(net1 <= net2){
                   isHas = true;
