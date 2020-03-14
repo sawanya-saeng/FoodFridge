@@ -23,6 +23,7 @@ class _meat_page extends State<meat_page> {
     _db.collection('Fridge')
         .where('uid', isEqualTo: user.uid)
         .where('type', isEqualTo:'meat')
+        .orderBy('date', descending: false)
         .snapshots().listen((docs) {
       tmp = docs.documents;
       setState(() {
@@ -36,7 +37,6 @@ class _meat_page extends State<meat_page> {
     // TODO: implement initState
     super.initState();
     getMeat();
-    calculateDate('2020-01-17');
   }
 
 
@@ -57,7 +57,6 @@ class _meat_page extends State<meat_page> {
     DateCalc date = DateCalc.fromDateTime(new DateTime.now());
     int diff = date.differenceValue(date: DateTime(int.parse(dateList[0]), int.parse(dateList[1]), int.parse(dateList[2])+1), type: DateType.day);
 
-    print(diff);
     return diff;
   }
 
@@ -104,7 +103,6 @@ class _meat_page extends State<meat_page> {
                           fontSize: 25,
                           color: Colors.white),
                     ),
-//                                child: Text(ingres[index].data['date'].toDate().toString()),
                   ),
                 ),
               ],
@@ -116,6 +114,9 @@ class _meat_page extends State<meat_page> {
                     padding: EdgeInsets.zero,
                     itemCount: ingres == null ? 0 : ingres.length,
                     itemBuilder: (BuildContext context, int index) {
+                      if(calculateDate(format.format(ingres[index]['date'].toDate())) <= 0){
+                        return Container();
+                      }
                       return Container(
                         margin: EdgeInsets.only(bottom: 10),
                         height: 100,

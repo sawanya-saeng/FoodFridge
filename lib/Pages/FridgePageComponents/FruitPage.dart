@@ -25,6 +25,7 @@ class _fruit_page extends State<fruit_page> {
     _db.collection('Fridge')
         .where('uid', isEqualTo: user.uid)
         .where('type' , isEqualTo: 'fruit')
+        .orderBy('date', descending: false)
         .snapshots()
         .listen((docs) {
       tmp = docs.documents;
@@ -119,6 +120,9 @@ class _fruit_page extends State<fruit_page> {
                       padding: EdgeInsets.zero,
                       itemCount: ingres == null ? 1 : ingres.length,
                       itemBuilder: (BuildContext context, int index) {
+                        if(calculateDate(format.format(ingres[index]['date'].toDate())) <= 0){
+                          return Container();
+                        }
                         return Container(
                           margin: EdgeInsets.only(bottom: 10),
                           height: 100,

@@ -19,8 +19,9 @@ class _expire_page extends State<expire_page> {
   Future getMeat() async {
     FirebaseUser user = await _auth.currentUser();
     List<DocumentSnapshot> tmp;
-    _db.collection('Bin')
+    _db.collection('Fridge')
         .where('uid', isEqualTo: user.uid)
+        .orderBy('date', descending: true)
         .snapshots().listen((docs) {
       tmp = docs.documents;
       setState(() {
@@ -34,7 +35,6 @@ class _expire_page extends State<expire_page> {
     // TODO: implement initState
     super.initState();
     getMeat();
-    calculateDate('2020-01-17');
   }
 
 
@@ -123,6 +123,9 @@ class _expire_page extends State<expire_page> {
                       padding: EdgeInsets.zero,
                       itemCount: ingres == null ? 0 : ingres.length,
                       itemBuilder: (BuildContext context, int index) {
+                        if(calculateDate(format.format(ingres[index]['date'].toDate())) > 0){
+                          return Container();
+                        }
                         return Container(
                           margin: EdgeInsets.only(bottom: 10),
                           height: 100,
