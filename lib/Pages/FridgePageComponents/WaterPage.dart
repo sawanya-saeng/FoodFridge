@@ -24,7 +24,7 @@ class _water_page extends State<water_page> {
     _db.collection('Fridge')
         .where('uid', isEqualTo: user.uid)
         .where('type' , isEqualTo: 'water')
-        .orderBy('date', descending: false)
+        .orderBy('date', descending: true)
         .snapshots()
         .listen((docs) {
       tmp = docs.documents;
@@ -119,9 +119,6 @@ class _water_page extends State<water_page> {
                       padding: EdgeInsets.zero,
                       itemCount: ingres == null ? 1 : ingres.length,
                       itemBuilder: (BuildContext context, int index) {
-                        if(calculateDate(format.format(ingres[index]['date'].toDate())) <= 0){
-                          return Container();
-                        }
                         return Container(
                           margin: EdgeInsets.only(bottom: 10),
                           height: 100,

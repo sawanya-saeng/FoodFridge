@@ -25,7 +25,7 @@ class _fruit_page extends State<fruit_page> {
     _db.collection('Fridge')
         .where('uid', isEqualTo: user.uid)
         .where('type' , isEqualTo: 'fruit')
-        .orderBy('date', descending: false)
+        .orderBy('date', descending: true)
         .snapshots()
         .listen((docs) {
       tmp = docs.documents;

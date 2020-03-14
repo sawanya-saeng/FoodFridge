@@ -23,7 +23,7 @@ class _meat_page extends State<meat_page> {
     _db.collection('Fridge')
         .where('uid', isEqualTo: user.uid)
         .where('type', isEqualTo:'meat')
-        .orderBy('date', descending: false)
+        .orderBy('date', descending: true)
         .snapshots().listen((docs) {
       tmp = docs.documents;
       setState(() {
@@ -114,9 +114,6 @@ class _meat_page extends State<meat_page> {
                     padding: EdgeInsets.zero,
                     itemCount: ingres == null ? 0 : ingres.length,
                     itemBuilder: (BuildContext context, int index) {
-                      if(calculateDate(format.format(ingres[index]['date'].toDate())) <= 0){
-                        return Container();
-                      }
                       return Container(
                         margin: EdgeInsets.only(bottom: 10),
                         height: 100,
