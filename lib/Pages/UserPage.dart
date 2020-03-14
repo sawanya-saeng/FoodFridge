@@ -1,8 +1,11 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:taluewapp/Pages/LoginPage.dart';
 import './AddMenu.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:taluewapp/Services/loadingScreenService.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class user_page extends StatefulWidget {
   @override
@@ -15,6 +18,7 @@ class _user_page extends State<user_page> with TickerProviderStateMixin{
   TextEditingController _searchController = new TextEditingController();
   final _db = Firestore.instance;
   final _storage = FirebaseStorage.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
   List<Map<String,dynamic>> allMenu;
   LoadingProgress _loadingProgress;
   AnimationController _animationController;
@@ -299,6 +303,22 @@ class _user_page extends State<user_page> with TickerProviderStateMixin{
                 ),
               ],
             ),
+          ),
+        ),
+        GestureDetector(
+          onTap: (){
+            _googleSignIn.signOut().then((e){
+              Navigator.popUntil(context, (route)=> route.isFirst);
+              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context){
+                return login_page();
+              }));
+            });
+          },
+          child: Container(
+            color: Colors.redAccent,
+            height: 60,
+            alignment: Alignment.center,
+            child: Text('ออกจากระบบ', style: TextStyle(color: Colors.white, fontSize: 28)),
           ),
         )
       ],

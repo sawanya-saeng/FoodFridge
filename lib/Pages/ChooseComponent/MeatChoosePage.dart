@@ -154,7 +154,7 @@ class _meat_choose_page extends State<meat_choose_page> {
                                 ingredientToFind.clear();
                                 ingredientToFind.addAll({
                                   'name': ingres[index]['name'],
-                                  'num': ingres[index]['num'],
+                                  'num': ingres[index]['num'].toString(),
                                   'unit': ingres[index]['unit']
                                 });
                                 _ingredient.setIngredient(ingredientToFind);

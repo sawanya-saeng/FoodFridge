@@ -3,8 +3,6 @@ import 'package:taluewapp/Pages/ExploredMenuPage.dart';
 import 'package:taluewapp/Pages/ChoosePage.dart';
 import 'package:taluewapp/Pages/XChoosePage.dart';
 import 'package:taluewapp/Pages/ShowAllMenu.dart';
-import 'package:taluewapp/main.dart';
-import 'MainPage.dart';
 import 'package:taluewapp/Services/Ingredient.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -101,13 +99,13 @@ class _findmenu_page extends State<findmenu_page> {
         for(int j=0; j<tmp.length; j++){
           if(allMenu[k].data['Ingredients']['Main'][i]['name'] == tmp[j]['name']){
             double net1 = toGrum(double.parse(allMenu[k].data['Ingredients']['Main'][i]['num'].toString()), allMenu[k].data['Ingredients']['Main'][i]['unit']);
-            double net2 = toGrum(double.parse(tmp[j]['num']), tmp[j]['unit']);
+            double net2 = toGrum(double.parse(tmp[j]['num'].toString()), tmp[j]['unit']);
 
             if(net1 <= net2){
               isHas = true;
               tmp_haveMainIngredients.add(allMenu[k].data['Ingredients']['Main'][i]['name']);
             }else{
-              tmp_notHaveMainIngredients.add([allMenu[k].data['Ingredients']['Main'][i]['name'], allMenu[k].data['Ingredients']['Main'][i]['num'] - int.parse(tmp[j]['num']), 'กรัม']);
+              tmp_notHaveMainIngredients.add([allMenu[k].data['Ingredients']['Main'][i]['name'], allMenu[k].data['Ingredients']['Main'][i]['num'] - double.parse(tmp[j]['num'].toString()), 'กรัม']);
               isPushed = true;
             }
           }
@@ -169,6 +167,10 @@ class _findmenu_page extends State<findmenu_page> {
       }else{
         if((isHasfalse(mainBool[i])) || (isHasfalse(optionBool[i]))){
           if(!checkMainIngredients(haveMainIngredients[i], _ingredient.getIngredient()['name'])){
+            continue;
+          }
+
+          if(isHasfalse(mainBool[i])){
             continue;
           }
 
@@ -234,7 +236,7 @@ class _findmenu_page extends State<findmenu_page> {
               isHas = true;
               tmp_haveMainIngredients.add(allMenu[k].data['Ingredients']['Main'][i]['name']);
             }else{
-              tmp_notHaveMainIngredients.add([allMenu[k].data['Ingredients']['Main'][i]['name'], allMenu[k].data['Ingredients']['Main'][i]['num'] - int.parse(tmp[j]['num']), 'กรัม']);
+              tmp_notHaveMainIngredients.add([allMenu[k].data['Ingredients']['Main'][i]['name'], allMenu[k].data['Ingredients']['Main'][i]['num'] - double.parse(tmp[j]['num']), 'กรัม']);
               isPushed = true;
             }
           }
@@ -291,11 +293,6 @@ class _findmenu_page extends State<findmenu_page> {
     }
 
     for(int i=0;i<allMenu.length;i++){
-      print(tmp);
-      print(haveMainIngredients[i]);
-      print(haveOptionalIngredients[i]);
-      print(mainBool[i]);
-      print(optionBool[i]);
       if(isAllfalse(mainBool[i])){
         continue;
       }else{

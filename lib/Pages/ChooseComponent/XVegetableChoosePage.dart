@@ -36,8 +36,6 @@ class _xvegetable_choose_page extends State<xvegetable_choose_page> {
     });
   }
 
-  List<Map<String, String>> ingredientToFind = [];
-
   Map<String, dynamic> checkIngredients(ingredientToFind, name) {
     bool isHas = false;
     int index = 0;
@@ -179,18 +177,19 @@ class _xvegetable_choose_page extends State<xvegetable_choose_page> {
                           return GestureDetector(
                             onTap: () {
                               setState(() {
-                                if(checkIngredients(ingredientToFind, ingres[index]['name'])['isHas']){
-                                  int indexToDelete = checkIngredients(ingredientToFind, ingres[index]['name'])['index'];
-                                  ingredientToFind.removeAt(indexToDelete);
+                                if(checkIngredients(_ingredient.getIngredients(), ingres[index]['name'])['isHas']){
+                                  int indexToDelete = checkIngredients(_ingredient.getIngredients(), ingres[index]['name'])['index'];
+                                  _ingredient.removeIngredients(indexToDelete);
                                 }else{
-                                  ingredientToFind.add({
+                                  Map<String, String> tmp = {
                                     'name': ingres[index]['name'],
-                                    'num': ingres[index]['num'],
+                                    'num': ingres[index]['num'].toString(),
                                     'unit': ingres[index]['unit']
-                                  });
+                                  };
+
+                                  _ingredient.addIngredients(tmp);
+                                  print(_ingredient.getIngredients());
                                 }
-                                _ingredient.setIngredients(ingredientToFind);
-                                print(ingredientToFind);
                               });
                             },
                             child: Container(
@@ -217,7 +216,7 @@ class _xvegetable_choose_page extends State<xvegetable_choose_page> {
                                                   height: 18,
                                                   width: 18,
                                                   decoration: BoxDecoration(
-                                                      color: checkIngredients(ingredientToFind, ingres[index].data['name'])['isHas']
+                                                      color: checkIngredients(_ingredient.getIngredients(), ingres[index].data['name'])['isHas']
                                                           ? Colors.red
                                                           : Colors.white,
                                                       shape:
