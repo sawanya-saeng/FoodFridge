@@ -33,6 +33,7 @@ class _xchoose_page extends State<xchoose_page> {
     super.didChangeDependencies();
     if(!isLoaded){
       _ingredient = Provider.of<Ingredient>(context);
+      _ingredient.resetIngredients();
     }
   }
 
@@ -202,10 +203,10 @@ class _xchoose_page extends State<xchoose_page> {
                     controller: _pageController,
                     children: <Widget>[
                       xmeat_choose_page(),
-//                      xvegetable_choose_page(),
-//                      xfruit_choose_page(),
-//                      xwater_choose_page(),
-//                      xothers_choose_page()
+                      xvegetable_choose_page(),
+                      xfruit_choose_page(),
+                      xwater_choose_page(),
+                      xothers_choose_page()
                     ],
                   ),
               ),
