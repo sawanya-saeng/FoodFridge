@@ -142,7 +142,7 @@ class _others_page extends State<others_page> {
                                   color: Color(0xffFC9002),
                                   alignment: Alignment.center,
                                   child: Text(
-                                    ingres[index].data['num'] +
+                                    ingres[index].data['num'].toString() +
                                         ' ' +
                                         ingres[index].data['unit'],
                                     style: TextStyle(
