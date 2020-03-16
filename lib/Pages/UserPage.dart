@@ -12,6 +12,11 @@ class user_page extends StatefulWidget {
   _user_page createState() => _user_page();
 }
 
+class IUser{
+  String name;
+  String image;
+}
+
 class _user_page extends State<user_page> with TickerProviderStateMixin{
   int _currentPage = 0;
   PageController _scrollController;
@@ -23,19 +28,31 @@ class _user_page extends State<user_page> with TickerProviderStateMixin{
   LoadingProgress _loadingProgress;
   AnimationController _animationController;
   bool isLoaded;
+  final _auth = FirebaseAuth.instance;
+  IUser user;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    user = new IUser();
     isLoaded = true;
     _animationController = new AnimationController(vsync: this, duration: Duration(seconds: 10));
     _loadingProgress = new LoadingProgress(_animationController);
     _scrollController = new PageController(initialPage: 0);
-    getFavMenu();
+//    getFavMenu();
+    getUserData();
   }
 
-
+  Future getUserData()async{
+    //Get google account data
+    FirebaseUser userTmp = await _auth.currentUser();
+    setState(() {
+      this.user.name = userTmp.displayName;
+      this.user.image = userTmp.providerData[0].photoUrl;
+      isLoaded = false;
+    });
+  }
 
   Future getFavMenu()async{
     List<Map<String,dynamic>> tmp = List<Map<String,dynamic>>();
@@ -68,20 +85,14 @@ class _user_page extends State<user_page> with TickerProviderStateMixin{
     }
 
     setState(() {
-      print('Ok');
       allMenu = tmp;
-      print(allMenu);
       isLoaded = false;
     });
   }
 
-
-
-
-
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return isLoaded ? _loadingProgress.getSubWidget(context) : Column(
       children: <Widget>[
         Container(
             height: 60,
@@ -101,12 +112,14 @@ class _user_page extends State<user_page> with TickerProviderStateMixin{
               Container(
                 alignment: Alignment.center,
                 height: 100,
+                width: 100,
                 decoration: BoxDecoration(
-                    shape: BoxShape.circle, color: Colors.blueGrey),
-                child: Image.asset('assets/user.png'),
+                  shape: BoxShape.circle,
+                  image: DecorationImage(image: this.user.image == null ? AssetImage('assets/user.png') :NetworkImage(this.user.image),fit: BoxFit.cover)
+                ),
               ),
               Container(
-                child: Text('Name',
+                child: Text(this.user.name,
                     style: TextStyle(color: Colors.black, fontSize: 25)),
               ),
             ],

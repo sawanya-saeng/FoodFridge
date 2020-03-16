@@ -6,7 +6,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import 'package:date_calc/date_calc.dart';
 import 'package:platform_alert_dialog/platform_alert_dialog.dart';
-import 'package:taluewapp/Services/loadingScreenService.dart';
 
 class meat_page extends StatefulWidget {
   @override
@@ -201,29 +200,23 @@ class _meat_page extends State<meat_page> with TickerProviderStateMixin{
                                           color: Color(0xffFFA733),
                                           alignment: Alignment.center,
                                           child: Text(
-                                            '${calculateDate(format.format(ingres[index]['date'].toDate()))} วัน',
+                                            ingres[index]['date'] == null ? 'ไม่มีกำหนด':'${calculateDate(format.format(ingres[index]['date'].toDate()))} วัน',
                                             style: TextStyle(
                                                 fontSize: 25,
                                                 color: Colors.white),
                                           ),
-//                                child: Text(ingres[index].data['date'].toDate().toString()),
                                         ),
-                                        GestureDetector(
-                                          onTap: (){
-                                            calculateDate(format.format(ingres[index].data['date'].toDate()));
-                                          },
-                                          child: Container(
+                                        Container(
                                             alignment: Alignment.center,
                                             height: 30,
                                             child: Text(
-                                              '${ingres[index].data['date'].toDate().day.toString()}/${ingres[index].data['date'].toDate().month.toString()}/${ingres[index].data['date'].toDate().year.toString()}',
+                                                ingres[index].data['date'] == null ? 'ไม่มีกำหนด':'${ingres[index].data['date'].toDate().day.toString()}/${ingres[index].data['date'].toDate().month.toString()}/${ingres[index].data['date'].toDate().year.toString()}',
                                               style: TextStyle(
                                                   fontSize: 15,
                                                   color: Colors.white),
                                             ),
                                             color: Color(0xffFC9002),
                                           ),
-                                        ),
                                       ]),
                                 ),
                               ),

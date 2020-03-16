@@ -29,7 +29,6 @@ class _add_page extends State<add_page> {
     // TODO: implement build
 
     double _safeTop = MediaQuery.of(context).padding.top;
-    double _safeBottom = MediaQuery.of(context).padding.bottom;
 
     Future errorDialog(String msg) async {
       await showDialog<void>(

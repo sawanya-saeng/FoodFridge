@@ -124,7 +124,6 @@ class _veget_page extends State<veget_page> with TickerProviderStateMixin{
                             fontSize: 25,
                             color: Colors.white),
                       ),
-//                                child: Text(ingres[index].data['date'].toDate().toString()),
                     ),
                   ),
                 ],
@@ -206,29 +205,23 @@ class _veget_page extends State<veget_page> with TickerProviderStateMixin{
                                             color: Color(0xffFFA733),
                                             alignment: Alignment.center,
                                             child: Text(
-                                              '${calculateDate(format.format(ingres[index]['date'].toDate()))} วัน',
+                                              ingres[index]['date'] == null ? 'ไม่มีกำหนด':'${calculateDate(format.format(ingres[index]['date'].toDate()))} วัน',
                                               style: TextStyle(
                                                   fontSize: 25,
                                                   color: Colors.white),
                                             ),
-//                                child: Text(ingres[index].data['date'].toDate().toString()),
                                           ),
-                                          GestureDetector(
-                                            onTap: (){
-                                              calculateDate(ingres[index].data['date'].toDate());
-                                            },
-                                            child: Container(
+                                          Container(
                                               alignment: Alignment.center,
                                               height: 30,
                                               child: Text(
-                                                '${ingres[index].data['date'].toDate().day.toString()}/${ingres[index].data['date'].toDate().month.toString()}/${ingres[index].data['date'].toDate().year.toString()}',
+                                                ingres[index]['date'] == null ? 'ไม่มีกำหนด':'${ingres[index].data['date'].toDate().day.toString()}/${ingres[index].data['date'].toDate().month.toString()}/${ingres[index].data['date'].toDate().year.toString()}',
                                                 style: TextStyle(
                                                     fontSize: 15,
                                                     color: Colors.white),
                                               ),
                                               color: Color(0xffFC9002),
                                             ),
-                                          ),
                                         ]),
                                   ),
                                 ),
