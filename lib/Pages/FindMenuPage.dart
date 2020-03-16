@@ -329,6 +329,8 @@ class _findmenu_page extends State<findmenu_page> {
             canDo.add(allMenu[i].documentID);
           });
         }
+
+
       }
     }
 //    FirebaseUser user = await _auth.currentUser();

@@ -29,7 +29,7 @@ class _veget_page extends State<veget_page> with TickerProviderStateMixin{
     _db.collection('Fridge')
         .where('uid', isEqualTo: user.uid)
         .where('type', isEqualTo: 'vegetable')
-        .orderBy('date', descending: true)
+        .orderBy('date', descending: false)
         .snapshots().listen((docs) {
       tmp = docs.documents;
       setState(() {

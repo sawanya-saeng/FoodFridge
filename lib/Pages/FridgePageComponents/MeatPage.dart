@@ -27,7 +27,7 @@ class _meat_page extends State<meat_page> with TickerProviderStateMixin{
   Future getMeat() async {
     FirebaseUser user = await _auth.currentUser();
     List<DocumentSnapshot> tmp;
-    _db.collection('Fridge').where('uid', isEqualTo: user.uid).where('type', isEqualTo:'meat').orderBy('date', descending: true).snapshots().listen((docs) {
+    _db.collection('Fridge').where('uid', isEqualTo: user.uid).where('type', isEqualTo:'meat').orderBy('date', descending: false).snapshots().listen((docs) {
       tmp = docs.documents;
       setState(() {
         ingres = tmp;

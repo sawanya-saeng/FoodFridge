@@ -28,7 +28,7 @@ class _water_page extends State<water_page> with TickerProviderStateMixin{
     List<DocumentSnapshot> tmp;
     _db.collection('Fridge').where('uid', isEqualTo: user.uid)
         .where('type' , isEqualTo: 'water')
-        .orderBy('date', descending: true)
+        .orderBy('date', descending: false)
         .snapshots()
         .listen((docs) {
       tmp = docs.documents;
