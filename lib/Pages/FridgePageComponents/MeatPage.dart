@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:taluewapp/Services/loadingScreenService.dart';
 import 'AddPage.dart';
@@ -20,8 +22,10 @@ class _meat_page extends State<meat_page> with TickerProviderStateMixin{
   LoadingProgress _loadingProgress;
   AnimationController _animationController;
   bool isLoading = false;
-
+  List<bool> expandList = [];
+  ScrollController _scrollController;
   final format = DateFormat('yyyy-MM-dd');
+  List<Map<String, dynamic>> items = [];
 
   Future getMeat() async {
     FirebaseUser user = await _auth.currentUser();
@@ -30,8 +34,38 @@ class _meat_page extends State<meat_page> with TickerProviderStateMixin{
       tmp = docs.documents;
       setState(() {
         ingres = tmp;
+        for(int i=0; i<ingres.length; i++){
+          bool isHas = checkMember(ingres[i].data['name'])['isHas'];
+          int index = checkMember(ingres[i].data['name'])['index'];
+          if(isHas){
+            items[index]['num'].add(ingres[i].data['num']);
+            items[index]['expire'].add(ingres[i]['date'] == null ? 'ไม่มีกำหนด':'${calculateDate(format.format(ingres[i]['date'].toDate()))} วัน');
+          }else{
+            items.add({
+              'name': ingres[i].data['name'],
+              'num': [ingres[i].data['num']],
+              'expire': [ingres[i]['date'] == null ? 'ไม่มีกำหนด':'${calculateDate(format.format(ingres[i]['date'].toDate()))} วัน']
+            });
+          }
+        }
+        print(items);
       });
     });
+  }
+
+  Map<String, dynamic> checkMember(String value){
+    for(int i=0; i<items.length; i++){
+      if(items[i]['name'] == value){
+        return {
+          'isHas': true,
+          'index': i
+        };
+      }
+    }
+    return {
+      'isHas': false,
+      'index': null
+    };
   }
 
   Future deleteItem(String itemId) async{
@@ -51,6 +85,7 @@ class _meat_page extends State<meat_page> with TickerProviderStateMixin{
     super.initState();
     _animationController = new AnimationController(vsync: this, duration: Duration(seconds: 10));
     _loadingProgress = new LoadingProgress(_animationController);
+    _scrollController = new ScrollController();
     getMeat();
   }
 
@@ -128,8 +163,163 @@ class _meat_page extends State<meat_page> with TickerProviderStateMixin{
             child: Container(
                 child: ListView.builder(
                     padding: EdgeInsets.zero,
-                    itemCount: ingres == null ? 0 : ingres.length,
+                    itemCount: ingres == null ? 0 : ingres.length+1,
+                    controller: _scrollController,
                     itemBuilder: (BuildContext context, int index) {
+                      expandList.add(false);
+                      if(index == ingres.length){
+                        return Stack(
+                          children: <Widget>[
+                            Container(
+                              child: Column(
+                                children: <Widget>[
+                                  Container(
+                                    margin: EdgeInsets.only(top: expandList[index] ? 100 : 0),
+                                    height: 100,
+                                    child: Row(
+                                      children: <Widget>[
+                                        Expanded(
+                                          flex: 4,
+                                          child: Container(
+                                            color: Color(0xffFCFCFC),
+                                            alignment: Alignment.center,
+                                            child: Text(
+                                              'test name',
+                                              style: TextStyle(fontSize: 25),
+                                            ),
+                                          ),
+                                        ),
+                                        Expanded(
+                                          flex: 2,
+                                          child: Container(
+                                            color: Color(0xffFC9002),
+                                            alignment: Alignment.center,
+                                            child: Text('5 ฟอง',
+                                              style: TextStyle(
+                                                  fontSize: 25, color: Colors.white),
+                                            ),
+                                          ),
+                                        ),
+                                        Expanded(
+                                          flex: 2,
+                                          child: Container(
+                                            child: Stack(
+                                                alignment: Alignment.bottomCenter,
+                                                children: <Widget>[
+                                                  Container(
+                                                    color: Color(0xffFFA733),
+                                                    alignment: Alignment.center,
+                                                    child: Text(
+                                                      '6 วัน',
+                                                      style: TextStyle(
+                                                          fontSize: 25,
+                                                          color: Colors.white),
+                                                    ),
+                                                  ),
+                                                  Container(
+                                                    alignment: Alignment.center,
+                                                    height: 30,
+                                                    child: Text(
+                                                      '24/5/2020',
+                                                      style: TextStyle(
+                                                          fontSize: 15,
+                                                          color: Colors.white),
+                                                    ),
+                                                    color: Color(0xffFC9002),
+                                                  ),
+                                                ]),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  GestureDetector(
+                                    onTap: (){
+                                      setState(() {
+                                        expandList[index] = !expandList[index];
+                                        if(expandList[index]){
+                                          _scrollController.animateTo(_scrollController.position.pixels + 100, duration: Duration(milliseconds: 300), curve: Curves.ease);
+                                        }else{
+                                          _scrollController.animateTo(_scrollController.position.pixels - 100, duration: Duration(milliseconds: 300), curve: Curves.ease);
+                                        }
+                                      });
+                                    },
+                                    child: Container(
+                                      height: 20,
+                                      decoration: BoxDecoration(
+                                        border: Border.all(color: Colors.grey)
+                                      ),
+                                      alignment: Alignment.center,
+                                      child: Icon(expandList[index] ? Icons.arrow_drop_up : Icons.arrow_drop_down),
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                            Container(
+                              margin: EdgeInsets.only(bottom: 10),
+                              height: 100,
+                              color: Colors.green,
+                              child: Row(
+                                children: <Widget>[
+                                  Expanded(
+                                    flex: 4,
+                                    child: Container(
+                                      color: Color(0xffFCFCFC),
+                                      alignment: Alignment.center,
+                                      child: Text(
+                                        'test name',
+                                        style: TextStyle(fontSize: 25),
+                                      ),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 2,
+                                    child: Container(
+                                      color: Color(0xffFC9002),
+                                      alignment: Alignment.center,
+                                      child: Text('10 ฟอง',
+                                        style: TextStyle(
+                                            fontSize: 25, color: Colors.white),
+                                      ),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 2,
+                                    child: Container(
+                                      child: Stack(
+                                          alignment: Alignment.bottomCenter,
+                                          children: <Widget>[
+                                            Container(
+                                              color: Color(0xffFFA733),
+                                              alignment: Alignment.center,
+                                              child: Text(
+                                                '3 วัน',
+                                                style: TextStyle(
+                                                    fontSize: 25,
+                                                    color: Colors.white),
+                                              ),
+                                            ),
+                                            Container(
+                                              alignment: Alignment.center,
+                                              height: 30,
+                                              child: Text(
+                                                '20/5/2020',
+                                                style: TextStyle(
+                                                    fontSize: 15,
+                                                    color: Colors.white),
+                                              ),
+                                              color: Color(0xffFC9002),
+                                            ),
+                                          ]),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          ],
+                        );
+                      }
                       return GestureDetector(
                         onLongPress: (){
                           showDialog(context: context,builder: (context){
