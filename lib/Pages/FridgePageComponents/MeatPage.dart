@@ -40,11 +40,15 @@ class _meat_page extends State<meat_page> with TickerProviderStateMixin{
           if(isHas){
             items[index]['num'].add(ingres[i].data['num']);
             items[index]['expire'].add(ingres[i]['date'] == null ? 'ไม่มีกำหนด':'${calculateDate(format.format(ingres[i]['date'].toDate()))} วัน');
+            items[index]['unit'].add(ingres[i].data['unit']);
+            items[index]['date'].add(ingres[i].data['date']);
           }else{
             items.add({
               'name': ingres[i].data['name'],
               'num': [ingres[i].data['num']],
-              'expire': [ingres[i]['date'] == null ? 'ไม่มีกำหนด':'${calculateDate(format.format(ingres[i]['date'].toDate()))} วัน']
+              'expire': [ingres[i].data['date'] == null ? 'ไม่มีกำหนด':'${calculateDate(format.format(ingres[i].data['date'].toDate()))} วัน'],
+              'unit': [ingres[i].data['unit']],
+              'date': [ingres[i].data['date']]
             });
           }
         }
@@ -163,161 +167,104 @@ class _meat_page extends State<meat_page> with TickerProviderStateMixin{
             child: Container(
                 child: ListView.builder(
                     padding: EdgeInsets.zero,
-                    itemCount: ingres == null ? 0 : ingres.length+1,
+                    itemCount: items == null ? 0 : items.length,
                     controller: _scrollController,
                     itemBuilder: (BuildContext context, int index) {
                       expandList.add(false);
-                      if(index == ingres.length){
+                      if(items[index]['num'].length > 1){
                         return Stack(
-                          children: <Widget>[
-                            Container(
-                              child: Column(
-                                children: <Widget>[
-                                  Container(
-                                    margin: EdgeInsets.only(top: expandList[index] ? 100 : 0),
-                                    height: 100,
-                                    child: Row(
-                                      children: <Widget>[
-                                        Expanded(
-                                          flex: 4,
-                                          child: Container(
-                                            color: Color(0xffFCFCFC),
-                                            alignment: Alignment.center,
-                                            child: Text(
-                                              'test name',
-                                              style: TextStyle(fontSize: 25),
-                                            ),
-                                          ),
-                                        ),
-                                        Expanded(
-                                          flex: 2,
-                                          child: Container(
-                                            color: Color(0xffFC9002),
-                                            alignment: Alignment.center,
-                                            child: Text('5 ฟอง',
-                                              style: TextStyle(
-                                                  fontSize: 25, color: Colors.white),
-                                            ),
-                                          ),
-                                        ),
-                                        Expanded(
-                                          flex: 2,
-                                          child: Container(
-                                            child: Stack(
-                                                alignment: Alignment.bottomCenter,
-                                                children: <Widget>[
-                                                  Container(
-                                                    color: Color(0xffFFA733),
-                                                    alignment: Alignment.center,
-                                                    child: Text(
-                                                      '6 วัน',
-                                                      style: TextStyle(
-                                                          fontSize: 25,
-                                                          color: Colors.white),
-                                                    ),
-                                                  ),
-                                                  Container(
-                                                    alignment: Alignment.center,
-                                                    height: 30,
-                                                    child: Text(
-                                                      '24/5/2020',
-                                                      style: TextStyle(
-                                                          fontSize: 15,
-                                                          color: Colors.white),
-                                                    ),
-                                                    color: Color(0xffFC9002),
-                                                  ),
-                                                ]),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  GestureDetector(
-                                    onTap: (){
-                                      setState(() {
-                                        expandList[index] = !expandList[index];
-                                        if(expandList[index]){
-                                          _scrollController.animateTo(_scrollController.position.pixels + 100, duration: Duration(milliseconds: 300), curve: Curves.ease);
-                                        }else{
-                                          _scrollController.animateTo(_scrollController.position.pixels - 100, duration: Duration(milliseconds: 300), curve: Curves.ease);
-                                        }
-                                      });
-                                    },
-                                    child: Container(
-                                      height: 20,
-                                      decoration: BoxDecoration(
-                                        border: Border.all(color: Colors.grey)
-                                      ),
-                                      alignment: Alignment.center,
-                                      child: Icon(expandList[index] ? Icons.arrow_drop_up : Icons.arrow_drop_down),
-                                    ),
-                                  )
-                                ],
-                              ),
-                            ),
-                            Container(
-                              margin: EdgeInsets.only(bottom: 10),
-                              height: 100,
-                              color: Colors.green,
-                              child: Row(
-                                children: <Widget>[
-                                  Expanded(
-                                    flex: 4,
-                                    child: Container(
-                                      color: Color(0xffFCFCFC),
-                                      alignment: Alignment.center,
-                                      child: Text(
-                                        'test name',
-                                        style: TextStyle(fontSize: 25),
-                                      ),
-                                    ),
-                                  ),
-                                  Expanded(
-                                    flex: 2,
-                                    child: Container(
-                                      color: Color(0xffFC9002),
-                                      alignment: Alignment.center,
-                                      child: Text('10 ฟอง',
-                                        style: TextStyle(
-                                            fontSize: 25, color: Colors.white),
-                                      ),
-                                    ),
-                                  ),
-                                  Expanded(
-                                    flex: 2,
-                                    child: Container(
-                                      child: Stack(
-                                          alignment: Alignment.bottomCenter,
+                          children: List.generate(items[index]['num'].length, (int jdex){
+                            return Column(
+                              children: <Widget>[
+                                Container(
+                                  margin: EdgeInsets.only(top: expandList[index] == true ? double.parse((100*(items[index]['num'].length - (jdex+1))).toString()) : 0),
+                                  child: Column(
+                                    children: <Widget>[
+                                      Container(
+                                        height: 100,
+                                        child: Row(
                                           children: <Widget>[
-                                            Container(
-                                              color: Color(0xffFFA733),
-                                              alignment: Alignment.center,
-                                              child: Text(
-                                                '3 วัน',
-                                                style: TextStyle(
-                                                    fontSize: 25,
-                                                    color: Colors.white),
+                                            Expanded(
+                                              flex: 4,
+                                              child: Container(
+                                                color: Color(0xffFCFCFC),
+                                                alignment: Alignment.center,
+                                                child: Text(
+                                                  items[index]['name'],
+                                                  style: TextStyle(fontSize: 25),
+                                                ),
                                               ),
                                             ),
-                                            Container(
-                                              alignment: Alignment.center,
-                                              height: 30,
-                                              child: Text(
-                                                '20/5/2020',
-                                                style: TextStyle(
-                                                    fontSize: 15,
-                                                    color: Colors.white),
+                                            Expanded(
+                                              flex: 2,
+                                              child: Container(
+                                                color: Color(0xffFC9002),
+                                                alignment: Alignment.center,
+                                                child: Text(items[index]['num'][jdex].toString(),
+                                                  style: TextStyle(
+                                                      fontSize: 25, color: Colors.white),
+                                                ),
                                               ),
-                                              color: Color(0xffFC9002),
                                             ),
-                                          ]),
-                                    ),
+                                            Expanded(
+                                              flex: 2,
+                                              child: Container(
+                                                child: Stack(
+                                                    alignment: Alignment.bottomCenter,
+                                                    children: <Widget>[
+                                                      Container(
+                                                        color: Color(0xffFFA733),
+                                                        alignment: Alignment.center,
+                                                        child: Text(
+                                                          items[index]['expire'][jdex],
+                                                          style: TextStyle(
+                                                              fontSize: 25,
+                                                              color: Colors.white),
+                                                        ),
+                                                      ),
+                                                      Container(
+                                                        alignment: Alignment.center,
+                                                        height: 30,
+                                                        child: Text(
+                                                          items[index]['date'][jdex] == null ? 'ไม่มีกำหนด':'${items[index]['date'][jdex].toDate().day.toString()}/${items[index]['date'][jdex].toDate().month.toString()}/${items[index]['date'][jdex].toDate().year.toString()}',
+                                                          style: TextStyle(
+                                                              fontSize: 15,
+                                                              color: Colors.white),
+                                                        ),
+                                                        color: Color(0xffFC9002),
+                                                      ),
+                                                    ]),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ],
-                              ),
-                            )
-                          ],
+                                ),
+                                jdex == 0 ? GestureDetector(
+                                  onTap: (){
+                                    setState(() {
+                                      expandList[index] = !expandList[index];
+//                                        if(expandList[index]){
+//                                          _scrollController.animateTo(_scrollController.position.pixels + 100, duration: Duration(milliseconds: 300), curve: Curves.ease);
+//                                        }else{
+//                                          _scrollController.animateTo(_scrollController.position.pixels - 100, duration: Duration(milliseconds: 300), curve: Curves.ease);
+//                                        }
+                                    });
+                                  },
+                                  child: Container(
+                                    height: 20,
+                                    decoration: BoxDecoration(
+                                        border: Border.all(color: Colors.grey)
+                                    ),
+                                    alignment: Alignment.center,
+                                    child: Icon(expandList[index] ? Icons.arrow_drop_up : Icons.arrow_drop_down),
+                                  ),
+                                ):Container()
+                              ],
+                            );
+                          })
                         );
                       }
                       return GestureDetector(
@@ -361,7 +308,7 @@ class _meat_page extends State<meat_page> with TickerProviderStateMixin{
                                   color: Color(0xffFCFCFC),
                                   alignment: Alignment.center,
                                   child: Text(
-                                    ingres[index].data['name'],
+                                    items[index]['name'],
                                     style: TextStyle(fontSize: 25),
                                   ),
                                 ),
@@ -372,9 +319,9 @@ class _meat_page extends State<meat_page> with TickerProviderStateMixin{
                                   color: Color(0xffFC9002),
                                   alignment: Alignment.center,
                                   child: Text(
-                                    ingres[index].data['num'].toString() +
+                                    items[index]['num'][0].toString() +
                                         ' ' +
-                                        ingres[index].data['unit'],
+                                        items[index]['unit'][0],
                                     style: TextStyle(
                                         fontSize: 25, color: Colors.white),
                                   ),
@@ -390,7 +337,7 @@ class _meat_page extends State<meat_page> with TickerProviderStateMixin{
                                           color: Color(0xffFFA733),
                                           alignment: Alignment.center,
                                           child: Text(
-                                            ingres[index]['date'] == null ? 'ไม่มีกำหนด':'${calculateDate(format.format(ingres[index]['date'].toDate()))} วัน',
+                                            items[index]['expire'][0],
                                             style: TextStyle(
                                                 fontSize: 25,
                                                 color: Colors.white),
@@ -400,7 +347,7 @@ class _meat_page extends State<meat_page> with TickerProviderStateMixin{
                                             alignment: Alignment.center,
                                             height: 30,
                                             child: Text(
-                                                ingres[index].data['date'] == null ? 'ไม่มีกำหนด':'${ingres[index].data['date'].toDate().day.toString()}/${ingres[index].data['date'].toDate().month.toString()}/${ingres[index].data['date'].toDate().year.toString()}',
+                                              items[index]['date'][0] == null ? 'ไม่มีกำหนด':'${items[index]['date'][0].toDate().day.toString()}/${items[index]['date'][0].toDate().month.toString()}/${items[index]['date'][0].toDate().year.toString()}',
                                               style: TextStyle(
                                                   fontSize: 15,
                                                   color: Colors.white),
