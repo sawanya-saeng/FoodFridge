@@ -8,8 +8,10 @@ import 'package:taluewapp/Pages/HowToPage.dart';
 import 'package:taluewapp/Pages/UserPage.dart';
 
 class main_page extends StatefulWidget {
+  int pageIndex;
+  main_page(this.pageIndex);
   @override
-  _main_page createState() => _main_page();
+  _main_page createState() => _main_page(this.pageIndex);
 }
 
 int _currentIndex = 0;
@@ -22,15 +24,16 @@ List<Widget> pages = [
 ];
 
 class _main_page extends State<main_page> {
-
+  int pageIndex;
+  _main_page(this.pageIndex);
   PageController _pageController;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    _pageController = PageController(initialPage: 0);
-    _currentIndex = 0;
+    _pageController = PageController(initialPage: this.pageIndex);
+    _currentIndex = this.pageIndex;
   }
 
   @override

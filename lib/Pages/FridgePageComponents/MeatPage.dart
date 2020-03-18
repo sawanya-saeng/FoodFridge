@@ -34,6 +34,7 @@ class _meat_page extends State<meat_page> with TickerProviderStateMixin{
       tmp = docs.documents;
       setState(() {
         ingres = tmp;
+        items.clear();
         for(int i=0; i<ingres.length; i++){
           bool isHas = checkMember(ingres[i].data['name'])['isHas'];
           int index = checkMember(ingres[i].data['name'])['index'];

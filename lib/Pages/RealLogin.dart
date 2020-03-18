@@ -73,7 +73,7 @@ class _real_page extends State<real_page> {
                             onTap: () {
                               logInWithGoogle().then((e){
                                 Navigator.push(context, MaterialPageRoute(builder: (context){
-                                  return main_page();
+                                  return main_page(0);
                                 }));
                               });
                             },

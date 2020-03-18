@@ -97,7 +97,7 @@ class _howto_page extends State<howto_page> {
 
       Navigator.of(context).popUntil((route) => route.isFirst);
       Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context){
-        return main_page();
+        return main_page(0);
       }));
     }
   }
