@@ -39,12 +39,14 @@ class _meat_page extends State<meat_page> with TickerProviderStateMixin{
           bool isHas = checkMember(ingres[i].data['name'])['isHas'];
           int index = checkMember(ingres[i].data['name'])['index'];
           if(isHas){
+            items[index]['id'].add(ingres[i].documentID);
             items[index]['num'].add(ingres[i].data['num']);
             items[index]['expire'].add(ingres[i]['date'] == null ? 'ไม่มีกำหนด':'${calculateDate(format.format(ingres[i]['date'].toDate()))} วัน');
             items[index]['unit'].add(ingres[i].data['unit']);
             items[index]['date'].add(ingres[i].data['date']);
           }else{
             items.add({
+              'id': [ingres[i].documentID],
               'name': ingres[i].data['name'],
               'num': [ingres[i].data['num']],
               'expire': [ingres[i].data['date'] == null ? 'ไม่มีกำหนด':'${calculateDate(format.format(ingres[i].data['date'].toDate()))} วัน'],
@@ -177,70 +179,100 @@ class _meat_page extends State<meat_page> with TickerProviderStateMixin{
                           children: List.generate(items[index]['num'].length, (int jdex){
                             return Column(
                               children: <Widget>[
-                                Container(
-                                  margin: EdgeInsets.only(top: expandList[index] == true ? double.parse((100*(items[index]['num'].length - (jdex+1))).toString()) : 0),
-                                  child: Column(
-                                    children: <Widget>[
-                                      Container(
-                                        height: 100,
-                                        child: Row(
-                                          children: <Widget>[
-                                            Expanded(
-                                              flex: 4,
-                                              child: Container(
-                                                color: Color(0xffFCFCFC),
-                                                alignment: Alignment.center,
-                                                child: Text(
-                                                  items[index]['name'],
-                                                  style: TextStyle(fontSize: 25),
-                                                ),
-                                              ),
-                                            ),
-                                            Expanded(
-                                              flex: 2,
-                                              child: Container(
-                                                color: Color(0xffFC9002),
-                                                alignment: Alignment.center,
-                                                child: Text(items[index]['num'][jdex].toString(),
-                                                  style: TextStyle(
-                                                      fontSize: 25, color: Colors.white),
-                                                ),
-                                              ),
-                                            ),
-                                            Expanded(
-                                              flex: 2,
-                                              child: Container(
-                                                child: Stack(
-                                                    alignment: Alignment.bottomCenter,
-                                                    children: <Widget>[
-                                                      Container(
-                                                        color: Color(0xffFFA733),
-                                                        alignment: Alignment.center,
-                                                        child: Text(
-                                                          items[index]['expire'][jdex],
-                                                          style: TextStyle(
-                                                              fontSize: 25,
-                                                              color: Colors.white),
-                                                        ),
-                                                      ),
-                                                      Container(
-                                                        alignment: Alignment.center,
-                                                        height: 30,
-                                                        child: Text(
-                                                          items[index]['date'][jdex] == null ? 'ไม่มีกำหนด':'${items[index]['date'][jdex].toDate().day.toString()}/${items[index]['date'][jdex].toDate().month.toString()}/${items[index]['date'][jdex].toDate().year.toString()}',
-                                                          style: TextStyle(
-                                                              fontSize: 15,
-                                                              color: Colors.white),
-                                                        ),
-                                                        color: Color(0xffFC9002),
-                                                      ),
-                                                    ]),
-                                              ),
-                                            ),
-                                          ],
+                                GestureDetector(
+                                  onLongPress: (){
+                                    showDialog(context: context,builder: (context){
+                                      return PlatformAlertDialog(
+                                        title: Text('ยืนยันการลบหรือไม่?'),
+                                        content: SingleChildScrollView(
+                                          child: ListBody(
+                                            children: <Widget>[
+                                              Text('หากลบวัตถุดิบจะเอากลับมาไม่ได้แล้วนะ!!'),
+                                            ],
+                                          ),
                                         ),
-                                      ),
-                                    ],
+                                        actions: <Widget>[
+                                          PlatformDialogAction(
+                                            child: Text('ยกเลิก'),
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
+                                            },
+                                          ),
+                                          PlatformDialogAction(
+                                            child: Text('ตกลง'),
+                                            onPressed: () {
+                                              deleteItem(items[index]['id'][jdex]);
+                                            },
+                                          )
+                                        ],
+                                      );
+                                    });
+                                  },
+                                  child: Container(
+                                    margin: EdgeInsets.only(top: expandList[index] == true ? double.parse((100*(items[index]['num'].length - (jdex+1))).toString()) : 0),
+                                    child: Column(
+                                      children: <Widget>[
+                                        Container(
+                                          height: 100,
+                                          child: Row(
+                                            children: <Widget>[
+                                              Expanded(
+                                                flex: 4,
+                                                child: Container(
+                                                  color: Color(0xffFCFCFC),
+                                                  alignment: Alignment.center,
+                                                  child: Text(
+                                                    items[index]['name'],
+                                                    style: TextStyle(fontSize: 25),
+                                                  ),
+                                                ),
+                                              ),
+                                              Expanded(
+                                                flex: 2,
+                                                child: Container(
+                                                  color: Color(0xffFC9002),
+                                                  alignment: Alignment.center,
+                                                  child: Text(items[index]['num'][jdex].toString(),
+                                                    style: TextStyle(
+                                                        fontSize: 25, color: Colors.white),
+                                                  ),
+                                                ),
+                                              ),
+                                              Expanded(
+                                                flex: 2,
+                                                child: Container(
+                                                  child: Stack(
+                                                      alignment: Alignment.bottomCenter,
+                                                      children: <Widget>[
+                                                        Container(
+                                                          color: Color(0xffFFA733),
+                                                          alignment: Alignment.center,
+                                                          child: Text(
+                                                            items[index]['expire'][jdex],
+                                                            style: TextStyle(
+                                                                fontSize: 25,
+                                                                color: Colors.white),
+                                                          ),
+                                                        ),
+                                                        Container(
+                                                          alignment: Alignment.center,
+                                                          height: 30,
+                                                          child: Text(
+                                                            items[index]['date'][jdex] == null ? 'ไม่มีกำหนด':'${items[index]['date'][jdex].toDate().day.toString()}/${items[index]['date'][jdex].toDate().month.toString()}/${items[index]['date'][jdex].toDate().year.toString()}',
+                                                            style: TextStyle(
+                                                                fontSize: 15,
+                                                                color: Colors.white),
+                                                          ),
+                                                          color: Color(0xffFC9002),
+                                                        ),
+                                                      ]),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                                 jdex == 0 ? GestureDetector(
@@ -290,7 +322,7 @@ class _meat_page extends State<meat_page> with TickerProviderStateMixin{
                                 PlatformDialogAction(
                                   child: Text('ตกลง'),
                                   onPressed: () {
-                                    deleteItem(ingres[index].documentID);
+                                    deleteItem(items[index]['id'][0]);
                                   },
                                 )
                               ],

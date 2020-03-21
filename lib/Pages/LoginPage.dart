@@ -9,7 +9,6 @@ class login_page extends StatefulWidget {
 class _login_page extends State<login_page> {
   @override
   Widget build(BuildContext context) {
-    double _width = MediaQuery.of(context).size.width;
     double _safeTop = MediaQuery.of(context).padding.top;
     double _safeBottom = MediaQuery.of(context).padding.bottom;
     // TODO: implement build
