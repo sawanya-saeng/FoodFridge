@@ -1,4 +1,6 @@
+import 'package:date_calc/date_calc.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:taluewapp/Pages/MainPage.dart';
 import './FridgePageComponents/AddPage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -20,12 +22,15 @@ class _howto_page extends State<howto_page> {
   final _storage = FirebaseStorage.instance;
   final _auth = FirebaseAuth.instance;
   PageController _scrollController;
+  final format = DateFormat('yyyy-MM-dd');
 
   Map<String, dynamic> menuDetail;
   List<dynamic> mainIngredients;
   List<dynamic> optionIngredients;
   List<dynamic> allIngredients;
   List<dynamic> fridgeIngredients;
+  List<dynamic> items = [];
+  List<dynamic> calculatedItems = [];
   String mainImage;
 
   double grumToUnit(num, unit){
@@ -51,8 +56,6 @@ class _howto_page extends State<howto_page> {
   }
 
   Future deleteIngredientFromFridge()async {
-    print(allIngredients);
-    print(fridgeIngredients);
     if (checkMainIngredient()) {
       for(int i=0; i<allIngredients.length; i++){
         for(int j=0; j<fridgeIngredients.length; j++){
@@ -60,7 +63,11 @@ class _howto_page extends State<howto_page> {
             String unit = fridgeIngredients[j]['unit'];
             double net1 = toGrum(double.parse(allIngredients[i]['num'].toString()), allIngredients[i]['unit']);
             double net2 = toGrum(double.parse(fridgeIngredients[j]['num'].toString()), fridgeIngredients[j]['unit']);
+
             double newValue = net2 < net1 ? 0 : net2 - net1;
+
+            print("fridge");
+            print(fridgeIngredients);
 
             print("main : ");
             print(allIngredients[i]['name']);
@@ -79,26 +86,26 @@ class _howto_page extends State<howto_page> {
             print("Store");
             print(grumToUnit(newValue, unit));
 
-            if(newValue == 0) {
-              DocumentSnapshot tmp = await _db.collection('Fridge').document(fridgeIngredients[j]['id']).get();
-              await _db.collection('Fridge').document(fridgeIngredients[j]['id']).delete();
-              await _db.collection('Bin').add(tmp.data);
-
-            }else{
-                await _db.collection('Fridge').document(fridgeIngredients[j]['id']).updateData({
-                  'num': newValue
-                });
-            }
-
-            continue;
+//            if(newValue == 0) {
+//              DocumentSnapshot tmp = await _db.collection('Fridge').document(fridgeIngredients[j]['id']).get();
+//              await _db.collection('Fridge').document(fridgeIngredients[j]['id']).delete();
+//              await _db.collection('Bin').add(tmp.data);
+//
+//            }else{
+//                await _db.collection('Fridge').document(fridgeIngredients[j]['id']).updateData({
+//                  'num': newValue
+//                });
+//            }
+//
+//            continue;
           }
         }
       }
 
-      Navigator.of(context).popUntil((route) => route.isFirst);
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context){
-        return main_page(0);
-      }));
+//      Navigator.of(context).popUntil((route) => route.isFirst);
+//      Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context){
+//        return main_page(0);
+//      }));
     }
   }
 
@@ -123,8 +130,93 @@ class _howto_page extends State<howto_page> {
 
     setState(() {
       fridgeIngredients = tmp;
-      print(fridgeIngredients);
+      items.clear();
+      calculatedItems.clear();
+      for(int i=0; i<fridgeIngredients.length; i++){
+        bool isHas = checkMember(fridgeIngredients[i]['name'])['isHas'];
+        int index = checkMember(fridgeIngredients[i]['name'])['index'];
+        if(isHas){
+          items[index]['id'].add(fridgeIngredients[i]['id']);
+          items[index]['num'].add(fridgeIngredients[i]['num']);
+          items[index]['expire'].add(fridgeIngredients[i]['date'] == null ? 'ไม่มีกำหนด':'${calculateDate(format.format(fridgeIngredients[i]['date'].toDate()))} วัน');
+          items[index]['unit'].add(fridgeIngredients[i]['unit']);
+          items[index]['date'].add(fridgeIngredients[i]['date']);
+        }else{
+          items.add({
+            'id': [fridgeIngredients[i]['id']],
+            'name': fridgeIngredients[i]['name'],
+            'num': [fridgeIngredients[i]['num']],
+            'expire': [fridgeIngredients[i]['date'] == null ? 'ไม่มีกำหนด':'${calculateDate(format.format(fridgeIngredients[i]['date'].toDate()))} วัน'],
+            'unit': [fridgeIngredients[i]['unit']],
+            'date': [fridgeIngredients[i]['date']]
+          });
+        }
+      }
+      for(int i=0; i<items.length; i++){
+        if(items[i]['num'].length > 1){
+          double weightSum = 0;
+          Timestamp latestDate;
+          int max = 0;
+          for(int j=0;j<items[i]['num'].length;j++){
+            double otherWeight = double.parse(items[i]['num'][j].toString());
+            if(items[i]['unit'][0] != items[i]['unit'][j]){
+              otherWeight = toGrum(double.parse(items[i]['num'][j].toString()), items[i]['unit'][0]);
+            }
+            weightSum += otherWeight;
+          }
+
+          for(int j=0;j<items[i]['date'].length;j++){
+            if(items[i]['date'][j] == null){
+              continue;
+            }
+            if(max <= calculateDate(format.format(items[i]['date'][j].toDate()))){
+              max = calculateDate(format.format(items[i]['date'][j].toDate()));
+              latestDate = items[i]['date'][j];
+            }
+          }
+
+          items[i]['num'] = [weightSum];
+          items[i]['date'] = [latestDate];
+        }
+        calculatedItems.add(items[i]);
+      }
     });
+  }
+
+  calculateDate(String date1){
+    List<String> dateList = date1.split('-');
+
+    if(DateTime.now().year > int.parse(dateList[0])){
+      return 0;
+    }
+
+    if(DateTime.now().month > int.parse(dateList[1]) && DateTime.now().year == int.parse(dateList[0])){
+      return 0;
+    }
+
+    if(DateTime.now().day > int.parse(dateList[2]) && DateTime.now().month == int.parse(dateList[1]) && DateTime.now().year == int.parse(dateList[0])){
+      return 0;
+    }
+
+    DateCalc date = DateCalc.fromDateTime(new DateTime.now());
+    int diff = date.differenceValue(date: DateTime(int.parse(dateList[0]), int.parse(dateList[1]), int.parse(dateList[2])+1), type: DateType.day);
+
+    return diff;
+  }
+
+  Map<String, dynamic> checkMember(String value){
+    for(int i=0; i<items.length; i++){
+      if(items[i]['name'] == value){
+        return {
+          'isHas': true,
+          'index': i
+        };
+      }
+    }
+    return {
+      'isHas': false,
+      'index': null
+    };
   }
 
   double toGrum(double num, String unit) {
