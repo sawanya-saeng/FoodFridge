@@ -22,12 +22,13 @@ class _xfruit_choose_page extends State<xfruit_choose_page> {
   bool isLoaded = false;
   Ingredient _ingredient;
   final format = DateFormat('yyyy-MM-dd');
+  List<Map<String, dynamic>> items = [];
+  List<Map<String, dynamic>> calculatedItems = [];
 
   Future getMeat() async {
     FirebaseUser user = await _auth.currentUser();
     List<DocumentSnapshot> tmp;
-    _db
-        .collection('Fridge')
+    _db.collection('Fridge')
         .where('uid', isEqualTo: user.uid)
         .where('type', isEqualTo:'fruit')
         .snapshots()
@@ -35,8 +36,91 @@ class _xfruit_choose_page extends State<xfruit_choose_page> {
       tmp = docs.documents;
       setState(() {
         ingres = tmp;
+        items.clear();
+        for(int i=0; i<ingres.length; i++){
+          bool isHas = checkMember(ingres[i].data['name'])['isHas'];
+          int index = checkMember(ingres[i].data['name'])['index'];
+          if(isHas){
+            items[index]['id'].add(ingres[i].documentID);
+            items[index]['num'].add(ingres[i].data['num']);
+            items[index]['expire'].add(ingres[i]['date'] == null ? 'ไม่มีกำหนด':'${calculateDate(format.format(ingres[i]['date'].toDate()))} วัน');
+            items[index]['unit'].add(ingres[i].data['unit']);
+            items[index]['date'].add(ingres[i].data['date']);
+          }else{
+            items.add({
+              'id': [ingres[i].documentID],
+              'name': ingres[i].data['name'],
+              'num': [ingres[i].data['num']],
+              'expire': [ingres[i].data['date'] == null ? 'ไม่มีกำหนด':'${calculateDate(format.format(ingres[i].data['date'].toDate()))} วัน'],
+              'unit': [ingres[i].data['unit']],
+              'date': [ingres[i].data['date']]
+            });
+          }
+        }
+
+        for(int i=0; i<items.length; i++){
+          if(items[i]['num'].length > 1){
+            double weightSum = 0;
+            Timestamp latestDate;
+            int min = calculateDate(format.format(items[i]['date'][0].toDate()));
+            for(int j=0;j<items[i]['num'].length;j++){
+              double otherWeight = double.parse(items[i]['num'][j].toString());
+              if(items[i]['unit'][0] != items[i]['unit'][j]){
+                otherWeight = toGrum(double.parse(items[i]['num'][j].toString()), items[i]['unit'][0]);
+              }
+              weightSum += otherWeight;
+            }
+
+            for(int j=0;j<items[i]['date'].length;j++){
+              if(items[i]['date'][j] == null){
+                continue;
+              }
+              if(min >= calculateDate(format.format(items[i]['date'][j].toDate()))){
+                min = calculateDate(format.format(items[i]['date'][j].toDate()));
+                latestDate = items[i]['date'][j];
+              }
+            }
+
+            items[i]['num'] = [weightSum];
+            items[i]['date'] = [latestDate];
+          }
+          calculatedItems.add(items[i]);
+        }
+
+        print(calculatedItems);
       });
     });
+  }
+
+  double toGrum(double num, String unit) {
+    double base=1;
+
+    if(unit == "กิโล"){
+      base = 1000;
+    }
+    if(unit == "ฟอง"){
+      base = 50;
+    }
+    if(unit == "ช้อนโต๊"){
+      base = 12.5;
+    }
+
+    return num*base;
+  }
+
+  Map<String, dynamic> checkMember(String value){
+    for(int i=0; i<items.length; i++){
+      if(items[i]['name'] == value){
+        return {
+          'isHas': true,
+          'index': i
+        };
+      }
+    }
+    return {
+      'isHas': false,
+      'index': null
+    };
   }
 
   Map<String, dynamic> checkIngredients(ingredientToFind, name) {
@@ -57,6 +141,8 @@ class _xfruit_choose_page extends State<xfruit_choose_page> {
     };
   }
 
+  Map<String, String> ingredientToFind = {};
+
   @override
   void initState() {
     // TODO: implement initState
@@ -65,9 +151,9 @@ class _xfruit_choose_page extends State<xfruit_choose_page> {
   }
 
   @override
-  void didChangeDependencies() {
+  void didChangeDependencies(){
     super.didChangeDependencies();
-    if (!isLoaded) {
+    if(!isLoaded){
       _ingredient = Provider.of<Ingredient>(context);
       isLoaded = true;
     }
@@ -99,9 +185,7 @@ class _xfruit_choose_page extends State<xfruit_choose_page> {
     // TODO: implement build
     return Padding(
       padding: EdgeInsets.all(20),
-      child: ingres != null
-          ? ingres.length != 0
-          ? Container(
+      child: calculatedItems != null ? calculatedItems.length != 0 ? Container(
           child: Column(
             children: <Widget>[
               Container(
@@ -117,19 +201,12 @@ class _xfruit_choose_page extends State<xfruit_choose_page> {
                         child: Row(
                           children: <Widget>[
                             Container(
-                              padding:
-                              EdgeInsets.only(left: 20, right: 20),
+                              padding: EdgeInsets.only(left: 20,right: 20),
                               child: Column(
-                                mainAxisAlignment:
-                                MainAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.center,
                                 children: <Widget>[
                                   Container(
-                                    child: Text(
-                                      "All",
-                                      style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 20),
-                                    ),
+                                    child: Text("All",style: TextStyle(color: Colors.white,fontSize: 20),),
                                   ),
                                   Container(
                                     height: 18,
@@ -137,15 +214,14 @@ class _xfruit_choose_page extends State<xfruit_choose_page> {
                                     decoration: BoxDecoration(
                                         color: Colors.white,
                                         shape: BoxShape.circle,
-                                        border: Border.all(
-                                            color: Colors.red)),
+                                        border: Border.all(color: Colors.red)
+                                    ),
                                   ),
                                 ],
                               ),
                             ),
                             Container(
-                              child: Text(
-                                'วัตถุดิบ',
+                              child: Text('วัตถุดิบ',
                                 style: TextStyle(fontSize: 25),
                               ),
                             ),
@@ -158,8 +234,7 @@ class _xfruit_choose_page extends State<xfruit_choose_page> {
                       child: Container(
                         color: Color(0xffE58200),
                         alignment: Alignment.center,
-                        child: Text(
-                          'คงเหลือ',
+                        child: Text('คงเหลือ',
                           style: TextStyle(
                               fontSize: 25, color: Colors.white),
                         ),
@@ -173,7 +248,8 @@ class _xfruit_choose_page extends State<xfruit_choose_page> {
                         child: Text(
                           'วันที่เหลือ',
                           style: TextStyle(
-                              fontSize: 25, color: Colors.white),
+                              fontSize: 25,
+                              color: Colors.white),
                         ),
                       ),
                     ),
@@ -184,23 +260,22 @@ class _xfruit_choose_page extends State<xfruit_choose_page> {
                 child: Container(
                     child: ListView.builder(
                         padding: EdgeInsets.zero,
-                        itemCount: ingres == null ? 0 : ingres.length,
+                        itemCount: calculatedItems == null ? 0 : calculatedItems.length,
                         itemBuilder: (BuildContext context, int index) {
                           return GestureDetector(
-                            onTap: () {
+                            onTap: (){
                               setState(() {
-                                if(checkIngredients(_ingredient.getIngredients(), ingres[index]['name'])['isHas']){
-                                  int indexToDelete = checkIngredients(_ingredient.getIngredients(), ingres[index]['name'])['index'];
+                                if(checkIngredients(_ingredient.getIngredients(), items[index]['name'])['isHas']){
+                                  int indexToDelete = checkIngredients(_ingredient.getIngredients(), items[index]['name'])['index'];
                                   _ingredient.removeIngredients(indexToDelete);
                                 }else{
                                   Map<String, String> tmp = {
-                                    'name': ingres[index]['name'],
-                                    'num': ingres[index]['num'].toString(),
-                                    'unit': ingres[index]['unit']
+                                    'name': items[index]['name'],
+                                    'num': items[index]['num'][0].toString(),
+                                    'unit': items[index]['unit'][0]
                                   };
 
                                   _ingredient.addIngredients(tmp);
-                                  print(_ingredient.getIngredients());
                                 }
                               });
                             },
@@ -217,34 +292,28 @@ class _xfruit_choose_page extends State<xfruit_choose_page> {
                                       child: Row(
                                         children: <Widget>[
                                           Container(
-                                            padding: EdgeInsets.only(
-                                                left: 20, right: 20),
+                                            padding: EdgeInsets.only(left: 20,right: 20),
                                             child: Column(
-                                              mainAxisAlignment:
-                                              MainAxisAlignment
-                                                  .center,
+                                              mainAxisAlignment: MainAxisAlignment.center,
                                               children: <Widget>[
                                                 Container(
                                                   height: 18,
                                                   width: 18,
                                                   decoration: BoxDecoration(
-                                                      color: checkIngredients(_ingredient.getIngredients(), ingres[index].data['name'])['isHas']
+                                                      color: checkIngredients(_ingredient.getIngredients(), calculatedItems[index]['name'])['isHas']
                                                           ? Colors.red
                                                           : Colors.white,
-                                                      shape:
-                                                      BoxShape.circle,
-                                                      border: Border.all(
-                                                          color: Colors
-                                                              .red)),
+                                                      shape: BoxShape.circle,
+                                                      border: Border.all(color: Colors.red)
+                                                  ),
                                                 ),
                                               ],
                                             ),
                                           ),
                                           Container(
                                             child: Text(
-                                              ingres[index].data['name'],
-                                              style:
-                                              TextStyle(fontSize: 25),
+                                              calculatedItems[index]['name'],
+                                              style: TextStyle(fontSize: 25),
                                             ),
                                           ),
                                         ],
@@ -257,12 +326,11 @@ class _xfruit_choose_page extends State<xfruit_choose_page> {
                                       color: Color(0xffFC9002),
                                       alignment: Alignment.center,
                                       child: Text(
-                                        ingres[index].data['num'] +
+                                        calculatedItems[index]['num'][0].toString() +
                                             ' ' +
-                                            ingres[index].data['unit'],
+                                            calculatedItems[index]['unit'][0],
                                         style: TextStyle(
-                                            fontSize: 25,
-                                            color: Colors.white),
+                                            fontSize: 25, color: Colors.white),
                                       ),
                                     ),
                                   ),
@@ -270,39 +338,28 @@ class _xfruit_choose_page extends State<xfruit_choose_page> {
                                     flex: 2,
                                     child: Container(
                                       child: Stack(
-                                          alignment:
-                                          Alignment.bottomCenter,
+                                          alignment: Alignment.bottomCenter,
                                           children: <Widget>[
                                             Container(
                                               color: Color(0xffFFA733),
                                               alignment: Alignment.center,
                                               child: Text(
-                                                ingres[index].data['date'] == null ? 'ไม่มีกำหนด':'${calculateDate(format.format(ingres[index]['date'].toDate()))} วัน',
+                                                calculatedItems[index]['date'][0] == null ? 'ไม่มีกำหนด':'${calculateDate(format.format(calculatedItems[index]['date'][0].toDate()))} วัน',
                                                 style: TextStyle(
-                                                    fontSize: 25,
+                                                    fontSize: 22,
                                                     color: Colors.white),
                                               ),
                                             ),
-                                            GestureDetector(
-                                              onTap: () {
-                                                calculateDate(
-                                                    ingres[index]
-                                                        .data['date']
-                                                        .toDate());
-                                              },
-                                              child: Container(
-                                                alignment:
-                                                Alignment.center,
-                                                height: 30,
-                                                child: Text(
-                                                  ingres[index].data['date'] == null ? 'ไม่มีกำหนด':'${ingres[index].data['date'].toDate().day.toString()}/${ingres[index].data['date'].toDate().month.toString()}/${ingres[index].data['date'].toDate().year.toString()}',
-                                                  style: TextStyle(
-                                                      fontSize: 15,
-                                                      color:
-                                                      Colors.white),
-                                                ),
-                                                color: Color(0xffFC9002),
+                                            Container(
+                                              alignment: Alignment.center,
+                                              height: 30,
+                                              child: Text(
+                                                calculatedItems[index]['date'][0] == null ? 'ไม่มีกำหนด':'${calculatedItems[index]['date'][0].toDate().day.toString()}/${calculatedItems[index]['date'][0].toDate().month.toString()}/${calculatedItems[index]['date'][0].toDate().year.toString()}',
+                                                style: TextStyle(
+                                                    fontSize: 15,
+                                                    color: Colors.white),
                                               ),
+                                              color: Color(0xffFC9002),
                                             ),
                                           ]),
                                     ),
@@ -314,16 +371,14 @@ class _xfruit_choose_page extends State<xfruit_choose_page> {
                         })),
               ),
             ],
-          ))
-          : Column(
+          )
+      ):Column(
         children: <Widget>[
           Expanded(
             child: Container(
                 alignment: Alignment.center,
-                child: Text(
-                  "ไม่มีวัตถุดิบ",
-                  style: TextStyle(fontSize: 25),
-                )),
+                child: Text("ไม่มีวัตถุดิบ",style: TextStyle(fontSize: 25),)
+            ),
           ),
           GestureDetector(
             child: Container(
@@ -349,8 +404,7 @@ class _xfruit_choose_page extends State<xfruit_choose_page> {
             ),
           )
         ],
-      )
-          : Container(),
+      ):Container(),
     );
   }
 }
