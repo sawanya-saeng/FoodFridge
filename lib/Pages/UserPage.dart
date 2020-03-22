@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:taluewapp/Services/loadingScreenService.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'EditUserPage.dart';
 
 class user_page extends StatefulWidget {
   @override
@@ -94,14 +95,35 @@ class _user_page extends State<user_page> with TickerProviderStateMixin{
   Widget build(BuildContext context) {
     return isLoaded ? _loadingProgress.getSubWidget(context) : Column(
       children: <Widget>[
-        Container(
-            height: 60,
-            alignment: Alignment.center,
-            color: Color(0xffB15B25),
-            child: Text(
-              'ข้อมูลส่วนตัว',
-              style: TextStyle(color: Colors.white, fontSize: 35),
-            )),
+        Stack(
+          alignment: Alignment.centerRight,
+          children: <Widget>[
+            Container(
+              height: 60,
+              alignment: Alignment.center,
+              color: Color(0xffB15B25),
+              child: Text(
+                'ข้อมูลส่วนตัว',
+                style: TextStyle(color: Colors.white, fontSize: 35),
+              ),
+            ),
+            GestureDetector(
+              onTap: () {
+                Navigator.push(context,
+                    MaterialPageRoute(
+                        builder: (context) {
+                          return edit_user();
+                        }));
+              },
+              child: Container(
+                child: Icon(
+                  Icons.settings,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        ),
         Container(
           alignment: Alignment.center,
           color: Colors.white,
