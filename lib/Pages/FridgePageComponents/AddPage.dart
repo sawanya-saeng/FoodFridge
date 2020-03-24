@@ -2,18 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_cupertino_date_picker/flutter_cupertino_date_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 import 'package:platform_alert_dialog/platform_alert_dialog.dart';
 
 class add_page extends StatefulWidget {
   String type;
-  add_page(this.type);
-  _add_page createState() => _add_page(this.type);
+  bool isEdit;
+  String id;
+  add_page(this.type, [this.isEdit = false, this.id = '']);
+  _add_page createState() => _add_page(this.type, this.isEdit, this.id);
 }
 
 
 class _add_page extends State<add_page> {
   String type;
-  _add_page(this.type);
+  bool isEdit;
+  String id;
+  _add_page(this.type, this.isEdit, this.id);
 
   String unitValue = 'กรัม';
   String dateNow = '';
@@ -22,7 +27,31 @@ class _add_page extends State<add_page> {
   TextEditingController _num = TextEditingController();
   FirebaseAuth _auth = FirebaseAuth.instance;
   Firestore _db = Firestore.instance;
+  Map<String, dynamic> item = {};
+  final format = DateFormat('yyyy-MM-dd');
 
+  Future loadItem()async {
+    await _db.collection('Fridge').document(this.id).get().then((docs){
+      setState(() {
+        item['id'] = docs.documentID;
+        item = docs.data;
+        print(item);
+
+        _name.text = item['name'];
+        _num.text = item['num'].toString();
+        unitValue = item['unit'];
+        dateNow = item['date'] == null ? 'ไม่มีกำหนด' : format.format(item['date'].toDate());
+        dateTime =item['date'] == null ? null :  item['date'].toDate();
+      });
+    });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    loadItem();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -70,14 +99,24 @@ class _add_page extends State<add_page> {
 
 
       FirebaseUser user = await _auth.currentUser();
-      await _db.collection('Fridge').add({
-        'name' : _name.text,
-        'num' : _num.text,
-        'unit' : unitValue,
-        'date' : dateTime,
-        'uid' : user.uid,
-        'type' : this.type
-      });
+      if(this.isEdit){
+        await _db.collection('Fridge').document(this.id).updateData({
+          'name' : _name.text,
+          'num' : _num.text,
+          'unit' : unitValue,
+          'date' : dateTime,
+        });
+      }else{
+        await _db.collection('Fridge').add({
+          'name' : _name.text,
+          'num' : _num.text,
+          'unit' : unitValue,
+          'date' : dateTime,
+          'uid' : user.uid,
+          'type' : this.type
+        });
+      }
+
 
       Navigator.of(context).pop();
     }

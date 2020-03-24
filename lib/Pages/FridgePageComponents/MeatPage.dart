@@ -180,6 +180,11 @@ class _meat_page extends State<meat_page> with TickerProviderStateMixin{
                             return Column(
                               children: <Widget>[
                                 GestureDetector(
+                                  onTap: (){
+                                    Navigator.push(context, MaterialPageRoute(builder: (context){
+                                      return add_page('meat', true, items[index]['id'][jdex]);
+                                    }));
+                                  },
                                   onLongPress: (){
                                     showDialog(context: context,builder: (context){
                                       return PlatformAlertDialog(
@@ -301,6 +306,11 @@ class _meat_page extends State<meat_page> with TickerProviderStateMixin{
                         );
                       }
                       return GestureDetector(
+                        onTap: (){
+                          Navigator.push(context, MaterialPageRoute(builder: (context){
+                            return add_page('meat', true, items[index]['id'][0]);
+                          }));
+                        },
                         onLongPress: (){
                           showDialog(context: context,builder: (context){
                             return PlatformAlertDialog(

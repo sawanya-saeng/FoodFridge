@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:taluewapp/Pages/MainPage.dart';
 
 class howto_page extends StatefulWidget {
   String menu_id;
@@ -66,12 +67,6 @@ class _howto_page extends State<howto_page> {
   Future deleteIngredientFromFridge()async {
     List<Map<String, String>> toDelete = [];
     List<Map<String, String>> toUpdate = [];
-//    print('all');
-//    print(allIngredients);
-//    print('fridge');
-//    print(fridgeIngredients);
-//    print('cal');
-//    print(calculatedItems);
     if (checkMainIngredient()) {
       for(int i=0; i<allIngredients.length; i++){
         var ingredienctCost = toGrum(double.parse(allIngredients[i]['num'].toString()), allIngredients[i]['unit']);
@@ -90,7 +85,7 @@ class _howto_page extends State<howto_page> {
               if(ingredienctCost < 0){
                 toUpdate.add({
                   'id': calculatedItems[j]['id'][k],
-                  'num': (ingredienctCost).abs().toString(),
+                  'num': grumToUnit((ingredienctCost).abs(), calculatedItems[j]['unit'][k]).toString(),
                   'name': calculatedItems[j]['name'],
                   'unit': calculatedItems[j]['unit'][k]
                 });
@@ -111,111 +106,19 @@ class _howto_page extends State<howto_page> {
     print(toDelete);
     print(toUpdate);
 
-    for(int i=0; i<toDelete.length; i++){}
+    for(int i=0; i<toDelete.length; i++){
+      await _db.collection('Fridge').document(toDelete[i]['id']).delete();
+    }
 
-    for(int i=0; i<toUpdate.length; i++){}
-
-//    if (checkMainIngredient()) {
-//      for(int i=0; i<allIngredients.length; i++){
-//
-//      }
-//      for(int i=0; i<allIngredients.length; i++){
-//        for(int j=0; j<calculatedItems.length; j++){
-//          if(allIngredients[i]['name'] == calculatedItems[j]['name']){
-//            String unit = calculatedItems[j]['unit'][0];
-//            double net1 = toGrum(double.parse(allIngredients[i]['num'].toString()), allIngredients[i]['unit']);
-//            double net2 = toGrum(double.parse(calculatedItems[j]['num'][0].toString()), calculatedItems[j]['unit'][0]);
-//
-//            double newValue = net2 < net1 ? 0 : net2 - net1;
-//
-//            print("fridge");
-//            print(calculatedItems);
-//
-//            print("main : ");
-//            print(allIngredients[i]['name']);
-//            print(net1);
-//
-//            print("fridge : ");
-//            print(calculatedItems[j]['name']);
-//            print(net2);
-//
-//            print("result: ");
-//            print(newValue);
-//
-//            print("********");
-//            print(unit);
-//
-//            print("Store");
-//            print(grumToUnit(newValue, unit));
-//
-////            if(newValue == 0) {
-////              for(int k=0; k<calculatedItems[j]['id'].length; k++){
-////                DocumentSnapshot tmp = await _db.collection('Fridge').document(calculatedItems[j]['id'][k]).get();
-////                await _db.collection('Fridge').document(calculatedItems[j]['id'][k]).delete();
-////                await _db.collection('Bin').add(tmp.data);
-////              }
-////
-////            }else{
-////                await _db.collection('Fridge').document(fridgeIngredients[j]['id']).updateData({
-////                  'num': newValue
-////                });
-////            }
-////            print('fridge');
-////            print(fridgeIngredients);
-////            print('all');
-////            print(allIngredients);
-////            print('cal');
-////            print(calculatedItems);
-//
-//            bool isDone = false;
-//            List<dynamic> ingredientPayload = [];
-//
-//            for(int k=0; k<calculatedItems[j]['id'].length; k++){
-//              for(int p=0; p<fridgeIngredients.length;p++){
-//                if(calculatedItems[j]['id'][k] == fridgeIngredients[p]['id']){
-//                  ingredientPayload.add({
-//                    'id': fridgeIngredients[p]['id'],
-//                    'num': fridgeIngredients[p]['num']
-//                  });
-//                }
-//              }
-//            }
-//            for(int p=0; p<allIngredients.length; p++){
-//              if(isDone){
-//                break;
-//              }
-//              for(int k=0; k<calculatedItems[j]['id'].length; k++){
-//                if(calculatedItems[j]['id'][k] == allIngredients[p]['id']){
-//                  if(double.parse(ingredientPayload[j]['num'].toString()) - allIngredients[p]['num'] >= 0){
-//                    toUpdate.add({
-//                      'id': ingredientPayload[j]['id'].toString(),
-//                      'num': (double.parse(ingredientPayload[j]['num'].toString()) - allIngredients[p]['num']).toString()
-//                    });
-//                    isDone = true;
-//                    break;
-//                  }else{
-//                    allIngredients[p]['num'] = allIngredients[p]['num'] - ingredientPayload[j]['num'];
-//                    toDelete.add(ingredientPayload[j]['id']);
-//                  }
-//                }
-//              }
-//            }
-//
-//            print('toDelete');
-//            print(toDelete);
-//            print('toUpdate');
-//            print(toUpdate);
-//
-//            continue;
-//          }
-//        }
-//      }
-
-//      Navigator.of(context).popUntil((route) => route.isFirst);
-//      Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context){
-//        return main_page(0);
-//      }));
-//    }
+    for(int i=0; i<toUpdate.length; i++){
+      await _db.collection('Fridge').document(toUpdate[i]['id']).updateData({
+        'num': toUpdate[i]['num'].toString()
+      });
+    }
+      Navigator.of(context).popUntil((route) => route.isFirst);
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context){
+        return main_page(0);
+      }));
   }
 
   Future getImage()async{
@@ -438,17 +341,15 @@ class _howto_page extends State<howto_page> {
                                   flex: 2,
                                   child: Container(
                                     child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: <Widget>[
                                         GestureDetector(
                                           onTap: () {
                                             setState(() {
-                                              int tmp = int.parse(
-                                                  allIngredients[index]["value"]
-                                                      .text);
+                                              int tmp = int.parse(allIngredients[index]["value"].text);
                                               tmp--;
-                                              allIngredients[index]["value"].text =
-                                                  tmp.toString();
+                                              allIngredients[index]['value'].text = tmp.toString();
+                                              allIngredients[index]["num"] = tmp.toString();
                                             });
                                           },
                                           child: Container(
@@ -459,7 +360,6 @@ class _howto_page extends State<howto_page> {
                                             child: Icon(Icons.remove),
                                           ),
                                         ),
-
                                         Container(
                                             height: 25,
                                             width: 80,
@@ -478,12 +378,10 @@ class _howto_page extends State<howto_page> {
                                         GestureDetector(
                                           onTap: () {
                                             setState(() {
-                                              int tmp = int.parse(
-                                                  allIngredients[index]["value"]
-                                                      .text);
+                                              int tmp = int.parse(allIngredients[index]["value"].text);
                                               tmp++;
-                                              allIngredients[index]["value"].text =
-                                                  tmp.toString();
+                                              allIngredients[index]['value'].text = tmp.toString();
+                                              allIngredients[index]["num"] = tmp.toString();
                                             });
                                           },
                                           child: Container(
@@ -495,7 +393,6 @@ class _howto_page extends State<howto_page> {
                                           ),
                                         ),
                                         Container(
-                                          width: 40,
                                           margin: EdgeInsets.only(left: 15),
                                           child: Text(
                                               "${allIngredients[index]["unit"]}"),
