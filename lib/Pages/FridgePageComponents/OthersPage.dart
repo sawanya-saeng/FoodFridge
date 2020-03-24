@@ -180,6 +180,11 @@ class _others_page extends State<others_page> with TickerProviderStateMixin{
                                 return Column(
                                   children: <Widget>[
                                     GestureDetector(
+                                      onTap: (){
+                                        Navigator.push(context, MaterialPageRoute(builder: (context){
+                                          return add_page('others', true, items[index]['id'][jdex]);
+                                        }));
+                                      },
                                       onLongPress: (){
                                         showDialog(context: context,builder: (context){
                                           return PlatformAlertDialog(

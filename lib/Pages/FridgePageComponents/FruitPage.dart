@@ -180,6 +180,11 @@ class _fruit_page extends State<fruit_page> with TickerProviderStateMixin{
                                 return Column(
                                   children: <Widget>[
                                     GestureDetector(
+                                      onTap: (){
+                                        Navigator.push(context, MaterialPageRoute(builder: (context){
+                                          return add_page('fruit', true, items[index]['id'][jdex]);
+                                        }));
+                                      },
                                       onLongPress: (){
                                         showDialog(context: context,builder: (context){
                                           return PlatformAlertDialog(
