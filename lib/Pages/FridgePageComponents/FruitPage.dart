@@ -301,6 +301,11 @@ class _fruit_page extends State<fruit_page> with TickerProviderStateMixin{
                           );
                         }
                         return GestureDetector(
+                          onTap: (){
+                            Navigator.push(context, MaterialPageRoute(builder: (context){
+                              return add_page('fruit', true, items[index]['id'][0]);
+                            }));
+                          },
                           onLongPress: (){
                             showDialog(context: context,builder: (context){
                               return PlatformAlertDialog(
