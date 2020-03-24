@@ -1,8 +1,6 @@
 import 'package:date_calc/date_calc.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:taluewapp/Pages/MainPage.dart';
-import './FridgePageComponents/AddPage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -55,16 +53,68 @@ class _howto_page extends State<howto_page> {
     return true;
   }
 
-  Future deleteIngredientFromFridge()async {
-    List<String> toDelete = [];
-    List<Map<String, String>> toUpdate = [];
-    print('cal');
-    print(calculatedItems);
-    if (checkMainIngredient()) {
-      for(int i=0; i<allIngredients.length; i++){
-        
+  double getNumFromId(String id){
+    for(int i=0; i<fridgeIngredients.length; i++){
+      if(id == fridgeIngredients[i]['id']){
+        return double.parse(fridgeIngredients[i]['num'].toString());
       }
     }
+
+    return 0;
+  }
+
+  Future deleteIngredientFromFridge()async {
+    List<Map<String, String>> toDelete = [];
+    List<Map<String, String>> toUpdate = [];
+//    print('all');
+//    print(allIngredients);
+//    print('fridge');
+//    print(fridgeIngredients);
+//    print('cal');
+//    print(calculatedItems);
+    if (checkMainIngredient()) {
+      for(int i=0; i<allIngredients.length; i++){
+        var ingredienctCost = toGrum(double.parse(allIngredients[i]['num'].toString()), allIngredients[i]['unit']);
+        print(allIngredients[i]['name']);
+        print('ใช้');
+        print(ingredienctCost);
+
+        for(int j=0; j<calculatedItems.length; j++){
+          if(calculatedItems[j]['name'] == allIngredients[i]['name']){
+            for(int k=0; k<calculatedItems[j]['id'].length; k++){
+              var targetNum = toGrum(getNumFromId(calculatedItems[j]['id'][k]), calculatedItems[j]['unit'][k]);
+              print('${calculatedItems[j]['id'][k]} -- ${calculatedItems[j]['name']}');
+              print('${ingredienctCost} - ${targetNum}');
+              ingredienctCost -= targetNum;
+
+              if(ingredienctCost < 0){
+                toUpdate.add({
+                  'id': calculatedItems[j]['id'][k],
+                  'num': (ingredienctCost).abs().toString(),
+                  'name': calculatedItems[j]['name'],
+                  'unit': calculatedItems[j]['unit'][k]
+                });
+
+                k = calculatedItems[j]['id'].length;
+              }else{
+                toDelete.add({
+                  'id': calculatedItems[j]['id'][k],
+                  'name': calculatedItems[j]['name']
+                });
+              }
+            }
+          }
+        }
+      }
+    }
+
+    print(toDelete);
+    print(toUpdate);
+
+    for(int i=0; i<toDelete.length; i++){}
+
+    for(int i=0; i<toUpdate.length; i++){}
+
 //    if (checkMainIngredient()) {
 //      for(int i=0; i<allIngredients.length; i++){
 //

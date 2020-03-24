@@ -137,7 +137,7 @@ class _findmenu_page extends State<findmenu_page> {
                   isHas = true;
                   tmp_haveOptionalIngredients.add(allMenu[k].data['Ingredients']['Optional'][i]['name']);
                 }else{
-                  tmp_notHaveOptionalIngredients.add([allMenu[k].data['Ingredients']['Optional'][i]['name'], allMenu[k].data['Ingredients']['Optional'][i]['num'] - int.parse(tmp[j]['num']), 'กรัม']);
+                  tmp_notHaveOptionalIngredients.add([allMenu[k].data['Ingredients']['Optional'][i]['name'], allMenu[k].data['Ingredients']['Optional'][i]['num'] - double.parse(tmp[j]['num'].toString()), 'กรัม']);
                   isPushed = true;
                 }
               }
