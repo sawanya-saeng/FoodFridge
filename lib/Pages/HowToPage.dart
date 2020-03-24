@@ -56,57 +56,116 @@ class _howto_page extends State<howto_page> {
   }
 
   Future deleteIngredientFromFridge()async {
+    List<String> toDelete = [];
+    List<Map<String, String>> toUpdate = [];
+    print('cal');
+    print(calculatedItems);
     if (checkMainIngredient()) {
       for(int i=0; i<allIngredients.length; i++){
-        for(int j=0; j<fridgeIngredients.length; j++){
-          if(allIngredients[i]['name'] == fridgeIngredients[j]['name']){
-            String unit = fridgeIngredients[j]['unit'];
-            double net1 = toGrum(double.parse(allIngredients[i]['num'].toString()), allIngredients[i]['unit']);
-            double net2 = toGrum(double.parse(fridgeIngredients[j]['num'].toString()), fridgeIngredients[j]['unit']);
-
-            double newValue = net2 < net1 ? 0 : net2 - net1;
-
-            print("fridge");
-            print(fridgeIngredients);
-
-            print("main : ");
-            print(allIngredients[i]['name']);
-            print(net1);
-
-            print("fridge : ");
-            print(fridgeIngredients[j]['name']);
-            print(net2);
-
-            print("result: ");
-            print(newValue);
-
-            print("********");
-            print(unit);
-
-            print("Store");
-            print(grumToUnit(newValue, unit));
-
-//            if(newValue == 0) {
-//              DocumentSnapshot tmp = await _db.collection('Fridge').document(fridgeIngredients[j]['id']).get();
-//              await _db.collection('Fridge').document(fridgeIngredients[j]['id']).delete();
-//              await _db.collection('Bin').add(tmp.data);
+        
+      }
+    }
+//    if (checkMainIngredient()) {
+//      for(int i=0; i<allIngredients.length; i++){
 //
-//            }else{
-//                await _db.collection('Fridge').document(fridgeIngredients[j]['id']).updateData({
-//                  'num': newValue
-//                });
+//      }
+//      for(int i=0; i<allIngredients.length; i++){
+//        for(int j=0; j<calculatedItems.length; j++){
+//          if(allIngredients[i]['name'] == calculatedItems[j]['name']){
+//            String unit = calculatedItems[j]['unit'][0];
+//            double net1 = toGrum(double.parse(allIngredients[i]['num'].toString()), allIngredients[i]['unit']);
+//            double net2 = toGrum(double.parse(calculatedItems[j]['num'][0].toString()), calculatedItems[j]['unit'][0]);
+//
+//            double newValue = net2 < net1 ? 0 : net2 - net1;
+//
+//            print("fridge");
+//            print(calculatedItems);
+//
+//            print("main : ");
+//            print(allIngredients[i]['name']);
+//            print(net1);
+//
+//            print("fridge : ");
+//            print(calculatedItems[j]['name']);
+//            print(net2);
+//
+//            print("result: ");
+//            print(newValue);
+//
+//            print("********");
+//            print(unit);
+//
+//            print("Store");
+//            print(grumToUnit(newValue, unit));
+//
+////            if(newValue == 0) {
+////              for(int k=0; k<calculatedItems[j]['id'].length; k++){
+////                DocumentSnapshot tmp = await _db.collection('Fridge').document(calculatedItems[j]['id'][k]).get();
+////                await _db.collection('Fridge').document(calculatedItems[j]['id'][k]).delete();
+////                await _db.collection('Bin').add(tmp.data);
+////              }
+////
+////            }else{
+////                await _db.collection('Fridge').document(fridgeIngredients[j]['id']).updateData({
+////                  'num': newValue
+////                });
+////            }
+////            print('fridge');
+////            print(fridgeIngredients);
+////            print('all');
+////            print(allIngredients);
+////            print('cal');
+////            print(calculatedItems);
+//
+//            bool isDone = false;
+//            List<dynamic> ingredientPayload = [];
+//
+//            for(int k=0; k<calculatedItems[j]['id'].length; k++){
+//              for(int p=0; p<fridgeIngredients.length;p++){
+//                if(calculatedItems[j]['id'][k] == fridgeIngredients[p]['id']){
+//                  ingredientPayload.add({
+//                    'id': fridgeIngredients[p]['id'],
+//                    'num': fridgeIngredients[p]['num']
+//                  });
+//                }
+//              }
+//            }
+//            for(int p=0; p<allIngredients.length; p++){
+//              if(isDone){
+//                break;
+//              }
+//              for(int k=0; k<calculatedItems[j]['id'].length; k++){
+//                if(calculatedItems[j]['id'][k] == allIngredients[p]['id']){
+//                  if(double.parse(ingredientPayload[j]['num'].toString()) - allIngredients[p]['num'] >= 0){
+//                    toUpdate.add({
+//                      'id': ingredientPayload[j]['id'].toString(),
+//                      'num': (double.parse(ingredientPayload[j]['num'].toString()) - allIngredients[p]['num']).toString()
+//                    });
+//                    isDone = true;
+//                    break;
+//                  }else{
+//                    allIngredients[p]['num'] = allIngredients[p]['num'] - ingredientPayload[j]['num'];
+//                    toDelete.add(ingredientPayload[j]['id']);
+//                  }
+//                }
+//              }
 //            }
 //
+//            print('toDelete');
+//            print(toDelete);
+//            print('toUpdate');
+//            print(toUpdate);
+//
 //            continue;
-          }
-        }
-      }
+//          }
+//        }
+//      }
 
 //      Navigator.of(context).popUntil((route) => route.isFirst);
 //      Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context){
 //        return main_page(0);
 //      }));
-    }
+//    }
   }
 
   Future getImage()async{
@@ -281,7 +340,6 @@ class _howto_page extends State<howto_page> {
         }
         optionIngredients = tmpMap;
         allIngredients = mainIngredients+optionIngredients;
-        print(allIngredients);
       });
     });
   }
@@ -290,7 +348,6 @@ class _howto_page extends State<howto_page> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    print(this.menu_id);
     _scrollController = PageController(initialPage: 0);
     getImage();
     getMenuDetail();
