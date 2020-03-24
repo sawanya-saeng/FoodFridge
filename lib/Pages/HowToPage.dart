@@ -22,7 +22,7 @@ class _howto_page extends State<howto_page> {
   final _auth = FirebaseAuth.instance;
   PageController _scrollController;
   final format = DateFormat('yyyy-MM-dd');
-
+  bool isFavor;
   Map<String, dynamic> menuDetail;
   List<dynamic> mainIngredients;
   List<dynamic> optionIngredients;
@@ -302,6 +302,7 @@ class _howto_page extends State<howto_page> {
     // TODO: implement initState
     super.initState();
     _scrollController = PageController(initialPage: 0);
+    isFavor = false;
     getImage();
     getMenuDetail();
     getIngredientFromFridge();
@@ -571,17 +572,41 @@ class _howto_page extends State<howto_page> {
                     style: TextStyle(color: Colors.white, fontSize: 35),
                   ),
                 ),
-                GestureDetector(
-                  onTap: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: Container(
-                    child: Icon(
-                      Icons.arrow_back_ios,
-                      color: Colors.white,
-                    ),
+                Container(
+                  alignment: Alignment.center,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: Container(
+                          child: Icon(
+                            Icons.arrow_back_ios,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            isFavor = !isFavor;
+                          });
+                        },
+                        child: Container(
+                          child: Icon(
+                            isFavor ? Icons.star : Icons.star_border,
+                            color: Colors.yellow,
+                            size:40,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
+                )
+
+
               ],
             ),
             Container(
