@@ -64,6 +64,38 @@ class _howto_page extends State<howto_page> {
     return 0;
   }
 
+  Future saveToFavor()async{
+    FirebaseUser user = await _auth.currentUser();
+    await _db.collection('Favor').add({
+      'uid': user.uid,
+      'menu': this.menu_id,
+      'date': new DateTime.now()
+    });
+  }
+
+  Future deleteFavor()async{
+    FirebaseUser user = await _auth.currentUser();
+    await _db.collection('Favor').where('uid', isEqualTo: user.uid).where('menu', isEqualTo: this.menu_id).getDocuments().then((docs){
+      docs.documents.forEach((d){
+        _db.collection('Favor').document(d.documentID).delete();
+      });
+    });
+  }
+
+  Future loadFavor()async{
+    FirebaseUser user = await _auth.currentUser();
+    await _db.collection('Favor').where('uid', isEqualTo: user.uid).getDocuments().then((docs){
+      docs.documents.forEach((d){
+        if(this.menu_id == d.data['menu']){
+          print('${this.menu_id} === ${d.data["menu"]}');
+          setState(() {
+            isFavor = true;
+          });
+        }
+      });
+    });
+  }
+
   Future deleteIngredientFromFridge()async {
     List<Map<String, String>> toDelete = [];
     List<Map<String, String>> toUpdate = [];
@@ -306,6 +338,7 @@ class _howto_page extends State<howto_page> {
     getImage();
     getMenuDetail();
     getIngredientFromFridge();
+    loadFavor();
   }
 
   Future deleteIngredientManual() async {
@@ -593,6 +626,11 @@ class _howto_page extends State<howto_page> {
                           setState(() {
                             isFavor = !isFavor;
                           });
+                          if(isFavor){
+                            saveToFavor();
+                          }else{
+                            deleteFavor();
+                          }
                         },
                         child: Container(
                           child: Icon(

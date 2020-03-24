@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:taluewapp/Pages/HowToPage.dart';
 import 'package:taluewapp/Pages/LoginPage.dart';
 import './AddMenu.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -31,6 +32,27 @@ class _user_page extends State<user_page> with TickerProviderStateMixin{
   bool isLoaded;
   final _auth = FirebaseAuth.instance;
   IUser user;
+  List<String> favorListId = [];
+  List<Map<String, dynamic>> favorListMenu = [];
+
+  Future getFavorId()async{
+    final user = await _auth.currentUser();
+    await _db.collection('Favor').where('uid', isEqualTo: user.uid).getDocuments().then((docs){
+      docs.documents.forEach((d){
+        setState(() {
+          favorListId.add(d.data['menu']);
+        });
+      });
+    });
+
+    for(int i=0; i<favorListId.length; i++){
+      await _db.collection('Menu').document(favorListId[i]).get().then((d){
+        setState(() {
+          favorListMenu.add(d.data);
+        });
+      });
+    }
+  }
 
   @override
   void initState() {
@@ -43,6 +65,7 @@ class _user_page extends State<user_page> with TickerProviderStateMixin{
     _scrollController = new PageController(initialPage: 0);
 //    getFavMenu();
     getUserData();
+    getFavorId();
   }
 
   Future getUserData()async{
@@ -259,11 +282,13 @@ class _user_page extends State<user_page> with TickerProviderStateMixin{
                           alignment: Alignment.center,
                         ),
                         Container(
-                          child: ListView(
+                          child: ListView.builder(
                             padding: EdgeInsets.all(20),
-                            children: <Widget>[
-                              Container(
-                                child: Row(
+                            itemCount: favorListId == null ? 0 : favorListId.length,
+                            itemBuilder: (BuildContext context, int index){
+                              return Container(
+                                margin: EdgeInsets.only(bottom: 15),
+                                child:  Row(
                                   children: <Widget>[
                                     Container(
                                       decoration: BoxDecoration(
@@ -282,8 +307,9 @@ class _user_page extends State<user_page> with TickerProviderStateMixin{
                                         child: Column(
                                           children: <Widget>[
                                             Container(
+                                              alignment: Alignment.centerLeft,
                                               child: Text(
-                                                'ผัดเต้าหู้มะเขือเทศ',
+                                                favorListMenu[index]['Name'],
                                                 style: TextStyle(
                                                     color: Color(0xff914d1f),
                                                     fontSize: 30),
@@ -292,21 +318,27 @@ class _user_page extends State<user_page> with TickerProviderStateMixin{
                                             Container(
                                               child: Row(
                                                 mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceBetween,
+                                                MainAxisAlignment
+                                                    .spaceBetween,
                                                 children: <Widget>[
                                                   Expanded(
-
-                                                    child: Container(
-                                                      alignment:
-                                                          Alignment.center,
-                                                      height: 40,
-                                                      color: Color(0xff914d1f),
-                                                      child: Text(
-                                                        "วิธีการทำ",
-                                                        style: TextStyle(
-                                                            color: Colors.white,
-                                                            fontSize: 20),
+                                                    child: GestureDetector(
+                                                      onTap: (){
+                                                        Navigator.push(context, MaterialPageRoute(builder: (context){
+                                                          return howto_page(favorListId[index]);
+                                                        }));
+                                                      },
+                                                      child: Container(
+                                                        alignment:
+                                                        Alignment.center,
+                                                        height: 40,
+                                                        color: Color(0xff914d1f),
+                                                        child: Text(
+                                                          "วิธีการทำ",
+                                                          style: TextStyle(
+                                                              color: Colors.white,
+                                                              fontSize: 20),
+                                                        ),
                                                       ),
                                                     ),
                                                   ),
@@ -328,8 +360,78 @@ class _user_page extends State<user_page> with TickerProviderStateMixin{
                                     ),
                                   ],
                                 ),
-                              ),
-                            ],
+                              );
+                            },
+
+//                            children: <Widget>[
+//                              Container(
+//                                child: Row(
+//                                  children: <Widget>[
+//                                    Container(
+//                                      decoration: BoxDecoration(
+//                                        border: Border.all(color: Colors.black),
+//                                      ),
+//                                      height: 120,
+//                                      width: 160,
+//                                      child: Image.asset(
+//                                        'assets/menu1.jpg',
+//                                        fit: BoxFit.cover,
+//                                      ),
+//                                    ),
+//                                    Expanded(
+//                                      child: Container(
+//                                        padding: EdgeInsets.only(left: 15),
+//                                        child: Column(
+//                                          children: <Widget>[
+//                                            Container(
+//                                              child: Text(
+//                                                'ผัดเต้าหู้มะเขือเทศ',
+//                                                style: TextStyle(
+//                                                    color: Color(0xff914d1f),
+//                                                    fontSize: 30),
+//                                              ),
+//                                            ),
+//                                            Container(
+//                                              child: Row(
+//                                                mainAxisAlignment:
+//                                                    MainAxisAlignment
+//                                                        .spaceBetween,
+//                                                children: <Widget>[
+//                                                  Expanded(
+//
+//                                                    child: Container(
+//                                                      alignment:
+//                                                          Alignment.center,
+//                                                      height: 40,
+//                                                      color: Color(0xff914d1f),
+//                                                      child: Text(
+//                                                        "วิธีการทำ",
+//                                                        style: TextStyle(
+//                                                            color: Colors.white,
+//                                                            fontSize: 20),
+//                                                      ),
+//                                                    ),
+//                                                  ),
+//                                                  Container(
+//                                                    margin: EdgeInsets.only(
+//                                                        left: 10),
+//                                                    child: Icon(
+//                                                      Icons.delete,
+//                                                      size: 50,
+//                                                      color: Colors.green,
+//                                                    ),
+//                                                  ),
+//                                                ],
+//                                              ),
+//                                            ),
+//                                          ],
+//                                        ),
+//                                      ),
+//                                    ),
+//                                  ],
+//                                ),
+//                              ),
+//                            ],
                           ),
                         ),
                       ],
