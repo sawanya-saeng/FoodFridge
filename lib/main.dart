@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'Pages/LoginPage.dart';
+import 'package:taluewapp/Pages/MainPage.dart';
 import 'package:provider/provider.dart';
 import 'Services/Ingredient.dart';
 
@@ -14,7 +14,7 @@ void main() {
         theme: ThemeData(
             fontFamily: 'taluewFont'
         ),
-        home: login_page(),
+        home: main_page(0),
         debugShowCheckedModeBanner: false,
       ),
     )

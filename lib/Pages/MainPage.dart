@@ -1,10 +1,9 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:taluewapp/Pages/FridgePage.dart';
 import 'package:taluewapp/Pages/FindMenuPage.dart';
 import 'package:taluewapp/Pages/ExpirePage.dart';
 import 'package:taluewapp/Pages/BinPage.dart';
-import 'package:taluewapp/Pages/FridgePageComponents/FruitPage.dart';
-import 'package:taluewapp/Pages/HowToPage.dart';
 import 'package:taluewapp/Pages/UserPage.dart';
 
 class main_page extends StatefulWidget {
@@ -27,13 +26,41 @@ class _main_page extends State<main_page> {
   int pageIndex;
   _main_page(this.pageIndex);
   PageController _pageController;
+  final _auth = FirebaseAuth.instance;
+  bool isSignIn = false;
+
+  Future checkSignIn()async{
+    FirebaseUser user = await _auth.currentUser();
+    if(user == null){
+      setState(() {
+        isSignIn = false;
+      });
+    }else{
+      setState(() {
+        isSignIn = true;
+      });
+    }
+  }
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     _pageController = PageController(initialPage: this.pageIndex);
-    _currentIndex = this.pageIndex;
+
+    checkSignIn().then((e){
+      if(isSignIn){
+        setState(() {
+          _pageController.animateToPage(this.pageIndex, duration: Duration(milliseconds: 300), curve: Curves.ease);
+          _currentIndex = this.pageIndex;
+        });
+      }else{
+        setState(() {
+          _pageController.animateToPage(1, duration: Duration(milliseconds: 300), curve: Curves.ease);
+          _currentIndex = 1;
+        });
+      }
+    });
   }
 
   @override
@@ -60,10 +87,6 @@ class _main_page extends State<main_page> {
                 child: Image.asset('assets/logofoodfridge.png'),
               ),
               Expanded(
-//                child: Container(
-//                  color: Colors.white,
-//                  child: pages[_currentIndex],
-//                ),
                 child: PageView(
                   controller: _pageController,
                   physics: NeverScrollableScrollPhysics(),
@@ -81,7 +104,7 @@ class _main_page extends State<main_page> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: <Widget>[
-                    Expanded(
+                    isSignIn ? Expanded(
                       child: GestureDetector(
                         onTap: () {
                           setState(() {
@@ -112,7 +135,7 @@ class _main_page extends State<main_page> {
                           ),
                         ),
                       ),
-                    ),
+                    ):Container(),
                     Expanded(
                       child: GestureDetector(
                         onTap: () {
@@ -144,7 +167,7 @@ class _main_page extends State<main_page> {
                         ),
                       ),
                     ),
-                    Expanded(
+                    isSignIn ? Expanded(
                       child: GestureDetector(
                         onTap: () {
                           setState(() {
@@ -174,8 +197,8 @@ class _main_page extends State<main_page> {
                           ),
                         ),
                       ),
-                    ),
-                    Expanded(
+                    ):Container(),
+                    isSignIn ? Expanded(
                       child: GestureDetector(
                         onTap: () {
                           setState(() {
@@ -205,7 +228,7 @@ class _main_page extends State<main_page> {
                           ),
                         ),
                       ),
-                    ),
+                    ):Container(),
                     Expanded(
                       child: GestureDetector(
                         onTap: () {

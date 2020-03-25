@@ -31,6 +31,20 @@ class _howto_page extends State<howto_page> {
   List<dynamic> items = [];
   List<dynamic> calculatedItems = [];
   String mainImage;
+  bool isSignIn = false;
+
+  Future checkSignIn()async{
+    FirebaseUser user = await _auth.currentUser();
+    if(user == null){
+      setState(() {
+        isSignIn = false;
+      });
+    }else{
+      setState(() {
+        isSignIn = true;
+      });
+    }
+  }
 
   double grumToUnit(num, unit){
     double base = 1;
@@ -335,10 +349,15 @@ class _howto_page extends State<howto_page> {
     super.initState();
     _scrollController = PageController(initialPage: 0);
     isFavor = false;
-    getImage();
-    getMenuDetail();
-    getIngredientFromFridge();
-    loadFavor();
+    checkSignIn().then((e){
+      getImage();
+      getMenuDetail();
+      if(isSignIn){
+        getIngredientFromFridge();
+        loadFavor();
+      }
+    });
+
   }
 
   Future deleteIngredientManual() async {
@@ -623,13 +642,15 @@ class _howto_page extends State<howto_page> {
                       ),
                       GestureDetector(
                         onTap: () {
-                          setState(() {
-                            isFavor = !isFavor;
-                          });
-                          if(isFavor){
-                            saveToFavor();
-                          }else{
-                            deleteFavor();
+                          if(isSignIn){
+                            setState(() {
+                              isFavor = !isFavor;
+                            });
+                            if(isFavor){
+                              saveToFavor();
+                            }else{
+                              deleteFavor();
+                            }
                           }
                         },
                         child: Container(
@@ -1009,14 +1030,6 @@ class _howto_page extends State<howto_page> {
                                       ],
                                     ),
                                   ),
-
-
-
-
-
-
-
-
                                 ],
                               ),
                             ),
@@ -1030,7 +1043,9 @@ class _howto_page extends State<howto_page> {
             ),
             GestureDetector(
               onTap: () {
-                deleteIngredientAuto();
+                if(isSignIn){
+                  deleteIngredientAuto();
+                }
               },
               child: Container(
                 margin: EdgeInsets.only(top: 15),
@@ -1047,7 +1062,9 @@ class _howto_page extends State<howto_page> {
             ),
             GestureDetector(
               onTap: () {
-                deleteIngredientManual();
+                if(isSignIn){
+                  deleteIngredientManual();
+                }
               },
               child: Container(
                 margin: EdgeInsets.only(top: 5, bottom: 15),

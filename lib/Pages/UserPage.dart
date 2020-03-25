@@ -34,6 +34,22 @@ class _user_page extends State<user_page> with TickerProviderStateMixin{
   IUser user;
   List<String> favorListId = [];
   List<Map<String, dynamic>> favorListMenu = [];
+  bool isSignIn = false;
+
+  Future checkSignIn()async{
+    FirebaseUser user = await _auth.currentUser();
+    if(user == null){
+      setState(() {
+        isSignIn = false;
+        isLoaded = false;
+      });
+    }else{
+      setState(() {
+        isSignIn = true;
+        isLoaded = false;
+      });
+    }
+  }
 
   Future getFavorId()async{
     final user = await _auth.currentUser();
@@ -63,9 +79,14 @@ class _user_page extends State<user_page> with TickerProviderStateMixin{
     _animationController = new AnimationController(vsync: this, duration: Duration(seconds: 10));
     _loadingProgress = new LoadingProgress(_animationController);
     _scrollController = new PageController(initialPage: 0);
-//    getFavMenu();
-    getUserData();
-    getFavorId();
+
+    checkSignIn().then((e){
+      if(isSignIn){
+        //    getFavMenu();
+        getUserData();
+        getFavorId();
+      }
+    });
   }
 
   Future getUserData()async{
@@ -116,7 +137,7 @@ class _user_page extends State<user_page> with TickerProviderStateMixin{
 
   @override
   Widget build(BuildContext context) {
-    return isLoaded ? _loadingProgress.getSubWidget(context) : Column(
+    return isLoaded ? _loadingProgress.getSubWidget(context) : isSignIn == null ? Container() : isSignIn ? Column(
       children: <Widget>[
         Stack(
           alignment: Alignment.centerRight,
@@ -444,11 +465,13 @@ class _user_page extends State<user_page> with TickerProviderStateMixin{
         ),
         GestureDetector(
           onTap: (){
-            _googleSignIn.signOut().then((e){
-              Navigator.popUntil(context, (route)=> route.isFirst);
-              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context){
-                return login_page();
-              }));
+            _auth.signOut().then((e){
+              _googleSignIn.signOut().then((e){
+                Navigator.popUntil(context, (route)=> route.isFirst);
+                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context){
+                  return login_page();
+                }));
+              });
             });
           },
           child: Container(
@@ -459,6 +482,26 @@ class _user_page extends State<user_page> with TickerProviderStateMixin{
           ),
         )
       ],
+    ):Container(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          GestureDetector(
+            onTap: (){
+              Navigator.popUntil(context, (route)=> route.isFirst);
+              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context){
+                return login_page();
+              }));
+            },
+            child: Container(
+              color: Colors.lightGreen,
+              height: 60,
+              alignment: Alignment.center,
+              child: Text('เข้าสู่ระบบ', style: TextStyle(color: Colors.white, fontSize: 28)),
+            ),
+          )
+        ],
+      ),
     );
   }
 }

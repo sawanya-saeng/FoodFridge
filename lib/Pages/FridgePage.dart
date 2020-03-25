@@ -1,8 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:taluewapp/Pages/FridgePageComponents/FruitPage.dart';
 import 'package:taluewapp/Pages/FridgePageComponents/OthersPage.dart';
 import 'package:taluewapp/Pages/FridgePageComponents/VegetablePage.dart';
 import 'package:taluewapp/Pages/FridgePageComponents/WaterPage.dart';
+import 'package:taluewapp/Services/loadingScreenService.dart';
 import './FridgePageComponents/MeatPage.dart';
 
 class fridge_page extends StatefulWidget {
@@ -12,8 +14,7 @@ class fridge_page extends StatefulWidget {
 
 int click;
 
-class _fridge_page extends State<fridge_page> {
-
+class _fridge_page extends State<fridge_page> with TickerProviderStateMixin{
   PageController _pageController = PageController(initialPage: 0);
 
   @override

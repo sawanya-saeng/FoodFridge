@@ -23,6 +23,20 @@ class _findmenu_page extends State<findmenu_page> {
   List<dynamic> ingredientInFridge;
   List<dynamic> canDo = [];
   List<dynamic> maybeDo = [];
+  bool isSignIn = false;
+
+  Future checkSignIn()async{
+    FirebaseUser user = await _auth.currentUser();
+    if(user == null){
+      setState(() {
+        isSignIn = false;
+      });
+    }else{
+      setState(() {
+        isSignIn = true;
+      });
+    }
+  }
 
   @override
   void didChangeDependencies() {
@@ -496,6 +510,12 @@ class _findmenu_page extends State<findmenu_page> {
     return isBool;
   }
 
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    checkSignIn();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -604,13 +624,15 @@ class _findmenu_page extends State<findmenu_page> {
                     ),
                     GestureDetector(
                       onTap: () {
-                        setState(() {
-                          if (_navHeight == 0.0) {
-                            _navHeight = 120;
-                          } else {
-                            _navHeight = 0.0;
-                          }
-                        });
+                        if(isSignIn){
+                          setState(() {
+                            if (_navHeight == 0.0) {
+                              _navHeight = 120;
+                            } else {
+                              _navHeight = 0.0;
+                            }
+                          });
+                        }
                       },
                       child: Container(
                         padding: EdgeInsets.only(right: 10),
