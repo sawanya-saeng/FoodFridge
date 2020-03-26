@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -11,6 +12,7 @@ class real_page extends StatefulWidget {
 
 final GoogleSignIn _googleSignIn = GoogleSignIn();
 final FirebaseAuth _auth = FirebaseAuth.instance;
+final _db = Firestore.instance;
 
 Future logInWithGoogle() async {
   if(await _googleSignIn.isSignedIn() == false){
@@ -24,6 +26,30 @@ Future logInWithGoogle() async {
       accessToken: googleSignInAuthentication.accessToken);
 
   await _auth.signInWithCredential(credential);
+  FirebaseUser user = await _auth.currentUser();
+  if(await isMember()){
+
+  }else{
+    _db.collection('User').add({
+      'name': user.displayName == null ? '' : user.displayName,
+      'uid': user.uid == null ? '' : user.uid,
+      'display': user.photoUrl == null ? '' : user.photoUrl,
+      'email': user.email == null ? '' : user.email,
+      'phone': user.phoneNumber == null ? '' : user.phoneNumber
+    });
+  }
+}
+
+Future isMember()async{
+  FirebaseUser user = await _auth.currentUser();
+  bool isHas = false;
+  await _db.collection('User').where('uid', isEqualTo: user.uid).getDocuments().then((docs){
+    if(docs.documents.length > 0){
+      isHas = true;
+    }
+  });
+
+  return isHas;
 }
 
 class _real_page extends State<real_page> {

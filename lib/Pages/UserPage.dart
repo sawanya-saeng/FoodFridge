@@ -35,6 +35,7 @@ class _user_page extends State<user_page> with TickerProviderStateMixin{
   List<String> favorListId = [];
   List<Map<String, dynamic>> favorListMenu = [];
   bool isSignIn = false;
+  String _url;
 
   Future checkSignIn()async{
     FirebaseUser user = await _auth.currentUser();
@@ -93,9 +94,22 @@ class _user_page extends State<user_page> with TickerProviderStateMixin{
     //Get google account data
     FirebaseUser userTmp = await _auth.currentUser();
     setState(() {
-      this.user.name = userTmp.displayName;
-      this.user.image = userTmp.providerData[0].photoUrl;
-      isLoaded = false;
+      isLoaded = true;
+    });
+    String urlTmp;
+    urlTmp = await _storage.ref().child('User').child(userTmp.uid).getDownloadURL().catchError((e){
+      urlTmp = null;
+    });
+    setState(() {
+      _url = urlTmp;
+    });
+
+    await _db.collection('User').where('uid', isEqualTo: userTmp.uid).getDocuments().then((docs){
+      setState(() {
+        this.user.name = docs.documents[0].data['name'];
+        this.user.image = docs.documents[0].data['display'];
+        isLoaded = false;
+      });
     });
   }
 
@@ -181,7 +195,7 @@ class _user_page extends State<user_page> with TickerProviderStateMixin{
                 width: 100,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  image: DecorationImage(image: this.user.image == null ? AssetImage('assets/user.png') :NetworkImage(this.user.image),fit: BoxFit.cover)
+                  image: DecorationImage(image: this._url == null ? this.user.image == null ? AssetImage('assets/user.png') :NetworkImage(this.user.image) :  AssetImage('assets/user.png'),fit: BoxFit.cover)
                 ),
               ),
               Container(

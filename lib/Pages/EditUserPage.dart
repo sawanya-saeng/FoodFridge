@@ -3,10 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:taluewapp/Pages/MainPage.dart';
-import 'package:taluewapp/Pages/UserPage.dart';
 
 class edit_user extends StatefulWidget {
   @override
@@ -18,107 +16,58 @@ class _edit_user extends State<edit_user> {
   final _storageRef = FirebaseStorage.instance;
   final _auth = FirebaseAuth.instance;
 
-  List<Map<String, dynamic>> ingredients = [
-    {
-      "ingredient_name": new TextEditingController(),
-      "ingredient_value": new TextEditingController(text: '1'),
-      "ingredient_unit": "กิโล"
-    }
-  ];
+  File _file;
+  TextEditingController _name = new TextEditingController();
+  String _url;
+  String _uid;
+  String docId;
 
-  List<Map<String, dynamic>> optionalIngredient = [
-    {
-      "optional_ingredient_name": new TextEditingController(),
-      "optional_ingredient_value": new TextEditingController(text: '1'),
-      "optional_ingredient_unit": "กิโล"
-    }
-  ];
-
-  List<Map<String, dynamic>> howToMake = [
-    {
-      "description": new TextEditingController()
-    },
-    {
-      "description": new TextEditingController()
-    }
-  ];
-
-  File _foodImage;
-  TextEditingController _foodName = new TextEditingController();
+  Future getUserData()async{
+    FirebaseUser user = await _auth.currentUser();
+    await _db.collection('User').where('uid', isEqualTo: user.uid).getDocuments().then((docs){
+      setState(() {
+        _name.text = docs.documents[0].data['name'];
+        _url = docs.documents[0].data['display'];
+        _uid = user.uid;
+        docId = docs.documents[0].documentID;
+      });
+    });
+  }
 
   Future getPhotoFromGallery() async {
     File _tmp = await ImagePicker.pickImage(source: ImageSource.gallery);
     setState(() {
-      _foodImage = _tmp;
+      _file = _tmp;
     });
   }
 
-  Future addPhotoToHowToMake(rowIndex) async{
-    File _tmp = await ImagePicker.pickImage(source: ImageSource.gallery);
-    setState(() {
-      howToMake[rowIndex]['images'].add(_tmp);
-    });
-  }
-
-  Future saveMenu()async{
-    List<Map<String, dynamic>> tmp_ingredients = [];
-    List<Map<String, dynamic>> tmp_optionalIngredients = [];
-    List<String> howTo = [];
-    List<String> seasoning = [];
-    FirebaseUser user = await _auth.currentUser();
-
-    for(int i=0; i<ingredients.length; i++){
-      tmp_ingredients.add({
-        'name': ingredients[i]['ingredient_name'].text,
-        'num': ingredients[i]['ingredient_value'].text,
-        'unit': ingredients[i]['ingredient_unit']
-      });
+  Future saveUserData()async{
+    StorageReference storageReference = _storageRef.ref().child('User').child(_uid).child('profile');
+    if(_file != null){
+      StorageUploadTask mission = storageReference.putFile(_file);
     }
 
-    for(int i=0; i<optionalIngredient.length; i++){
-      tmp_optionalIngredients.add({
-        'name': optionalIngredient[i]['optional_ingredient_name'].text,
-        'num': optionalIngredient[i]['optional_ingredient_value'].text,
-        'unit': optionalIngredient[i]['optional_ingredient_unit']
-      });
-    }
-
-    for(int i=0; i<howToMake.length; i++){
-      howTo.add(howToMake[i]['description'].text);
-    }
-
-    Map<String, dynamic> menuData = {
-      'Name': _foodName.text,
-      'Howto': howTo,
-      'Ingredients': {
-        'Main': tmp_ingredients,
-        'Optional': tmp_optionalIngredients
-      },
-      'Seasoning': [],
-      'uid': user.uid
-    };
-
-    await _db.collection('Menu').add(menuData).then((docRef){
-      StorageReference storageReference = _storageRef.ref().child('Menu').child(docRef.documentID).child('menupic.jpg');
-      StorageUploadTask task = storageReference.putFile(_foodImage);
-      task.onComplete.then((err){
-
-      });
+    await _db.collection('User').document(docId).updateData({
+      'name': _name.text
     });
 
     Navigator.popUntil(context, (e) => e.isFirst);
     Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context){
       return main_page(4);
     }));
+  }
 
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getUserData();
   }
 
   @override
   Widget build(BuildContext context) {
     double _safeTop = MediaQuery.of(context).padding.top;
     TextStyle bigText = TextStyle(fontSize: 20, color: Color(0xffa5a5a5));
-    TextStyle headerText = TextStyle(fontSize: 20, color: Colors.black);
-
     return Scaffold(
       body: Container(
         color: Color(0xffededed),
@@ -171,16 +120,16 @@ class _edit_user extends State<edit_user> {
                         onTap: (){
                           getPhotoFromGallery();
                         },
-                        child: _foodImage == null
+                        child: _file == null
                             ? Container(
                           padding: EdgeInsets.only(top: 10, bottom: 10),
                           child: Column(
                             children: <Widget>[
                               Container(
-                                child: Icon(
+                                child: _url == null ? Icon(
                                   Icons.camera_alt,
                                   size: 40,
-                                ),
+                                ):Image.network(_url),
                               ),
                               Container(
                                 child: Text(
@@ -193,7 +142,7 @@ class _edit_user extends State<edit_user> {
                         )
                             : Container(
                           height: 250,
-                          child: Image.file(_foodImage),
+                          child: Image.file(_file),
                         ),
                       ),
                       Container(
@@ -211,7 +160,7 @@ class _edit_user extends State<edit_user> {
                                     BorderRadius.all(Radius.circular(8))),
                                 height: 45,
                                 child: TextField(
-                                  controller: _foodName,
+                                  controller: _name,
                                   style: bigText,
                                   decoration: InputDecoration.collapsed(hintText: "เปลี่ยนชื่อของคุณ"),
                                 ),
@@ -222,7 +171,7 @@ class _edit_user extends State<edit_user> {
                       ),
                       GestureDetector(
                         onTap: (){
-                          saveMenu();
+                          saveUserData();
                         },
                         child: Container(
                           margin: EdgeInsets.only(top: 20,bottom: 20),
