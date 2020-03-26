@@ -36,6 +36,8 @@ class _user_page extends State<user_page> with TickerProviderStateMixin{
   List<Map<String, dynamic>> favorListMenu = [];
   bool isSignIn = false;
   String _url;
+  List<Map<String, dynamic>> myListMenu = [];
+  List<String> myListMenuImage = [];
 
   Future checkSignIn()async{
     FirebaseUser user = await _auth.currentUser();
@@ -71,6 +73,39 @@ class _user_page extends State<user_page> with TickerProviderStateMixin{
     }
   }
 
+  Future getMyMenu()async{
+    setState(() {
+      isLoaded = true;
+    });
+    final user = await _auth.currentUser();
+    List<Map<String, dynamic>> menu_tmp = [];
+    List<String> url_tmp = [];
+    await _db.collection('Menu').where('uid', isEqualTo: user.uid).getDocuments().then((docs){
+      docs.documents.forEach((d){
+        setState(() {
+          var superTmp = {};
+          superTmp = d.data;
+          superTmp['menu_id'] = d.documentID;
+          menu_tmp.add(superTmp);
+          url_tmp.add(d.documentID);
+        });
+      });
+    });
+    
+    setState(() {
+      myListMenu = menu_tmp;
+    });
+
+    for(int i=0; i<url_tmp.length; i++){
+      String tmp = await _storage.ref().child('Menu').child(url_tmp[i]).child('menupic.jpg').getDownloadURL();
+      myListMenuImage.add(tmp);
+    }
+
+    setState(() {
+      isLoaded = false;
+    });
+  }
+
   @override
   void initState() {
     // TODO: implement initState
@@ -86,6 +121,7 @@ class _user_page extends State<user_page> with TickerProviderStateMixin{
         //    getFavMenu();
         getUserData();
         getFavorId();
+        getMyMenu();
       }
     });
   }
@@ -290,8 +326,89 @@ class _user_page extends State<user_page> with TickerProviderStateMixin{
                       controller: _scrollController,
                       children: <Widget>[
                         Container(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                          child: myListMenu == null ? Container() : myListMenu.length > 0 ?
+                          ListView.builder(
+                            padding: EdgeInsets.all(20),
+                            itemCount: myListMenu == null ? 0 : myListMenuImage == null ? 0 : myListMenuImage.length < myListMenu.length ? 0 : myListMenu.length,
+                            itemBuilder: (BuildContext context, int index){
+                              return Container(
+                                margin: EdgeInsets.only(bottom: 15),
+                                child:  Row(
+                                  children: <Widget>[
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        border: Border.all(color: Colors.black),
+                                      ),
+                                      height: 120,
+                                      width: 160,
+                                      child: Image.network(
+                                        myListMenuImage[index],
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: Container(
+                                        padding: EdgeInsets.only(left: 15),
+                                        child: Column(
+                                          children: <Widget>[
+                                            Container(
+                                              alignment: Alignment.centerLeft,
+                                              child: Text(
+                                                myListMenu[index]['Name'],
+                                                style: TextStyle(
+                                                    color: Color(0xff914d1f),
+                                                    fontSize: 30),
+                                              ),
+                                            ),
+                                            Container(
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                MainAxisAlignment
+                                                    .spaceBetween,
+                                                children: <Widget>[
+                                                  Expanded(
+                                                    child: GestureDetector(
+                                                      onTap: (){
+                                                        Navigator.push(context, MaterialPageRoute(builder: (context){
+                                                          return howto_page(myListMenu[index]['menu_id']);
+                                                        }));
+                                                      },
+                                                      child: Container(
+                                                        alignment:
+                                                        Alignment.center,
+                                                        height: 40,
+                                                        color: Color(0xff914d1f),
+                                                        child: Text(
+                                                          "วิธีการทำ",
+                                                          style: TextStyle(
+                                                              color: Colors.white,
+                                                              fontSize: 20),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  Container(
+                                                    margin: EdgeInsets.only(
+                                                        left: 10),
+                                                    child: Icon(
+                                                      Icons.delete,
+                                                      size: 50,
+                                                      color: Colors.green,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ):
+                          ListView(
                             children: <Widget>[
                               GestureDetector(
                                 onTap: () {
@@ -397,76 +514,6 @@ class _user_page extends State<user_page> with TickerProviderStateMixin{
                                 ),
                               );
                             },
-
-//                            children: <Widget>[
-//                              Container(
-//                                child: Row(
-//                                  children: <Widget>[
-//                                    Container(
-//                                      decoration: BoxDecoration(
-//                                        border: Border.all(color: Colors.black),
-//                                      ),
-//                                      height: 120,
-//                                      width: 160,
-//                                      child: Image.asset(
-//                                        'assets/menu1.jpg',
-//                                        fit: BoxFit.cover,
-//                                      ),
-//                                    ),
-//                                    Expanded(
-//                                      child: Container(
-//                                        padding: EdgeInsets.only(left: 15),
-//                                        child: Column(
-//                                          children: <Widget>[
-//                                            Container(
-//                                              child: Text(
-//                                                'ผัดเต้าหู้มะเขือเทศ',
-//                                                style: TextStyle(
-//                                                    color: Color(0xff914d1f),
-//                                                    fontSize: 30),
-//                                              ),
-//                                            ),
-//                                            Container(
-//                                              child: Row(
-//                                                mainAxisAlignment:
-//                                                    MainAxisAlignment
-//                                                        .spaceBetween,
-//                                                children: <Widget>[
-//                                                  Expanded(
-//
-//                                                    child: Container(
-//                                                      alignment:
-//                                                          Alignment.center,
-//                                                      height: 40,
-//                                                      color: Color(0xff914d1f),
-//                                                      child: Text(
-//                                                        "วิธีการทำ",
-//                                                        style: TextStyle(
-//                                                            color: Colors.white,
-//                                                            fontSize: 20),
-//                                                      ),
-//                                                    ),
-//                                                  ),
-//                                                  Container(
-//                                                    margin: EdgeInsets.only(
-//                                                        left: 10),
-//                                                    child: Icon(
-//                                                      Icons.delete,
-//                                                      size: 50,
-//                                                      color: Colors.green,
-//                                                    ),
-//                                                  ),
-//                                                ],
-//                                              ),
-//                                            ),
-//                                          ],
-//                                        ),
-//                                      ),
-//                                    ),
-//                                  ],
-//                                ),
-//                              ),
-//                            ],
                           ),
                         ),
                       ],
