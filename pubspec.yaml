@@ -33,6 +33,7 @@ dependencies:
   platform_alert_dialog: ^1.0.0+2
   intl: ^0.16.1
   date_calc: ^0.1.0
+  firebase_messaging: ^6.0.13
 
 dev_dependencies:
   flutter_test:

@@ -4,55 +4,75 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:taluewapp/Pages/FridgePage.dart';
 import 'MainPage.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 class real_page extends StatefulWidget {
   @override
   _real_page createState() => _real_page();
 }
 
-final GoogleSignIn _googleSignIn = GoogleSignIn();
-final FirebaseAuth _auth = FirebaseAuth.instance;
-final _db = Firestore.instance;
-
-Future logInWithGoogle() async {
-  if(await _googleSignIn.isSignedIn() == false){
-    _googleSignIn.signOut();
-  }
-  final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
-  final GoogleSignInAuthentication googleSignInAuthentication = await googleUser.authentication;
-
-  final AuthCredential credential = GoogleAuthProvider.getCredential(
-      idToken: googleSignInAuthentication.idToken,
-      accessToken: googleSignInAuthentication.accessToken);
-
-  await _auth.signInWithCredential(credential);
-  FirebaseUser user = await _auth.currentUser();
-  if(await isMember()){
-
-  }else{
-    _db.collection('User').add({
-      'name': user.displayName == null ? '' : user.displayName,
-      'uid': user.uid == null ? '' : user.uid,
-      'display': user.photoUrl == null ? '' : user.photoUrl,
-      'email': user.email == null ? '' : user.email,
-      'phone': user.phoneNumber == null ? '' : user.phoneNumber
-    });
-  }
-}
-
-Future isMember()async{
-  FirebaseUser user = await _auth.currentUser();
-  bool isHas = false;
-  await _db.collection('User').where('uid', isEqualTo: user.uid).getDocuments().then((docs){
-    if(docs.documents.length > 0){
-      isHas = true;
-    }
-  });
-
-  return isHas;
-}
-
 class _real_page extends State<real_page> {
+  FirebaseMessaging _firebaseMessaging;
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final _db = Firestore.instance;
+
+  Future logInWithGoogle() async {
+    String meessage_token = await _firebaseMessaging.getToken();
+    if(await _googleSignIn.isSignedIn() == false){
+      _googleSignIn.signOut();
+    }
+    final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
+    final GoogleSignInAuthentication googleSignInAuthentication = await googleUser.authentication;
+
+    final AuthCredential credential = GoogleAuthProvider.getCredential(
+        idToken: googleSignInAuthentication.idToken,
+        accessToken: googleSignInAuthentication.accessToken);
+
+    await _auth.signInWithCredential(credential);
+    FirebaseUser user = await _auth.currentUser();
+    var userData = await isMember();
+    if(userData['isHas']){
+      _db.collection('User').document(userData['docId']).updateData({
+        'message_token': meessage_token
+      });
+    }else{
+      _db.collection('User').add({
+        'name': user.displayName == null ? '' : user.displayName,
+        'uid': user.uid == null ? '' : user.uid,
+        'display': user.photoUrl == null ? '' : user.photoUrl,
+        'email': user.email == null ? '' : user.email,
+        'phone': user.phoneNumber == null ? '' : user.phoneNumber,
+        'message_token': meessage_token
+      });
+    }
+  }
+
+  Future<Map<String, dynamic>> isMember()async{
+    FirebaseUser user = await _auth.currentUser();
+    bool isHas = false;
+    String docId = '';
+    await _db.collection('User').where('uid', isEqualTo: user.uid).getDocuments().then((docs){
+      if(docs.documents.length > 0){
+        isHas = true;
+        docId = docs.documents[0].documentID;
+      }
+    });
+
+    return {
+      'isHas': isHas,
+      'docId': docId
+    };
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _firebaseMessaging = FirebaseMessaging();
+    _firebaseMessaging.requestNotificationPermissions();
+  }
+
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
