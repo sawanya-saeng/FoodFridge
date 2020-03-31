@@ -123,7 +123,7 @@ class _expire_page extends State<expire_page> {
                       padding: EdgeInsets.zero,
                       itemCount: ingres == null ? 0 : ingres.length,
                       itemBuilder: (BuildContext context, int index) {
-                        if(calculateDate(format.format(ingres[index]['date'].toDate())) > 0){
+                        if(ingres[index]['date'] == null || calculateDate(format.format(ingres[index]['date'].toDate())) > 0){
                           return Container();
                         }
                         return Container(

@@ -30,7 +30,9 @@ class _real_page extends State<real_page> {
         accessToken: googleSignInAuthentication.accessToken);
 
     await _auth.signInWithCredential(credential);
+
     FirebaseUser user = await _auth.currentUser();
+
     var userData = await isMember();
     if(userData['isHas']){
       _db.collection('User').document(userData['docId']).updateData({

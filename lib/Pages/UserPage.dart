@@ -133,7 +133,7 @@ class _user_page extends State<user_page> with TickerProviderStateMixin{
       isLoaded = true;
     });
     String urlTmp;
-    urlTmp = await _storage.ref().child('User').child(userTmp.uid).getDownloadURL().catchError((e){
+    urlTmp = await _storage.ref().child('User').child(userTmp.uid).child('profile').getDownloadURL().catchError((e){
       urlTmp = null;
     });
     setState(() {
@@ -144,8 +144,11 @@ class _user_page extends State<user_page> with TickerProviderStateMixin{
       setState(() {
         this.user.name = docs.documents[0].data['name'];
         this.user.image = docs.documents[0].data['display'];
-        isLoaded = false;
       });
+    });
+
+    setState(() {
+      isLoaded = false;
     });
   }
 
@@ -231,7 +234,7 @@ class _user_page extends State<user_page> with TickerProviderStateMixin{
                 width: 100,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  image: DecorationImage(image: this._url == null ? this.user.image == null ? AssetImage('assets/user.png') :NetworkImage(this.user.image) :  AssetImage('assets/user.png'),fit: BoxFit.cover)
+                  image: DecorationImage(image: this._url == null ? this.user.image == null ? AssetImage('assets/user.png') :NetworkImage(this.user.image) :  NetworkImage(_url),fit: BoxFit.cover)
                 ),
               ),
               Container(
