@@ -5,23 +5,29 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:taluewapp/Pages/MainPage.dart';
+import 'package:taluewapp/Services/loadingScreenService.dart';
+import 'package:transparent_image/transparent_image.dart';
 
 class howto_page extends StatefulWidget {
   String menu_id;
+
   howto_page(this.menu_id);
+
   @override
   _howto_page createState() => _howto_page(this.menu_id);
 }
 
-class _howto_page extends State<howto_page> {
+class _howto_page extends State<howto_page> with TickerProviderStateMixin{
   String menu_id;
+
   _howto_page(this.menu_id);
+  bool isLoading = true;
   int _currentPage = 0;
   final _db = Firestore.instance;
   final _storage = FirebaseStorage.instance;
   final _auth = FirebaseAuth.instance;
   PageController _scrollController;
-  final format = DateFormat('yyyy-MM-dd');
+  final format = DateFormat("yyyy-MM-dd hh:mm:ss");
   bool isFavor;
   Map<String, dynamic> menuDetail;
   List<dynamic> mainIngredients;
@@ -32,45 +38,71 @@ class _howto_page extends State<howto_page> {
   List<dynamic> calculatedItems = [];
   String mainImage;
   bool isSignIn = false;
+  Map<String, dynamic> userData;
+  String userUrl;
+  TextEditingController _commentText = TextEditingController();
+  LoadingProgress _loadingProgress;
+  AnimationController _animationController;
+  List<dynamic> commentData;
+  List<dynamic> commentUserData = [];
 
-  Future checkSignIn()async{
+  Future checkSignIn() async {
     FirebaseUser user = await _auth.currentUser();
-    if(user == null){
+    if (user == null) {
       setState(() {
         isSignIn = false;
       });
-    }else{
+    } else {
       setState(() {
         isSignIn = true;
       });
     }
   }
 
-  double grumToUnit(num, unit){
+  Future getUserData() async {
+    FirebaseUser user = await _auth.currentUser();
+    String tmp;
+    tmp = await _storage.ref().child('User').child(user.uid).child('profile').getDownloadURL().catchError((e){
+      tmp = null;
+    });
+
+    await _db.collection('User').where('uid', isEqualTo: user.uid).getDocuments().then((docs){
+      setState(() {
+        userData = docs.documents[0].data;
+        userUrl = tmp;
+      });
+    });
+
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+  double grumToUnit(num, unit) {
     double base = 1;
 
-    if(unit == 'ฟอง'){
+    if (unit == 'ฟอง') {
       base = 50;
     }
 
-    if(unit == 'กิโล'){
+    if (unit == 'กิโล') {
       base = 100;
     }
 
-    if(unit == 'ช้อนโต๊ะ'){
+    if (unit == 'ช้อนโต๊ะ') {
       base = 12.5;
     }
 
-    return num/base;
+    return num / base;
   }
 
-  bool checkMainIngredient(){
+  bool checkMainIngredient() {
     return true;
   }
 
-  double getNumFromId(String id){
-    for(int i=0; i<fridgeIngredients.length; i++){
-      if(id == fridgeIngredients[i]['id']){
+  double getNumFromId(String id) {
+    for (int i = 0; i < fridgeIngredients.length; i++) {
+      if (id == fridgeIngredients[i]['id']) {
         return double.parse(fridgeIngredients[i]['num'].toString());
       }
     }
@@ -78,66 +110,75 @@ class _howto_page extends State<howto_page> {
     return 0;
   }
 
-  Future saveToFavor()async{
+  Future saveToFavor() async {
     FirebaseUser user = await _auth.currentUser();
-    await _db.collection('Favor').add({
-      'uid': user.uid,
-      'menu': this.menu_id,
-      'date': new DateTime.now()
-    });
+    await _db.collection('Favor').add(
+        {'uid': user.uid, 'menu': this.menu_id, 'date': new DateTime.now()});
   }
 
-  Future deleteFavor()async{
+  Future deleteFavor() async {
     FirebaseUser user = await _auth.currentUser();
-    await _db.collection('Favor').where('uid', isEqualTo: user.uid).where('menu', isEqualTo: this.menu_id).getDocuments().then((docs){
-      docs.documents.forEach((d){
+    await _db
+        .collection('Favor')
+        .where('uid', isEqualTo: user.uid)
+        .where('menu', isEqualTo: this.menu_id)
+        .getDocuments()
+        .then((docs) {
+      docs.documents.forEach((d) {
         _db.collection('Favor').document(d.documentID).delete();
       });
     });
   }
 
-  Future loadFavor()async{
+  Future loadFavor() async {
     FirebaseUser user = await _auth.currentUser();
-    await _db.collection('Favor').where('uid', isEqualTo: user.uid).getDocuments().then((docs){
-      docs.documents.forEach((d){
-        if(this.menu_id == d.data['menu']){
-          print('${this.menu_id} === ${d.data["menu"]}');
+    await _db
+        .collection('Favor')
+        .where('uid', isEqualTo: user.uid)
+        .getDocuments()
+        .then((docs) {
+      docs.documents.forEach((d) {
+        if (this.menu_id == d.data['menu']) {
           setState(() {
             isFavor = true;
           });
         }
       });
     });
+
+    setState(() {
+      isLoading = false;
+    });
   }
 
-  Future deleteIngredientFromFridge()async {
+  Future deleteIngredientFromFridge() async {
     List<Map<String, String>> toDelete = [];
     List<Map<String, String>> toUpdate = [];
     if (checkMainIngredient()) {
-      for(int i=0; i<allIngredients.length; i++){
-        var ingredienctCost = toGrum(double.parse(allIngredients[i]['num'].toString()), allIngredients[i]['unit']);
-        print(allIngredients[i]['name']);
-        print('ใช้');
-        print(ingredienctCost);
+      for (int i = 0; i < allIngredients.length; i++) {
+        var ingredienctCost = toGrum(
+            double.parse(allIngredients[i]['num'].toString()),
+            allIngredients[i]['unit']);
 
-        for(int j=0; j<calculatedItems.length; j++){
-          if(calculatedItems[j]['name'] == allIngredients[i]['name']){
-            for(int k=0; k<calculatedItems[j]['id'].length; k++){
-              var targetNum = toGrum(getNumFromId(calculatedItems[j]['id'][k]), calculatedItems[j]['unit'][k]);
-              print('${calculatedItems[j]['id'][k]} -- ${calculatedItems[j]['name']}');
-              print('${ingredienctCost} - ${targetNum}');
+        for (int j = 0; j < calculatedItems.length; j++) {
+          if (calculatedItems[j]['name'] == allIngredients[i]['name']) {
+            for (int k = 0; k < calculatedItems[j]['id'].length; k++) {
+              var targetNum = toGrum(getNumFromId(calculatedItems[j]['id'][k]),
+                  calculatedItems[j]['unit'][k]);
               ingredienctCost -= targetNum;
 
-              if(ingredienctCost < 0){
+              if (ingredienctCost < 0) {
                 toUpdate.add({
                   'id': calculatedItems[j]['id'][k],
-                  'num': grumToUnit((ingredienctCost).abs(), calculatedItems[j]['unit'][k]).toString(),
+                  'num': grumToUnit((ingredienctCost).abs(),
+                          calculatedItems[j]['unit'][k])
+                      .toString(),
                   'name': calculatedItems[j]['name'],
                   'unit': calculatedItems[j]['unit'][k]
                 });
 
                 k = calculatedItems[j]['id'].length;
-              }else{
+              } else {
                 toDelete.add({
                   'id': calculatedItems[j]['id'][k],
                   'name': calculatedItems[j]['name']
@@ -149,37 +190,45 @@ class _howto_page extends State<howto_page> {
       }
     }
 
-    print(toDelete);
-    print(toUpdate);
-
-    for(int i=0; i<toDelete.length; i++){
+    for (int i = 0; i < toDelete.length; i++) {
       await _db.collection('Fridge').document(toDelete[i]['id']).delete();
     }
 
-    for(int i=0; i<toUpdate.length; i++){
-      await _db.collection('Fridge').document(toUpdate[i]['id']).updateData({
-        'num': toUpdate[i]['num'].toString()
-      });
+    for (int i = 0; i < toUpdate.length; i++) {
+      await _db
+          .collection('Fridge')
+          .document(toUpdate[i]['id'])
+          .updateData({'num': toUpdate[i]['num'].toString()});
     }
-      Navigator.of(context).popUntil((route) => route.isFirst);
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context){
-        return main_page(0);
-      }));
+    Navigator.of(context).popUntil((route) => route.isFirst);
+    Navigator.pushReplacement(context,
+        MaterialPageRoute(builder: (BuildContext context) {
+      return main_page(0);
+    }));
   }
 
-  Future getImage()async{
+  Future getImage() async {
     String tmp;
-    tmp = await _storage.ref().child('Menu').child(this.menu_id).child('menupic.jpg').getDownloadURL();
+    tmp = await _storage
+        .ref()
+        .child('Menu')
+        .child(this.menu_id)
+        .child('menupic.jpg')
+        .getDownloadURL();
     setState(() {
       mainImage = tmp;
     });
   }
 
-  Future getIngredientFromFridge() async{
+  Future getIngredientFromFridge() async {
     FirebaseUser user = await _auth.currentUser();
     List<dynamic> tmp = List<dynamic>();
-    await _db.collection('Fridge').where('uid', isEqualTo: user.uid).getDocuments().then((docs){
-      docs.documents.forEach((data){
+    await _db
+        .collection('Fridge')
+        .where('uid', isEqualTo: user.uid)
+        .getDocuments()
+        .then((docs) {
+      docs.documents.forEach((data) {
         var tmpMap = data.data;
         tmpMap['id'] = data.documentID;
         tmp.add(tmpMap);
@@ -190,44 +239,52 @@ class _howto_page extends State<howto_page> {
       fridgeIngredients = tmp;
       items.clear();
       calculatedItems.clear();
-      for(int i=0; i<fridgeIngredients.length; i++){
+      for (int i = 0; i < fridgeIngredients.length; i++) {
         bool isHas = checkMember(fridgeIngredients[i]['name'])['isHas'];
         int index = checkMember(fridgeIngredients[i]['name'])['index'];
-        if(isHas){
+        if (isHas) {
           items[index]['id'].add(fridgeIngredients[i]['id']);
           items[index]['num'].add(fridgeIngredients[i]['num']);
-          items[index]['expire'].add(fridgeIngredients[i]['date'] == null ? 'ไม่มีกำหนด':'${calculateDate(format.format(fridgeIngredients[i]['date'].toDate()))} วัน');
+          items[index]['expire'].add(fridgeIngredients[i]['date'] == null
+              ? 'ไม่มีกำหนด'
+              : '${calculateDate(format.format(fridgeIngredients[i]['date'].toDate()))} วัน');
           items[index]['unit'].add(fridgeIngredients[i]['unit']);
           items[index]['date'].add(fridgeIngredients[i]['date']);
-        }else{
+        } else {
           items.add({
             'id': [fridgeIngredients[i]['id']],
             'name': fridgeIngredients[i]['name'],
             'num': [fridgeIngredients[i]['num']],
-            'expire': [fridgeIngredients[i]['date'] == null ? 'ไม่มีกำหนด':'${calculateDate(format.format(fridgeIngredients[i]['date'].toDate()))} วัน'],
+            'expire': [
+              fridgeIngredients[i]['date'] == null
+                  ? 'ไม่มีกำหนด'
+                  : '${calculateDate(format.format(fridgeIngredients[i]['date'].toDate()))} วัน'
+            ],
             'unit': [fridgeIngredients[i]['unit']],
             'date': [fridgeIngredients[i]['date']]
           });
         }
       }
-      for(int i=0; i<items.length; i++){
-        if(items[i]['num'].length > 1){
+      for (int i = 0; i < items.length; i++) {
+        if (items[i]['num'].length > 1) {
           double weightSum = 0;
           Timestamp latestDate;
           int max = 0;
-          for(int j=0;j<items[i]['num'].length;j++){
+          for (int j = 0; j < items[i]['num'].length; j++) {
             double otherWeight = double.parse(items[i]['num'][j].toString());
-            if(items[i]['unit'][0] != items[i]['unit'][j]){
-              otherWeight = toGrum(double.parse(items[i]['num'][j].toString()), items[i]['unit'][0]);
+            if (items[i]['unit'][0] != items[i]['unit'][j]) {
+              otherWeight = toGrum(double.parse(items[i]['num'][j].toString()),
+                  items[i]['unit'][0]);
             }
             weightSum += otherWeight;
           }
 
-          for(int j=0;j<items[i]['date'].length;j++){
-            if(items[i]['date'][j] == null){
+          for (int j = 0; j < items[i]['date'].length; j++) {
+            if (items[i]['date'][j] == null) {
               continue;
             }
-            if(max <= calculateDate(format.format(items[i]['date'][j].toDate()))){
+            if (max <=
+                calculateDate(format.format(items[i]['date'][j].toDate()))) {
               max = calculateDate(format.format(items[i]['date'][j].toDate()));
               latestDate = items[i]['date'][j];
             }
@@ -238,126 +295,157 @@ class _howto_page extends State<howto_page> {
         }
         calculatedItems.add(items[i]);
       }
+
+      setState(() {
+        isLoading = false;
+      });
     });
   }
 
-  calculateDate(String date1){
+  calculateDate(String date1) {
     List<String> dateList = date1.split('-');
 
-    if(DateTime.now().year > int.parse(dateList[0])){
+    if (DateTime.now().year > int.parse(dateList[0])) {
       return 0;
     }
 
-    if(DateTime.now().month > int.parse(dateList[1]) && DateTime.now().year == int.parse(dateList[0])){
+    if (DateTime.now().month > int.parse(dateList[1]) &&
+        DateTime.now().year == int.parse(dateList[0])) {
       return 0;
     }
 
-    if(DateTime.now().day > int.parse(dateList[2]) && DateTime.now().month == int.parse(dateList[1]) && DateTime.now().year == int.parse(dateList[0])){
+    if (DateTime.now().day > int.parse(dateList[2]) &&
+        DateTime.now().month == int.parse(dateList[1]) &&
+        DateTime.now().year == int.parse(dateList[0])) {
       return 0;
     }
 
     DateCalc date = DateCalc.fromDateTime(new DateTime.now());
-    int diff = date.differenceValue(date: DateTime(int.parse(dateList[0]), int.parse(dateList[1]), int.parse(dateList[2])+1), type: DateType.day);
+    int diff = date.differenceValue(
+        date: DateTime(int.parse(dateList[0]), int.parse(dateList[1]),
+            int.parse(dateList[2]) + 1),
+        type: DateType.day);
 
     return diff;
   }
 
-  Map<String, dynamic> checkMember(String value){
-    for(int i=0; i<items.length; i++){
-      if(items[i]['name'] == value){
-        return {
-          'isHas': true,
-          'index': i
-        };
+  Map<String, dynamic> checkMember(String value) {
+    for (int i = 0; i < items.length; i++) {
+      if (items[i]['name'] == value) {
+        return {'isHas': true, 'index': i};
       }
     }
-    return {
-      'isHas': false,
-      'index': null
-    };
+    return {'isHas': false, 'index': null};
   }
 
   double toGrum(double num, String unit) {
-    double base=1;
+    double base = 1;
 
-    if(unit == "กิโล"){
+    if (unit == "กิโล") {
       base = 1000;
     }
-    if(unit == "ฟอง"){
+    if (unit == "ฟอง") {
       base = 50;
     }
-    if(unit == "ช้อนโต๊"){
+    if (unit == "ช้อนโต๊") {
       base = 12.5;
     }
 
-    return num*base;
+    return num * base;
   }
 
-  Map<String, dynamic> checkIngredients(list, item){
+  Future getCommentData()async{
+    await _db.collection('Menu').document(this.menu_id).get().then((d){
+      setState(() {
+        commentData = d.data['comments'] == null ? [] : d.data['comments'];
+      });
+    });
+  }
+
+  Future getCommentUser()async{
+    for(int i=0; i<commentData.length; i++){
+      await _db.collection('User').where('uid', isEqualTo: commentData[i]['uid']).getDocuments().then((d)async{
+        String url;
+//        url = await _storage.ref().child('User').child(commentData[i]['uid']).child('profile').getDownloadURL().catchError((e){
+//          url = d.documents[0]['display'];
+//        });
+
+        url = d.documents[0]['display'];
+
+        setState(() {
+          commentUserData.add({
+            'display': url
+          });
+        });
+      });
+    }
+
+  }
+
+  Map<String, dynamic> checkIngredients(list, item) {
     double net1 = 0;
     double net2 = 0;
-    for(int i=0; i<list.length; i++){
-      if(item['name'] == list[i]['name']){
+    for (int i = 0; i < list.length; i++) {
+      if (item['name'] == list[i]['name']) {
         net1 = toGrum(double.parse(list[i]['num'].toString()), list[i]['unit']);
         net2 = toGrum(double.parse(item['num'].toString()), item['unit']);
 
-        if(net1 >= net2){
-          return {
-            "isHas": true,
-            "num": '0'
-          };
-        }else{
-          return {
-            "isHas": false,
-            "num": list[i]['num']
-          };
+        if (net1 >= net2) {
+          return {"isHas": true, "num": '0'};
+        } else {
+          return {"isHas": false, "num": list[i]['num']};
         }
       }
     }
 
-    return {
-      "isHas": false,
-      "num": '0'
-    };
+    return {"isHas": false, "num": '0'};
   }
 
-  Future getMenuDetail()async{
-    await _db.collection('Menu').document(this.menu_id).get().then((data){
+  Future getMenuDetail() async {
+    await _db.collection('Menu').document(this.menu_id).get().then((data) {
       setState(() {
         List<dynamic> tmpMap = List<dynamic>();
         menuDetail = data.data;
         tmpMap = data.data['Ingredients']['Main'];
-        for(int i=0; i<tmpMap.length; i++){
+        for (int i = 0; i < tmpMap.length; i++) {
           tmpMap[i]['type'] = 'main';
-          tmpMap[i]['value'] = new TextEditingController(text: tmpMap[i]['num'].toString());
+          tmpMap[i]['value'] =
+              new TextEditingController(text: tmpMap[i]['num'].toString());
         }
         mainIngredients = tmpMap;
         tmpMap = data.data['Ingredients']['Optional'];
-        for(int i=0; i<tmpMap.length; i++){
+        for (int i = 0; i < tmpMap.length; i++) {
           tmpMap[i]['type'] = 'optional';
-          tmpMap[i]['value'] = new TextEditingController(text: tmpMap[i]['num'].toString());
+          tmpMap[i]['value'] =
+              new TextEditingController(text: tmpMap[i]['num'].toString());
         }
         optionIngredients = tmpMap;
-        allIngredients = mainIngredients+optionIngredients;
+        allIngredients = mainIngredients + optionIngredients;
       });
     });
   }
 
   @override
   void initState() {
+    isLoading = true;
+    _animationController = new AnimationController(vsync: this, duration: Duration(seconds: 10));
+    _loadingProgress = new LoadingProgress(_animationController);
     // TODO: implement initState
     super.initState();
     _scrollController = PageController(initialPage: 0);
     isFavor = false;
-    checkSignIn().then((e){
+    checkSignIn().then((e) {
+      getCommentData().then((e){
+        getCommentUser();
+      });
       getImage();
       getMenuDetail();
-      if(isSignIn){
+      if (isSignIn) {
+        getUserData();
         getIngredientFromFridge();
         loadFavor();
       }
     });
-
   }
 
   Future deleteIngredientManual() async {
@@ -377,7 +465,8 @@ class _howto_page extends State<howto_page> {
                   Expanded(
                     child: Container(
                       child: ListView.builder(
-                        itemCount: allIngredients == null ? 0 : allIngredients.length,
+                        itemCount:
+                            allIngredients == null ? 0 : allIngredients.length,
                         itemBuilder: (BuildContext context, int index) {
                           return Container(
                             margin: EdgeInsets.only(bottom: 15),
@@ -394,15 +483,20 @@ class _howto_page extends State<howto_page> {
                                   flex: 2,
                                   child: Container(
                                     child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       children: <Widget>[
                                         GestureDetector(
                                           onTap: () {
                                             setState(() {
-                                              int tmp = int.parse(allIngredients[index]["value"].text);
+                                              int tmp = int.parse(
+                                                  allIngredients[index]["value"]
+                                                      .text);
                                               tmp--;
-                                              allIngredients[index]['value'].text = tmp.toString();
-                                              allIngredients[index]["num"] = tmp.toString();
+                                              allIngredients[index]['value']
+                                                  .text = tmp.toString();
+                                              allIngredients[index]["num"] =
+                                                  tmp.toString();
                                             });
                                           },
                                           child: Container(
@@ -431,10 +525,14 @@ class _howto_page extends State<howto_page> {
                                         GestureDetector(
                                           onTap: () {
                                             setState(() {
-                                              int tmp = int.parse(allIngredients[index]["value"].text);
+                                              int tmp = int.parse(
+                                                  allIngredients[index]["value"]
+                                                      .text);
                                               tmp++;
-                                              allIngredients[index]['value'].text = tmp.toString();
-                                              allIngredients[index]["num"] = tmp.toString();
+                                              allIngredients[index]['value']
+                                                  .text = tmp.toString();
+                                              allIngredients[index]["num"] =
+                                                  tmp.toString();
                                             });
                                           },
                                           child: Container(
@@ -473,11 +571,10 @@ class _howto_page extends State<howto_page> {
                             child: Icon(Icons.not_interested),
                           ),
                         ),
-
-                          GestureDetector(
-                            onTap: () {
-                              deleteIngredientFromFridge();
-                            },
+                        GestureDetector(
+                          onTap: () {
+                            deleteIngredientFromFridge();
+                          },
                           child: Container(
                             child: Icon(Icons.check_circle),
                           ),
@@ -509,7 +606,8 @@ class _howto_page extends State<howto_page> {
                   Expanded(
                     child: Container(
                       child: ListView.builder(
-                        itemCount: allIngredients == null ? 0 : allIngredients.length,
+                        itemCount:
+                            allIngredients == null ? 0 : allIngredients.length,
                         itemBuilder: (BuildContext context, int index) {
                           return Container(
                             margin: EdgeInsets.only(bottom: 15),
@@ -518,7 +616,8 @@ class _howto_page extends State<howto_page> {
                                 Expanded(
                                   flex: 1,
                                   child: Container(
-                                    child: Text("${index + 1}. ${allIngredients[index]["name"]}"),
+                                    child: Text(
+                                        "${index + 1}. ${allIngredients[index]["name"]}"),
                                   ),
                                 ),
                                 Expanded(
@@ -534,17 +633,33 @@ class _howto_page extends State<howto_page> {
                                                 border: Border.all(
                                                     color: Colors.grey)),
                                             alignment: Alignment.center,
-                                            child: checkIngredients(fridgeIngredients, allIngredients[index])['isHas'] ? TextField(
-                                              enabled: false,
-                                              textAlign: TextAlign.center,
-                                              decoration: InputDecoration.collapsed(hintText: null), controller: allIngredients[index]["value"],):
-                                                TextField(
-                                                  textAlign: TextAlign.center,
-                                                  decoration: InputDecoration.collapsed(hintText: null),
-                                                  controller: new TextEditingController(text: '${checkIngredients(fridgeIngredients, allIngredients[index])['num']}'),
-                                                  style: TextStyle(color: Colors.redAccent),
-                                                )
-                                        ),
+                                            child: checkIngredients(
+                                                        fridgeIngredients,
+                                                        allIngredients[index])[
+                                                    'isHas']
+                                                ? TextField(
+                                                    enabled: false,
+                                                    textAlign: TextAlign.center,
+                                                    decoration: InputDecoration
+                                                        .collapsed(
+                                                            hintText: null),
+                                                    controller:
+                                                        allIngredients[index]
+                                                            ["value"],
+                                                  )
+                                                : TextField(
+                                                    textAlign: TextAlign.center,
+                                                    decoration: InputDecoration
+                                                        .collapsed(
+                                                            hintText: null),
+                                                    controller:
+                                                        new TextEditingController(
+                                                            text:
+                                                                '${checkIngredients(fridgeIngredients, allIngredients[index])['num']}'),
+                                                    style: TextStyle(
+                                                        color:
+                                                            Colors.redAccent),
+                                                  )),
                                         Container(
                                           width: 40,
                                           margin: EdgeInsets.only(left: 15),
@@ -592,10 +707,41 @@ class _howto_page extends State<howto_page> {
         });
   }
 
+  Future uploadComment()async{
+    setState(() {
+      isLoading = true;
+    });
+    FirebaseUser user = await _auth.currentUser();
+    String name = user.displayName;
+    await _db.collection('User').where('uid', isEqualTo: user.uid).getDocuments().then((docs){
+      name = docs.documents[0].data['name'];
+    });
+    String commentText = _commentText.text;
+    List<dynamic> tmp = new List<dynamic>.from(commentData);
+    _commentText.text = "";
+    tmp.add({
+      'name': name,
+      'text': commentText,
+      'uid': user.uid,
+      'updated_at': new DateFormat('yyyy-MM-dd hh:mm:ss').format(new DateTime.now())
+    });
+    await _db.collection('Menu').document(this.menu_id).updateData({
+      'comments': tmp
+    });
+
+    await getCommentData();
+    await getCommentUser();
+
+    setState(() {
+      isLoading = false;
+      _currentPage = 2;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     double _safeTop = MediaQuery.of(context).padding.top;
-    return Scaffold(
+    return isLoading ? _loadingProgress.getWidget(context) : Scaffold(
       //Here
       resizeToAvoidBottomPadding: false,
       //
@@ -642,13 +788,13 @@ class _howto_page extends State<howto_page> {
                       ),
                       GestureDetector(
                         onTap: () {
-                          if(isSignIn){
+                          if (isSignIn) {
                             setState(() {
                               isFavor = !isFavor;
                             });
-                            if(isFavor){
+                            if (isFavor) {
                               saveToFavor();
-                            }else{
+                            } else {
                               deleteFavor();
                             }
                           }
@@ -657,15 +803,13 @@ class _howto_page extends State<howto_page> {
                           child: Icon(
                             isFavor ? Icons.star : Icons.star_border,
                             color: Colors.yellow,
-                            size:40,
+                            size: 40,
                           ),
                         ),
                       ),
                     ],
                   ),
                 )
-
-
               ],
             ),
             Container(
@@ -678,10 +822,12 @@ class _howto_page extends State<howto_page> {
                   Container(
                     alignment: Alignment.center,
                     height: 180,
-                    child: mainImage == null ? CircularProgressIndicator() : Image.network(mainImage),
+                    child: mainImage == null
+                        ? CircularProgressIndicator()
+                        : Image.network(mainImage),
                   ),
                   Container(
-                    child: Text(menuDetail == null ? '':menuDetail['Name'],
+                    child: Text(menuDetail == null ? '' : menuDetail['Name'],
                         style: TextStyle(color: Colors.black, fontSize: 25)),
                   ),
                 ],
@@ -806,7 +952,8 @@ class _howto_page extends State<howto_page> {
                                 children: <Widget>[
                                   Expanded(
                                     child: Container(
-                                      padding: EdgeInsets.only(left: 35, top: 25, right: 35),
+                                      padding: EdgeInsets.only(
+                                          left: 35, top: 25, right: 35),
                                       child: ListView(
                                         padding: EdgeInsets.zero,
                                         children: <Widget>[
@@ -817,32 +964,49 @@ class _howto_page extends State<howto_page> {
                                                 child: Text(
                                                   'Main',
                                                   style: TextStyle(
-                                                    color: Colors.black, fontSize: 23),
+                                                      color: Colors.black,
+                                                      fontSize: 23),
                                                 ),
                                               ),
                                               Container(
-                                                margin: EdgeInsets.only(bottom: 15),
+                                                margin:
+                                                    EdgeInsets.only(bottom: 15),
                                                 child: Column(
-                                                  children: List.generate(mainIngredients == null ? 0 : mainIngredients.length, (int index){
+                                                  children: List.generate(
+                                                      mainIngredients == null
+                                                          ? 0
+                                                          : mainIngredients
+                                                              .length,
+                                                      (int index) {
                                                     return Row(
-                                                      mainAxisAlignment: MainAxisAlignment.start,
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .start,
                                                       children: <Widget>[
                                                         Container(
                                                           width: 200,
-                                                          padding: EdgeInsets.only(
-                                                              right: 85),
+                                                          padding:
+                                                              EdgeInsets.only(
+                                                                  right: 85),
                                                           child: Text(
-                                                              mainIngredients[index]['name'],style: TextStyle(
-                                                              color: Colors.black, fontSize: 17),
+                                                            mainIngredients[
+                                                                index]['name'],
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .black,
+                                                                fontSize: 17),
                                                           ),
                                                         ),
                                                         Container(
                                                           width: 75,
-                                                          alignment: Alignment.centerRight,
+                                                          alignment: Alignment
+                                                              .centerRight,
                                                           child: Text(
-                                                              '${mainIngredients[index]['num']
-                                                                  .toString()} ${mainIngredients[index]['unit']}',style: TextStyle(
-                                                              color: Colors.black, fontSize: 17),
+                                                            '${mainIngredients[index]['num'].toString()} ${mainIngredients[index]['unit']}',
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .black,
+                                                                fontSize: 17),
                                                           ),
                                                         ),
                                                       ],
@@ -852,35 +1016,55 @@ class _howto_page extends State<howto_page> {
                                               ),
                                               Container(
                                                 alignment: Alignment.centerLeft,
-                                                child: Text('Optional' ,
+                                                child: Text(
+                                                  'Optional',
                                                   style: TextStyle(
-                                                    color: Colors.black, fontSize: 23),
+                                                      color: Colors.black,
+                                                      fontSize: 23),
                                                 ),
                                               ),
                                               Container(
                                                 child: Column(
-                                                  children: List.generate(optionIngredients == null ? 0 : optionIngredients.length, (int index){
+                                                  children: List.generate(
+                                                      optionIngredients == null
+                                                          ? 0
+                                                          : optionIngredients
+                                                              .length,
+                                                      (int index) {
                                                     return Row(
-                                                      mainAxisAlignment: MainAxisAlignment
-                                                          .start,
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .start,
                                                       children: <Widget>[
                                                         Container(
                                                           width: 200,
-                                                          padding: EdgeInsets.only(
-                                                              right: 85),
+                                                          padding:
+                                                              EdgeInsets.only(
+                                                                  right: 85),
                                                           child: Text(
-                                                            optionIngredients[index] == '-' ? '' :optionIngredients[index]['name'],
+                                                            optionIngredients[
+                                                                        index] ==
+                                                                    '-'
+                                                                ? ''
+                                                                : optionIngredients[
+                                                                        index]
+                                                                    ['name'],
                                                             style: TextStyle(
-                                                              color: Colors.black, fontSize: 17),
+                                                                color: Colors
+                                                                    .black,
+                                                                fontSize: 17),
                                                           ),
                                                         ),
                                                         Container(
                                                           width: 75,
-                                                          alignment: Alignment.centerRight,
+                                                          alignment: Alignment
+                                                              .centerRight,
                                                           child: Text(
-                                                            '${optionIngredients[index] == '-'?'':optionIngredients[index]['num']
-                                                                .toString()} ${optionIngredients[index]['unit']}',style: TextStyle(
-                                                              color: Colors.black, fontSize: 17),
+                                                            '${optionIngredients[index] == '-' ? '' : optionIngredients[index]['num'].toString()} ${optionIngredients[index]['unit']}',
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .black,
+                                                                fontSize: 17),
                                                           ),
                                                         ),
                                                       ],
@@ -890,35 +1074,48 @@ class _howto_page extends State<howto_page> {
                                               ),
                                               Container(
                                                 alignment: Alignment.centerLeft,
-                                                child: Text('' ,
+                                                child: Text(
+                                                  '',
                                                   style: TextStyle(
-                                                      color: Colors.black, fontSize: 23),
+                                                      color: Colors.black,
+                                                      fontSize: 23),
                                                 ),
                                               ),
                                               Container(
                                                 alignment: Alignment.centerLeft,
-                                                child: Text('Seasoning' ,
+                                                child: Text(
+                                                  'Seasoning',
                                                   style: TextStyle(
-                                                      color: Colors.black, fontSize: 23),
+                                                      color: Colors.black,
+                                                      fontSize: 23),
                                                 ),
                                               ),
                                               Container(
                                                 child: Column(
-                                                  children: List.generate(menuDetail == null ? 0 : menuDetail['Seasoning'].length, (int index){
+                                                  children: List.generate(
+                                                      menuDetail == null
+                                                          ? 0
+                                                          : menuDetail[
+                                                                  'Seasoning']
+                                                              .length,
+                                                      (int index) {
                                                     return Row(
-                                                      mainAxisAlignment: MainAxisAlignment
-                                                          .start,
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .start,
                                                       children: <Widget>[
                                                         Container(
-                                                          padding: EdgeInsets.only(
-                                                              right: 1),
+                                                          padding:
+                                                              EdgeInsets.only(
+                                                                  right: 1),
                                                           child: Text(
-                                                            "${index+1}. ${menuDetail['Seasoning'][index]}",
+                                                            "${index + 1}. ${menuDetail['Seasoning'][index]}",
                                                             style: TextStyle(
-                                                                color: Colors.black, fontSize: 15),
+                                                                color: Colors
+                                                                    .black,
+                                                                fontSize: 15),
                                                           ),
                                                         ),
-
                                                       ],
                                                     );
                                                   }),
@@ -934,28 +1131,34 @@ class _howto_page extends State<howto_page> {
                               ),
                             ),
 
-
                             Container(
                               child: ListView(
                                 padding: EdgeInsets.all(20),
                                 children: <Widget>[
                                   Container(
                                     child: Column(
-                                      children: List.generate(menuDetail == null ? 0 : menuDetail['Howto'].length, (int index){
+                                      children: List.generate(
+                                          menuDetail == null
+                                              ? 0
+                                              : menuDetail['Howto'].length,
+                                          (int index) {
                                         return Container(
-                                          child: Row(children: <Widget>[
-                                            Container(
-                                              width: 350,
-                                              padding: EdgeInsets.only(
-                                                  left: 15, top: 15, right: 15),
-                                              child: Text(
-                                                "${menuDetail['Howto'][index]}",
-                                                style: TextStyle(
-                                                    color: Colors.black,
-                                                    fontSize: 18),
+                                          child: Row(
+                                            children: <Widget>[
+                                              Container(
+                                                width: 350,
+                                                padding: EdgeInsets.only(
+                                                    left: 15,
+                                                    top: 15,
+                                                    right: 15),
+                                                child: Text(
+                                                  "${menuDetail['Howto'][index]}",
+                                                  style: TextStyle(
+                                                      color: Colors.black,
+                                                      fontSize: 18),
+                                                ),
                                               ),
-                                            ),
-                                          ],
+                                            ],
                                           ),
                                         );
                                       }),
@@ -968,68 +1171,164 @@ class _howto_page extends State<howto_page> {
                             ////////////////// COMMENT //////////////////
 
                             Container(
-                              padding:
-                                  EdgeInsets.only(left: 20, top: 20, right: 20),
-                              child: Column(
+                              child: ListView(
                                 children: <Widget>[
                                   Container(
-                                    decoration: BoxDecoration(
-                                        border: Border(
-                                      top:
-                                          BorderSide(color: Color(0xffEDEDED)),
-                                    )),
+                                    padding: EdgeInsets.only(left: 20, right: 20),
+                                    alignment: Alignment.center,
+                                    child: Row(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: <Widget>[
+                                        Container(
+                                          height: 50,
+                                          width: 50,
+                                          child: FadeInImage.memoryNetwork(
+                                            placeholder: kTransparentImage,
+                                            image: userUrl == null ? userData ==
+                                                null
+                                                ? 'assets/user.png'
+                                                : userData['display'] == null
+                                                ? 'assets/user.png'
+                                                : userData['display'] : userUrl,
+                                            fit: BoxFit.cover,
+                                          ),
+                                          margin: EdgeInsets.only(right: 15),
+                                        ),
+                                        Expanded(
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                                border: Border(
+                                              top: BorderSide(
+                                                  color: Color(0xffEDEDED)),
+                                            )),
+                                            child: Row(
+                                              children: <Widget>[
+                                                Expanded(
+                                                  child: Container(
+                                                    padding: EdgeInsets.only(
+                                                        left: 10),
+                                                    alignment:
+                                                        Alignment.topLeft,
+                                                    decoration: BoxDecoration(
+                                                        color: Colors.white,
+                                                        border: Border.all(
+                                                            color: Colors.grey),
+                                                        borderRadius:
+                                                            BorderRadius.all(
+                                                                Radius.circular(
+                                                                    8))),
+                                                    height: 75,
+                                                    child: TextField(
+                                                      maxLines: null,
+                                                      controller: _commentText,
+                                                      decoration: InputDecoration
+                                                          .collapsed(
+                                                              hintText:
+                                                                  "พิมพ์ข้อความของคุณ"),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                  Container(
                                     height: 50,
+                                    padding: EdgeInsets.only(left: 20, right: 20),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: <Widget>[
+                                        GestureDetector(
+                                          onTap: (){
+                                            uploadComment();
+                                          },
+                                          child: Container(
+                                            alignment: Alignment.center,
+                                            height: 30,
+                                            width: 50,
+                                            decoration: BoxDecoration(
+                                              color: Colors.grey,
+                                              borderRadius: BorderRadius.all(Radius.circular(12))
+                                            ),
+                                            child: Text(
+                                              "ส่ง",
+                                              style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 20),
+                                            ),
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                  Container(
+                                    height: 50,
+                                    color: Colors.grey,
+                                    padding: EdgeInsets.only(left: 20, right: 20),
                                     child: Row(
                                       children: <Widget>[
                                         Expanded(
                                           child: Container(
-                                            padding: EdgeInsets.only(left: 10),
                                             alignment: Alignment.centerLeft,
-                                            decoration: BoxDecoration(
-                                                color: Colors.white,
-                                                border: Border.all(color: Colors.grey),
-                                                borderRadius:
-                                                BorderRadius.all(Radius.circular(8))),
-                                            height: 50,
-                                            child: TextField(
-                                              decoration: InputDecoration.collapsed(
-                                                  hintText: "พิมพ์ข้อความของคุณ"),
-                                            ),
+                                            child: Text("ความคิดเห็น ${commentData == null ? 0 : commentData.length} รายการ", style: TextStyle(color: Colors.white),),
                                           ),
-                                        ),
-
+                                        )
                                       ],
                                     ),
                                   ),
-
-
                                   Container(
-                                    height: 50,
-                                    child: Row(
-                                      children: <Widget>[
-                                        Expanded(
-                                          child: GestureDetector(
-                                            onTap: () {
-                                              Navigator.push(context,
-                                                  MaterialPageRoute(builder: (context) {
-                                                    return howto_page('123');
-                                                  }));
-                                            },
-                                            child: Container(
-                                              alignment: Alignment.center,
-                                              height: 30,
-                                              color: Colors.grey,
-                                              child: Text(
-                                                "Send",
-                                                style: TextStyle(
-                                                    color: Colors.white, fontSize: 20),
-                                              ),
-                                            ),
+                                    padding: EdgeInsets.only(top: 15),
+                                    child: Column(
+                                      children: List.generate(commentData == null ? 0 : commentUserData == null ? 0 : commentData.length != commentUserData.length ? 0 : commentData.length, (int index){
+                                        return Container(
+                                          decoration: BoxDecoration(
+                                            border: Border(bottom: BorderSide(color: Colors.grey, width: 1))
                                           ),
-                                        ),
-                                      ],
+                                          margin: EdgeInsets.only(bottom: 15),
+                                          padding: EdgeInsets.only(left: 20, right: 20, bottom: 15),
+                                          alignment: Alignment.center,
+                                          child: Row(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: <Widget>[
+                                              Container(
+                                                height: 50,
+                                                width: 50,
+                                                child: FadeInImage.memoryNetwork(
+                                                  placeholder: kTransparentImage,
+                                                  image: commentUserData[index]['display'] == null ? 'assets/user.png' : commentUserData[index]['display'],
+                                                  fit: BoxFit.cover,
+                                                ),
+                                                margin: EdgeInsets.only(right: 15),
+                                              ),
+                                              Expanded(
+                                                child: Container(
+                                                  alignment: Alignment.centerLeft,
+                                                  height: 50,
+                                                  child: Column(
+                                                    children: <Widget>[
+                                                      Container(
+                                                        alignment: Alignment.centerLeft,
+                                                        child: Text(commentData[index]['name']),
+                                                      ),
+                                                      Expanded(
+                                                        child: Container(
+                                                          alignment: Alignment.centerLeft,
+                                                          child:  Text(commentData[index]['text']),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              )
+                                            ],
+                                          ),
+                                        );
+                                      })
                                     ),
-                                  ),
+                                  )
                                 ],
                               ),
                             ),
@@ -1043,7 +1342,7 @@ class _howto_page extends State<howto_page> {
             ),
             GestureDetector(
               onTap: () {
-                if(isSignIn){
+                if (isSignIn) {
                   deleteIngredientAuto();
                 }
               },
@@ -1062,7 +1361,7 @@ class _howto_page extends State<howto_page> {
             ),
             GestureDetector(
               onTap: () {
-                if(isSignIn){
+                if (isSignIn) {
                   deleteIngredientManual();
                 }
               },
