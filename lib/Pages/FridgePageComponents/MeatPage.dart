@@ -427,7 +427,7 @@ class _meat_page extends State<meat_page> with TickerProviderStateMixin{
                   Container(
                     child: Text(
                       "เพิ่ม",
-                      style: TextStyle(fontSize: 25),
+                      style: TextStyle(fontSize: 25 ),
                     ),
                   ),
                 ],

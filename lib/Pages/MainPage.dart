@@ -95,7 +95,7 @@ class _main_page extends State<main_page> {
                     findmenu_page(),
                     expire_page(),
                     bin_page(),
-                    user_page()
+                    user_page(),
                   ],
                 ),
               ),

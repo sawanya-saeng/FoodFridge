@@ -238,7 +238,7 @@ class _user_page extends State<user_page> with TickerProviderStateMixin{
                 ),
               ),
               Container(
-                child: Text(this.user.name,
+                child: Text(this.user.name == null ? 'Loading' : this.user.name,
                     style: TextStyle(color: Colors.black, fontSize: 25)),
               ),
             ],
@@ -425,13 +425,13 @@ class _user_page extends State<user_page> with TickerProviderStateMixin{
                                   child: Image.asset('assets/write.png'),
                                 ),
                               ),
-                              Container(
-                                child: Text(
-                                  'เขียนสูตรอาหารเลย',
-                                  style: TextStyle(
-                                      color: Color(0xffA5A5A5), fontSize: 25),
-                                ),
-                              ),
+//                              Container(
+//                                child: Text(
+//                                  'เขียนสูตรอาหารเลย',
+//                                  style: TextStyle(
+//                                      color: Color(0xffA5A5A5), fontSize: 25),
+//                                ),
+//                              ),
                             ],
                           ),
                           alignment: Alignment.center,

@@ -27,7 +27,7 @@ class _howto_page extends State<howto_page> with TickerProviderStateMixin{
   final _storage = FirebaseStorage.instance;
   final _auth = FirebaseAuth.instance;
   PageController _scrollController;
-  final format = DateFormat("yyyy-MM-dd hh:mm:ss");
+  final format = DateFormat("yyyy-MM-dd");
   bool isFavor;
   Map<String, dynamic> menuDetail;
   List<dynamic> mainIngredients;
