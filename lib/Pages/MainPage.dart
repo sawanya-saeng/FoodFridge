@@ -1,9 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:taluewapp/Pages/FridgePage.dart';
 import 'package:taluewapp/Pages/FindMenuPage.dart';
 import 'package:taluewapp/Pages/ExpirePage.dart';
-import 'package:taluewapp/Pages/BinPage.dart';
+import 'package:taluewapp/Pages/NotificationPage.dart';
 import 'package:taluewapp/Pages/UserPage.dart';
 
 class main_page extends StatefulWidget {
@@ -18,7 +19,7 @@ List<Widget> pages = [
   fridge_page(),
   findmenu_page(),
   expire_page(),
-  bin_page(),
+  noti_page(),
   user_page()
 ];
 
@@ -28,6 +29,8 @@ class _main_page extends State<main_page> {
   PageController _pageController;
   final _auth = FirebaseAuth.instance;
   bool isSignIn = false;
+  FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+  bool isNotification = false;
 
   Future checkSignIn()async{
     FirebaseUser user = await _auth.currentUser();
@@ -61,6 +64,21 @@ class _main_page extends State<main_page> {
         });
       }
     });
+
+    _firebaseMessaging.configure(
+      onMessage: (Map<String, dynamic> message) async {
+        print("onMessage: $message");
+        setState(() {
+          isNotification = true;
+        });
+      },
+      onLaunch: (Map<String, dynamic> message) async {
+        print("onLaunch: $message");
+      },
+      onResume: (Map<String, dynamic> message) async {
+        print("onResume: $message");
+      },
+    );
   }
 
   @override
@@ -94,7 +112,7 @@ class _main_page extends State<main_page> {
                     fridge_page(),
                     findmenu_page(),
                     expire_page(),
-                    bin_page(),
+                    noti_page(),
                     user_page(),
                   ],
                 ),
@@ -185,8 +203,9 @@ class _main_page extends State<main_page> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: <Widget>[
                               Container(
-                                  height: 35,
-                                  child: Image.asset('assets/calendar.png')),
+                                height: 35,
+                                child: Image.asset('assets/calendar.png'),
+                              ),
                               Container(
                                   child: Text(
                                 'หมดอายุ',
@@ -202,6 +221,7 @@ class _main_page extends State<main_page> {
                       child: GestureDetector(
                         onTap: () {
                           setState(() {
+                            isNotification = false;
                             _currentIndex = 3;
                             _pageController.animateToPage(3, duration: Duration(milliseconds: 1), curve: Curves.ease);
                           });
@@ -215,12 +235,30 @@ class _main_page extends State<main_page> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: <Widget>[
-                              Container(
-                                  height: 35,
-                                  child: Image.asset('assets/delete.png')),
+                              Stack(
+                                alignment: Alignment.topCenter,
+                                children: <Widget>[
+                                  Container(
+                                      height: 35,
+                                      child: Image.asset('assets/notification.png')
+                                  ),
+                                  isNotification ? Container(
+                                    padding: EdgeInsets.only(left: 15, right: 15),
+                                    alignment: Alignment.topRight,
+                                    height: 15,
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: Colors.red,
+                                      ),
+                                      width: 15,
+                                    ),
+                                  ):Container(),
+                                ],
+                              ),
                               Container(
                                   child: Text(
-                                'ถังขยะ',
+                                'แจ้งเตือน',
                                 style: TextStyle(
                                     color: Colors.white, fontSize: 15),
                               ))
