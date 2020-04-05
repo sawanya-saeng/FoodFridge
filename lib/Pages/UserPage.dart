@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:platform_alert_dialog/platform_alert_dialog.dart';
 import 'package:taluewapp/Pages/HowToPage.dart';
 import 'package:taluewapp/Pages/LoginPage.dart';
 import './AddMenu.dart';
@@ -65,10 +66,16 @@ class _user_page extends State<user_page> with TickerProviderStateMixin{
     });
 
     for(int i=0; i<favorListId.length; i++){
+      Map<String, dynamic> tmp = {};
       await _db.collection('Menu').document(favorListId[i]).get().then((d){
-        setState(() {
-          favorListMenu.add(d.data);
-        });
+        tmp = d.data;
+      });
+      
+      String url = await _storage.ref().child('Menu').child(favorListId[i]).child('menupic.jpg').getDownloadURL().catchError((e){});
+      tmp['image'] = url;
+
+      setState(() {
+        favorListMenu.add(tmp);
       });
     }
   }
@@ -101,6 +108,16 @@ class _user_page extends State<user_page> with TickerProviderStateMixin{
       myListMenuImage.add(tmp);
     }
 
+    setState(() {
+      isLoaded = false;
+    });
+  }
+
+  Future deleteMenu(String menu_id) async {
+    setState(() {
+      isLoaded = true;
+    });
+    await _db.collection('Menu').document(menu_id).delete();
     setState(() {
       isLoaded = false;
     });
@@ -332,8 +349,32 @@ class _user_page extends State<user_page> with TickerProviderStateMixin{
                           child: myListMenu == null ? Container() : myListMenu.length > 0 ?
                           ListView.builder(
                             padding: EdgeInsets.all(20),
-                            itemCount: myListMenu == null ? 0 : myListMenuImage == null ? 0 : myListMenuImage.length < myListMenu.length ? 0 : myListMenu.length,
+                            itemCount: myListMenu == null ? 0 : myListMenuImage == null ? 0 : myListMenuImage.length < myListMenu.length ? 0 : myListMenu.length + 1,
                             itemBuilder: (BuildContext context, int index){
+                              if(index == myListMenu.length){
+                                return GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(context,
+                                        MaterialPageRoute(builder: (context) {
+                                          return add_menu();
+                                        }));
+                                  },
+                                  child: Container(
+                                    alignment: Alignment.center,
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: <Widget>[
+                                        Container(
+                                          child: Icon(Icons.add),
+                                        ),
+                                        Container(
+                                          child: Text("เพิ่มเมนู",style: TextStyle(fontSize: 25),),
+                                        ),
+                                      ],
+                                    )
+                                  ),
+                                );
+                              }
                               return Container(
                                 margin: EdgeInsets.only(bottom: 15),
                                 child:  Row(
@@ -390,13 +431,49 @@ class _user_page extends State<user_page> with TickerProviderStateMixin{
                                                       ),
                                                     ),
                                                   ),
-                                                  Container(
-                                                    margin: EdgeInsets.only(
-                                                        left: 10),
-                                                    child: Icon(
-                                                      Icons.delete,
-                                                      size: 50,
-                                                      color: Colors.green,
+                                                  GestureDetector(
+                                                    onTap: (){
+                                                      showDialog(
+                                                          context: context,
+                                                          builder: (context){
+                                                            return PlatformAlertDialog(
+                                                              title: Text('เดี๋ยวก่อน!'),
+                                                              content: SingleChildScrollView(
+                                                                child: ListBody(
+                                                                  children: <Widget>[
+                                                                    Text("ยืนกันการลบเมนูหรือไม่"),
+                                                                  ],
+                                                                ),
+                                                              ),
+                                                              actions: <Widget>[
+                                                                PlatformDialogAction(
+                                                                  child: Text('ยกเลิก'),
+                                                                  onPressed: () {
+                                                                    Navigator.of(context).pop();
+                                                                  },
+                                                                ),
+                                                                PlatformDialogAction(
+                                                                  child: Text('ตกลง'),
+                                                                  onPressed: () {
+                                                                    Navigator.of(context).pop();
+                                                                    deleteMenu(myListMenu[index]['menu_id']).then((e){
+                                                                      getMyMenu();
+                                                                    });
+                                                                  },
+                                                                ),
+                                                              ],
+                                                            );
+                                                          }
+                                                      );
+                                                    },
+                                                    child: Container(
+                                                      margin: EdgeInsets.only(
+                                                          left: 10),
+                                                      child: Icon(
+                                                        Icons.delete,
+                                                        size: 50,
+                                                        color: Colors.green,
+                                                      ),
                                                     ),
                                                   ),
                                                 ],
@@ -425,13 +502,6 @@ class _user_page extends State<user_page> with TickerProviderStateMixin{
                                   child: Image.asset('assets/write.png'),
                                 ),
                               ),
-//                              Container(
-//                                child: Text(
-//                                  'เขียนสูตรอาหารเลย',
-//                                  style: TextStyle(
-//                                      color: Color(0xffA5A5A5), fontSize: 25),
-//                                ),
-//                              ),
                             ],
                           ),
                           alignment: Alignment.center,
@@ -439,7 +509,7 @@ class _user_page extends State<user_page> with TickerProviderStateMixin{
                         Container(
                           child: ListView.builder(
                             padding: EdgeInsets.all(20),
-                            itemCount: favorListId == null ? 0 : favorListId.length,
+                            itemCount: favorListId == null ? 0 : favorListMenu == null ? 0 : favorListId.length == favorListMenu.length ? favorListId.length : 0,
                             itemBuilder: (BuildContext context, int index){
                               return Container(
                                 margin: EdgeInsets.only(bottom: 15),
@@ -451,8 +521,7 @@ class _user_page extends State<user_page> with TickerProviderStateMixin{
                                       ),
                                       height: 120,
                                       width: 160,
-                                      child: Image.asset(
-                                        'assets/menu1.jpg',
+                                      child: Image.network(favorListMenu[index]['image'],
                                         fit: BoxFit.cover,
                                       ),
                                     ),

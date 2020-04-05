@@ -556,8 +556,6 @@ class _findmenu_page extends State<findmenu_page> {
                               }));
                               if(result != null){
                                 loadMenuFromMainIngredient().then((a){
-                                  print("result: ");
-                                  print(result);
                                   setState(() {
                                     isSearched = true;
                                   });

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:taluewapp/Pages/ChooseComponent/MeatChoosePage.dart';
+import 'package:platform_alert_dialog/platform_alert_dialog.dart';
 import 'package:taluewapp/Pages/ChooseComponent/XMeatChoosePage.dart';
 import 'package:taluewapp/Services/Ingredient.dart';
 import 'package:provider/provider.dart';
@@ -84,7 +84,34 @@ class _xchoose_page extends State<xchoose_page> {
                       ),
                       GestureDetector(
                         onTap: (){
-                          Navigator.of(context).pop(_ingredient.getIngredient());
+                          print(_ingredient.getIngredients());
+                          if(_ingredient.getIngredients().isEmpty){
+                            showDialog(
+                                context: context,
+                                builder: (context){
+                                  return PlatformAlertDialog(
+                                    title: Text('กรุณาเลือกวัถตุดิบ!'),
+                                    content: SingleChildScrollView(
+                                      child: ListBody(
+                                        children: <Widget>[
+                                          Text("ต้องเลือกอย่างน้อย 1 วัตถุดิบในการค้นหา"),
+                                        ],
+                                      ),
+                                    ),
+                                    actions: <Widget>[
+                                      PlatformDialogAction(
+                                        child: Text('ตกลง'),
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                      ),
+                                    ],
+                                  );
+                                }
+                            );
+                          }else{
+                            Navigator.of(context).pop(_ingredient.getIngredient());
+                          }
                         },
                         child: Container(
                           child: Icon(

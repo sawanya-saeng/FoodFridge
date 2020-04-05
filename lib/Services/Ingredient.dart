@@ -25,6 +25,10 @@ class Ingredient with ChangeNotifier {
     this.ingredientList.removeAt(index);
   }
 
+  resetIngredient(){
+    this.ingredients.clear();
+  }
+
   resetIngredients(){
     this.ingredientList.clear();
   }

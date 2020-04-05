@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:taluewapp/Pages/FridgePage.dart';
 import 'MainPage.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
@@ -19,9 +18,10 @@ class _real_page extends State<real_page> {
 
   Future logInWithGoogle() async {
     String meessage_token = await _firebaseMessaging.getToken();
-    if(await _googleSignIn.isSignedIn() == false){
-      _googleSignIn.signOut();
-    }
+//    if(await _googleSignIn.isSignedIn() == false){
+//      _googleSignIn.signOut();
+//    }
+    _googleSignIn.signOut();
     final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
     final GoogleSignInAuthentication googleSignInAuthentication = await googleUser.authentication;
 
