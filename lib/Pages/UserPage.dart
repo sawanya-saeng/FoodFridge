@@ -230,8 +230,10 @@ class _user_page extends State<user_page> with TickerProviderStateMixin{
                         }));
               },
               child: Container(
+                padding: EdgeInsets.only(right: 10),
                 child: Icon(
                   Icons.settings,
+                  size: 30,
                   color: Colors.white,
                 ),
               ),
@@ -401,7 +403,7 @@ class _user_page extends State<user_page> with TickerProviderStateMixin{
                                                 myListMenu[index]['Name'],
                                                 style: TextStyle(
                                                     color: Color(0xff914d1f),
-                                                    fontSize: 30),
+                                                    fontSize: 25),
                                               ),
                                             ),
                                             Container(
@@ -466,6 +468,7 @@ class _user_page extends State<user_page> with TickerProviderStateMixin{
                                                           }
                                                       );
                                                     },
+
                                                     child: Container(
                                                       margin: EdgeInsets.only(
                                                           left: 10),
@@ -536,7 +539,7 @@ class _user_page extends State<user_page> with TickerProviderStateMixin{
                                                 favorListMenu[index]['Name'],
                                                 style: TextStyle(
                                                     color: Color(0xff914d1f),
-                                                    fontSize: 30),
+                                                    fontSize: 27),
                                               ),
                                             ),
                                             Container(
@@ -571,7 +574,7 @@ class _user_page extends State<user_page> with TickerProviderStateMixin{
                                                         left: 10),
                                                     child: Icon(
                                                       Icons.delete,
-                                                      size: 50,
+                                                      size: 47,
                                                       color: Colors.green,
                                                     ),
                                                   ),

@@ -154,7 +154,7 @@ class _expire_page extends State<expire_page> {
                                         ' ' +
                                         ingres[index].data['unit'],
                                     style: TextStyle(
-                                        fontSize: 25, color: Colors.white),
+                                        fontSize: 22, color: Colors.white),
                                   ),
                                 ),
                               ),
@@ -170,7 +170,7 @@ class _expire_page extends State<expire_page> {
                                           child: Text(
                                             '${calculateDate(format.format(ingres[index]['date'].toDate()))} วัน',
                                             style: TextStyle(
-                                                fontSize: 25,
+                                                fontSize: 22,
                                                 color: Colors.white),
                                           ),
 //                                child: Text(ingres[index].data['date'].toDate().toString()),
