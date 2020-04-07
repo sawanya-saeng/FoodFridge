@@ -74,12 +74,13 @@ class _user_page extends State<user_page> with TickerProviderStateMixin{
 
     for(int i=0; i<favorListId.length; i++){
       Map<String, dynamic> tmp = {};
-      setState(() {
-
-      });
       await _db.collection('Menu').document(favorListId[i]).get().then((d){
         tmp = d.data;
       });
+
+      if(tmp == null){
+        continue;
+      }
       
       String url = await _storage.ref().child('Menu').child(favorListId[i]).child('menupic.jpg').getDownloadURL().catchError((e){});
       tmp['image'] = url;
@@ -132,6 +133,7 @@ class _user_page extends State<user_page> with TickerProviderStateMixin{
       isLoaded = true;
     });
     await _db.collection('Menu').document(menu_id).delete();
+    await deleteFavor(menu_id);
     setState(() {
       isLoaded = false;
     });
@@ -392,7 +394,6 @@ class _user_page extends State<user_page> with TickerProviderStateMixin{
                                         MaterialPageRoute(builder: (context) {
                                           return add_menu();
                                         }));
-                                    print('asdadasdasdsad');
                                     getMyMenu();
                                   },
                                   child: Container(
