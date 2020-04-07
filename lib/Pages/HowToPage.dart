@@ -822,8 +822,10 @@ class _howto_page extends State<howto_page> with TickerProviderStateMixin{
                           Navigator.of(context).pop();
                         },
                         child: Container(
+                          padding: EdgeInsets.only(left: 10),
                           child: Icon(
                             Icons.arrow_back_ios,
+                            size:30,
                             color: Colors.white,
                           ),
                         ),
@@ -842,6 +844,7 @@ class _howto_page extends State<howto_page> with TickerProviderStateMixin{
                           }
                         },
                         child: Container(
+                          padding: EdgeInsets.only(right: 10),
                           child: Icon(
                             isFavor ? Icons.star : Icons.star_border,
                             color: Colors.yellow,

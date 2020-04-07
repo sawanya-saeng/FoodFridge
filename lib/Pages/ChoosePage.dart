@@ -77,8 +77,10 @@ class _choose_page extends State<choose_page> {
                           Navigator.of(context).pop();
                         },
                         child: Container(
+                          padding: EdgeInsets.only(left: 10),
                           child: Icon(
                             Icons.arrow_back_ios,
+                            size:30,
                             color: Colors.white,
                           ),
                         ),
@@ -115,8 +117,10 @@ class _choose_page extends State<choose_page> {
                           }
                         },
                         child: Container(
+                          padding: EdgeInsets.only(right: 10),
                           child: Icon(
                             Icons.check_circle,
+                            size:35,
                             color: Colors.white,
                           ),
                         ),

@@ -98,22 +98,10 @@ class _water_choose_page extends State<water_choose_page> {
                         child: Row(
                           children: <Widget>[
                             Container(
-                              padding: EdgeInsets.only(left: 20,right: 20),
+                              padding: EdgeInsets.only(left: 20,right: 40),
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: <Widget>[
-                                  Container(
-                                    child: Text("All",style: TextStyle(color: Colors.white,fontSize: 20),),
-                                  ),
-                                  Container(
-                                    height: 18,
-                                    width: 18,
-                                    decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        shape: BoxShape.circle,
-                                        border: Border.all(color: Colors.red)
-                                    ),
-                                  ),
                                 ],
                               ),
                             ),
