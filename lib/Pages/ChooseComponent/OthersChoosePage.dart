@@ -220,7 +220,7 @@ class _others_choose_page extends State<others_choose_page> {
                                             ' ' +
                                             ingres[index].data['unit'],
                                         style: TextStyle(
-                                            fontSize: 25, color: Colors.white),
+                                            fontSize: 21, color: Colors.white),
                                       ),
                                     ),
                                   ),
@@ -236,7 +236,7 @@ class _others_choose_page extends State<others_choose_page> {
                                               child: Text(
                                                 ingres[index].data['date'] == null ? 'ไม่มีกำหนด':'${calculateDate(format.format(ingres[index]['date'].toDate()))} วัน',
                                                 style: TextStyle(
-                                                    fontSize: 25,
+                                                    fontSize: 21,
                                                     color: Colors.white),
                                               ),
                                             ),

@@ -76,9 +76,7 @@ class _meat_page extends State<meat_page> with TickerProviderStateMixin{
   }
 
   Future deleteItem(String itemId) async{
-    setState(() {
-      isLoading = true;
-    });
+ 
     await _db.collection('Fridge').document(itemId).delete();
     Navigator.of(context).pop();
     setState(() {

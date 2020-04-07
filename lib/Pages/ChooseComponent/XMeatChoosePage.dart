@@ -330,7 +330,7 @@ class _xmeat_choose_page extends State<xmeat_choose_page> {
                                             ' ' +
                                             calculatedItems[index]['unit'][0],
                                         style: TextStyle(
-                                            fontSize: 25, color: Colors.white),
+                                            fontSize: 21, color: Colors.white),
                                       ),
                                     ),
                                   ),
