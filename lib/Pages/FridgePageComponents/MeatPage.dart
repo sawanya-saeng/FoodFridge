@@ -76,9 +76,7 @@ class _meat_page extends State<meat_page> with TickerProviderStateMixin{
   }
 
   Future deleteItem(String itemId) async{
-    setState(() {
-      isLoading = true;
-    });
+ 
     await _db.collection('Fridge').document(itemId).delete();
     Navigator.of(context).pop();
     setState(() {
@@ -237,9 +235,11 @@ class _meat_page extends State<meat_page> with TickerProviderStateMixin{
                                                 child: Container(
                                                   color: Color(0xffFC9002),
                                                   alignment: Alignment.center,
-                                                  child: Text(items[index]['num'][jdex].toString(),
+                                                  child: Text(items[index]['num'][jdex].toString()+
+                                                      ' ' +
+                                                      items[index]['unit'][jdex],
                                                     style: TextStyle(
-                                                        fontSize: 25, color: Colors.white),
+                                                        fontSize: 22, color: Colors.white),
                                                   ),
                                                 ),
                                               ),
@@ -255,7 +255,7 @@ class _meat_page extends State<meat_page> with TickerProviderStateMixin{
                                                           child: Text(
                                                             items[index]['expire'][jdex],
                                                             style: TextStyle(
-                                                                fontSize: 25,
+                                                                fontSize: 22,
                                                                 color: Colors.white),
                                                           ),
                                                         ),
@@ -366,7 +366,7 @@ class _meat_page extends State<meat_page> with TickerProviderStateMixin{
                                         ' ' +
                                         items[index]['unit'][0],
                                     style: TextStyle(
-                                        fontSize: 25, color: Colors.white),
+                                        fontSize: 22, color: Colors.white),
                                   ),
                                 ),
                               ),
@@ -382,7 +382,7 @@ class _meat_page extends State<meat_page> with TickerProviderStateMixin{
                                           child: Text(
                                             items[index]['expire'][0],
                                             style: TextStyle(
-                                                fontSize: 25,
+                                                fontSize: 22,
                                                 color: Colors.white),
                                           ),
                                         ),

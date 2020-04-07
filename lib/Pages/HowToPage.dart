@@ -1265,7 +1265,7 @@ class _howto_page extends State<howto_page> with TickerProviderStateMixin{
                                     ),
                                   ),
                                   Container(
-                                    height: 50,
+                                    height: 35,
                                     color: Colors.grey,
                                     padding: EdgeInsets.only(left: 20, right: 20),
                                     child: Row(
@@ -1349,7 +1349,7 @@ class _howto_page extends State<howto_page> with TickerProviderStateMixin{
               child: Container(
                 margin: EdgeInsets.only(top: 15),
                 alignment: Alignment.center,
-                height: 51,
+                height: 35,
                 decoration: BoxDecoration(
                   color: Color(0xff5A0000),
                 ),
@@ -1366,9 +1366,9 @@ class _howto_page extends State<howto_page> with TickerProviderStateMixin{
                 }
               },
               child: Container(
-                margin: EdgeInsets.only(top: 5, bottom: 15),
+                margin: EdgeInsets.only(top: 1, bottom: 15),
                 alignment: Alignment.center,
-                height: 51,
+                height: 35,
                 decoration: BoxDecoration(
                   color: Color(0xffB50000),
                 ),

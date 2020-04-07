@@ -330,7 +330,7 @@ class _xothers_choose_page extends State<xothers_choose_page> {
                                             ' ' +
                                             calculatedItems[index]['unit'][0],
                                         style: TextStyle(
-                                            fontSize: 25, color: Colors.white),
+                                            fontSize: 21, color: Colors.white),
                                       ),
                                     ),
                                   ),
@@ -346,7 +346,7 @@ class _xothers_choose_page extends State<xothers_choose_page> {
                                               child: Text(
                                                 calculatedItems[index]['date'][0] == null ? 'ไม่มีกำหนด':'${calculateDate(format.format(calculatedItems[index]['date'][0].toDate()))} วัน',
                                                 style: TextStyle(
-                                                    fontSize: 22,
+                                                    fontSize: 21,
                                                     color: Colors.white),
                                               ),
                                             ),

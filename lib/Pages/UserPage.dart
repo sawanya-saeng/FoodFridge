@@ -21,6 +21,7 @@ class IUser{
 }
 
 class _user_page extends State<user_page> with TickerProviderStateMixin{
+  String menu_id;
   int _currentPage = 0;
   PageController _scrollController;
   TextEditingController _searchController = new TextEditingController();
@@ -39,6 +40,8 @@ class _user_page extends State<user_page> with TickerProviderStateMixin{
   String _url;
   List<Map<String, dynamic>> myListMenu = [];
   List<String> myListMenuImage = [];
+
+  bool isLoading = false;
 
   Future checkSignIn()async{
     FirebaseUser user = await _auth.currentUser();
@@ -209,6 +212,24 @@ class _user_page extends State<user_page> with TickerProviderStateMixin{
     });
   }
 
+  Future deleteFavor() async {
+    FirebaseUser user = await _auth.currentUser();
+    await _db
+        .collection('Favor')
+        .where('uid', isEqualTo: user.uid)
+        .where('menu', isEqualTo: this.menu_id)
+        .getDocuments()
+        .then((docs) {
+      docs.documents.forEach((d) {
+        _db.collection('Favor').document(d.documentID).delete();
+      });
+    });
+    Navigator.of(context).pop();
+    setState(() {
+      isLoading = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return isLoaded ? _loadingProgress.getSubWidget(context) : isSignIn == null ? Container() : isSignIn ? Column(
@@ -234,8 +255,10 @@ class _user_page extends State<user_page> with TickerProviderStateMixin{
                         }));
               },
               child: Container(
+                padding: EdgeInsets.only(right: 10),
                 child: Icon(
                   Icons.settings,
+                  size: 30,
                   color: Colors.white,
                 ),
               ),
@@ -406,7 +429,7 @@ class _user_page extends State<user_page> with TickerProviderStateMixin{
                                                 myListMenu[index]['Name'],
                                                 style: TextStyle(
                                                     color: Color(0xff914d1f),
-                                                    fontSize: 30),
+                                                    fontSize: 25),
                                               ),
                                             ),
                                             Container(
@@ -541,7 +564,7 @@ class _user_page extends State<user_page> with TickerProviderStateMixin{
                                                 favorListMenu[index]['Name'],
                                                 style: TextStyle(
                                                     color: Color(0xff914d1f),
-                                                    fontSize: 30),
+                                                    fontSize: 27),
                                               ),
                                             ),
                                             Container(
@@ -571,13 +594,42 @@ class _user_page extends State<user_page> with TickerProviderStateMixin{
                                                       ),
                                                     ),
                                                   ),
-                                                  Container(
-                                                    margin: EdgeInsets.only(
-                                                        left: 10),
-                                                    child: Icon(
-                                                      Icons.delete,
-                                                      size: 50,
-                                                      color: Colors.green,
+
+                                                  GestureDetector(
+                                                    onTap: (){
+                                                      showDialog(context: context,builder: (context){
+                                                        return PlatformAlertDialog(
+                                                          title: Text('ยืนยันการลบหรือไม่?'),
+                                                          content: SingleChildScrollView(
+                                                            child: ListBody(
+                                                              children: <Widget>[
+                                                                Text(' '),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                          actions: <Widget>[
+                                                            PlatformDialogAction(
+                                                              child: Text('ยกเลิก'),
+                                                              onPressed: () {
+                                                                Navigator.of(context).pop();
+                                                              },
+                                                            ),
+                                                            PlatformDialogAction(
+                                                              child: Text('ตกลง'),
+                                                              onPressed: () {
+                                                                deleteFavor();
+                                                              },
+                                                            )
+                                                          ],
+                                                        );
+                                                      });
+                                                    },
+                                                    child: Container(
+                                                      child: Icon(
+                                                        Icons.delete,
+                                                        size: 47,
+                                                        color: Colors.green,
+                                                      ),
                                                     ),
                                                   ),
                                                 ],

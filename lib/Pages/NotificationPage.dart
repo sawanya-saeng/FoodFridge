@@ -87,8 +87,7 @@ class _noti_page extends State<noti_page> with TickerProviderStateMixin{
             child: Container(
               child: ListView(
                 padding: EdgeInsets.zero,
-                children: <Widget>[
-                  Container(
+                children: <Widget>[Container(
                     child: Column(
                       children: List.generate(newNotificationData.length + 1, (k){
                         int index = k-1;

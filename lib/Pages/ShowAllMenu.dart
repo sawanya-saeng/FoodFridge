@@ -95,7 +95,7 @@ class _showall_page extends State<showall_page> with TickerProviderStateMixin{
                       child: TextField(
                         controller: _searchController,
                         decoration: InputDecoration.collapsed(
-                            hintText: "Search"),
+                            hintText: "ค้นหาเมนูอาหาร"),
                       ),
 
                   ),
