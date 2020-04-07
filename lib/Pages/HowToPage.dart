@@ -154,11 +154,53 @@ class _howto_page extends State<howto_page> with TickerProviderStateMixin{
   Future deleteIngredientFromFridge() async {
     List<Map<String, String>> toDelete = [];
     List<Map<String, String>> toUpdate = [];
+    bool isConfirm = false;
+    TextEditingController _text = TextEditingController(text: '1');
+
+    await showDialog(
+      context: context,
+      builder: (context){
+        return AlertDialog(
+          title: Text("กรุณาใส่จำนวนจาน"),
+          content: Container(
+            height: 55,
+            child: TextField(
+              textAlign: TextAlign.center,
+              controller: _text,
+            ),
+          ),
+          actions: <Widget>[
+            FlatButton(
+              onPressed: (){
+                Navigator.of(context).pop();
+              },
+              child: Text("ยกเลิก"),
+            ),
+            FlatButton(
+              onPressed: (){
+                if(int.parse(_text.text) > 1){
+                  isConfirm = true;
+                }
+                Navigator.of(context).pop();
+              },
+              child: Text("ยืนยัน"),
+            ),
+          ],
+        );
+      },
+    );
+
+    if(!isConfirm){
+      return;
+    }
+
     if (checkMainIngredient()) {
       for (int i = 0; i < allIngredients.length; i++) {
         var ingredienctCost = toGrum(
             double.parse(allIngredients[i]['num'].toString()),
             allIngredients[i]['unit']);
+
+        ingredienctCost *= int.parse(_text.text);
 
         for (int j = 0; j < calculatedItems.length; j++) {
           if (calculatedItems[j]['name'] == allIngredients[i]['name']) {
