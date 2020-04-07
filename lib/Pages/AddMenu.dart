@@ -3,21 +3,22 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:taluewapp/Pages/MainPage.dart';
-import 'package:taluewapp/Pages/UserPage.dart';
+import 'package:taluewapp/Services/loadingScreenService.dart';
 
 class add_menu extends StatefulWidget {
   @override
   _add_menu createState() => _add_menu();
 }
 
-class _add_menu extends State<add_menu> {
+class _add_menu extends State<add_menu> with TickerProviderStateMixin{
   final _db = Firestore.instance;
   final _storageRef = FirebaseStorage.instance;
   final _auth = FirebaseAuth.instance;
-  
+  LoadingProgress _loadingProgress;
+  AnimationController _animationController;
+  bool isLoading = false;
+
   List<Map<String, dynamic>> ingredients = [
     {
       "ingredient_name": new TextEditingController(),
@@ -66,6 +67,10 @@ class _add_menu extends State<add_menu> {
     List<String> howTo = [];
     List<String> seasoning = [];
     FirebaseUser user = await _auth.currentUser();
+
+    setState(() {
+      isLoading = true;
+    });
     
     for(int i=0; i<ingredients.length; i++){
       tmp_ingredients.add({
@@ -102,11 +107,20 @@ class _add_menu extends State<add_menu> {
       StorageReference storageReference = _storageRef.ref().child('Menu').child(docRef.documentID).child('menupic.jpg');
       StorageUploadTask task = storageReference.putFile(_foodImage);
       task.onComplete.then((err){
-
+        setState(() {
+          isLoading = false;
+        });
+        Navigator.of(context).pop();
       });
     });
+  }
 
-    Navigator.of(context).pop();
+  @override
+  void initState() {
+    _animationController = AnimationController(vsync: this, duration: Duration(seconds: 10));
+    _loadingProgress = LoadingProgress(_animationController);
+    // TODO: implement initState
+    super.initState();
   }
 
   @override
@@ -115,7 +129,7 @@ class _add_menu extends State<add_menu> {
     TextStyle bigText = TextStyle(fontSize: 20, color: Color(0xffa5a5a5));
     TextStyle headerText = TextStyle(fontSize: 20, color: Colors.black);
 
-    return Scaffold(
+    return isLoading ? _loadingProgress.getWidget(context) : Scaffold(
       body: Container(
         color: Color(0xffededed),
         child: Column(

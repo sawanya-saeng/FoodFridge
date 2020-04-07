@@ -392,6 +392,7 @@ class _user_page extends State<user_page> with TickerProviderStateMixin{
                                         MaterialPageRoute(builder: (context) {
                                           return add_menu();
                                         }));
+                                    print('asdadasdasdsad');
                                     getMyMenu();
                                   },
                                   child: Container(
@@ -526,11 +527,13 @@ class _user_page extends State<user_page> with TickerProviderStateMixin{
                           ListView(
                             children: <Widget>[
                               GestureDetector(
-                                onTap: () {
-                                  Navigator.push(context,
+                                onTap: ()async {
+                                  await Navigator.push(context,
                                       MaterialPageRoute(builder: (context) {
                                     return add_menu();
                                   }));
+                                  print('asdadasdasdsad11111111111');
+                                  getMyMenu();
                                 },
                                 child: Container(
                                   height: 200,
