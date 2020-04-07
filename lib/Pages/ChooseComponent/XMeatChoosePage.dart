@@ -24,6 +24,7 @@ class _xmeat_choose_page extends State<xmeat_choose_page> {
   final format = DateFormat('yyyy-MM-dd');
   List<Map<String, dynamic>> items = [];
   List<Map<String, dynamic>> calculatedItems = [];
+  bool isSelectAll = false;
 
   Future getMeat() async {
     FirebaseUser user = await _auth.currentUser();
@@ -181,13 +182,22 @@ class _xmeat_choose_page extends State<xmeat_choose_page> {
   }
 
   selectAll(){
-    for(int i=0; i<items.length; i++){
-      _ingredient.addIngredients({
-        'name': items[i]['name'],
-        'num': items[i]['num'][0].toString(),
-        'unit': items[i]['unit'][0]
-      });
-    }
+    setState(() {
+      if(!isSelectAll){
+        isSelectAll = true;
+        for(int i=0; i<items.length; i++){
+          _ingredient.addIngredients({
+            'name': items[i]['name'],
+            'num': items[i]['num'][0].toString(),
+            'unit': items[i]['unit'][0]
+          });
+        }
+      }
+    });
+  }
+
+  checkSelectAll(){
+    return _ingredient.getIngredients().length == items.length;
   }
 
   @override
@@ -226,7 +236,7 @@ class _xmeat_choose_page extends State<xmeat_choose_page> {
                                       height: 18,
                                       width: 18,
                                       decoration: BoxDecoration(
-                                          color: Colors.white,
+                                          color: checkSelectAll() ? Colors.red : Colors.white,
                                           shape: BoxShape.circle,
                                           border: Border.all(color: Colors.red)
                                       ),
