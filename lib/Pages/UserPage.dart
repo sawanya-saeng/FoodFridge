@@ -60,6 +60,10 @@ class _user_page extends State<user_page> with TickerProviderStateMixin{
 
   Future getFavorId()async{
     final user = await _auth.currentUser();
+    setState(() {
+      favorListId.clear();
+      favorListMenu.clear();
+    });
     await _db.collection('Favor').where('uid', isEqualTo: user.uid).getDocuments().then((docs){
       docs.documents.forEach((d){
         setState(() {
@@ -70,6 +74,9 @@ class _user_page extends State<user_page> with TickerProviderStateMixin{
 
     for(int i=0; i<favorListId.length; i++){
       Map<String, dynamic> tmp = {};
+      setState(() {
+
+      });
       await _db.collection('Menu').document(favorListId[i]).get().then((d){
         tmp = d.data;
       });
@@ -212,12 +219,12 @@ class _user_page extends State<user_page> with TickerProviderStateMixin{
     });
   }
 
-  Future deleteFavor() async {
+  Future deleteFavor(docId) async {
     FirebaseUser user = await _auth.currentUser();
     await _db
         .collection('Favor')
         .where('uid', isEqualTo: user.uid)
-        .where('menu', isEqualTo: this.menu_id)
+        .where('menu', isEqualTo: docId)
         .getDocuments()
         .then((docs) {
       docs.documents.forEach((d) {
@@ -617,7 +624,9 @@ class _user_page extends State<user_page> with TickerProviderStateMixin{
                                                             PlatformDialogAction(
                                                               child: Text('ตกลง'),
                                                               onPressed: () {
-                                                                deleteFavor();
+                                                                deleteFavor(favorListId[index]).then((e){
+                                                                  getFavorId();
+                                                                });
                                                               },
                                                             )
                                                           ],
