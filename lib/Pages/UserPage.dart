@@ -82,6 +82,10 @@ class _user_page extends State<user_page> with TickerProviderStateMixin{
 
   Future getMyMenu()async{
     setState(() {
+      myListMenu.clear();
+      myListMenuImage.clear();
+    });
+    setState(() {
       isLoaded = true;
     });
     final user = await _auth.currentUser();
@@ -349,15 +353,16 @@ class _user_page extends State<user_page> with TickerProviderStateMixin{
                           child: myListMenu == null ? Container() : myListMenu.length > 0 ?
                           ListView.builder(
                             padding: EdgeInsets.all(20),
-                            itemCount: myListMenu == null ? 0 : myListMenuImage == null ? 0 : myListMenuImage.length < myListMenu.length ? 0 : myListMenu.length + 1,
+                            itemCount: myListMenu == null ? 0 : myListMenuImage == null ? 0 : myListMenuImage.length != myListMenu.length ? 0 : myListMenu.length + 1,
                             itemBuilder: (BuildContext context, int index){
                               if(index == myListMenu.length){
                                 return GestureDetector(
-                                  onTap: () {
-                                    Navigator.push(context,
+                                  onTap: ()async {
+                                    await Navigator.push(context,
                                         MaterialPageRoute(builder: (context) {
                                           return add_menu();
                                         }));
+                                    getMyMenu();
                                   },
                                   child: Container(
                                     alignment: Alignment.center,

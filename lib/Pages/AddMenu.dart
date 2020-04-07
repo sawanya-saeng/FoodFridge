@@ -106,11 +106,7 @@ class _add_menu extends State<add_menu> {
       });
     });
 
-    Navigator.popUntil(context, (e) => e.isFirst);
-    Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context){
-      return main_page(4);
-    }));
-
+    Navigator.of(context).pop();
   }
 
   @override
