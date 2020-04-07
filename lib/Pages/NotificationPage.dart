@@ -178,7 +178,7 @@ class _noti_page extends State<noti_page> with TickerProviderStateMixin{
                                 Container(
                                   alignment: Alignment.centerLeft,
                                   height: 50,
-                                  child: Text("จะหมดอายุภายใน ${oldNotificationData[index]['expireIn']} วัน",style: TextStyle(fontSize: 25),),
+                                  child: Text(oldNotificationData[index]['expireIn'] < 1 ? "หมดอายุแล้ว" : "จะหมดอายุภายใน ${oldNotificationData[index]['expireIn']} วัน",style: TextStyle(fontSize: 25),),
                                 ),
                               ],
                             ),

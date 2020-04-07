@@ -50,7 +50,9 @@ class _add_page extends State<add_page> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    loadItem();
+    if(id.isNotEmpty){
+      loadItem();
+    }
   }
 
   @override
