@@ -181,7 +181,13 @@ class _xmeat_choose_page extends State<xmeat_choose_page> {
   }
 
   selectAll(){
-    
+    for(int i=0; i<items.length; i++){
+      _ingredient.addIngredients({
+        'name': items[i]['name'],
+        'num': items[i]['num'][0].toString(),
+        'unit': items[i]['unit'][0]
+      });
+    }
   }
 
   @override
@@ -206,7 +212,7 @@ class _xmeat_choose_page extends State<xmeat_choose_page> {
                           children: <Widget>[
                             GestureDetector(
                               onTap: (){
-
+                                selectAll();
                               },
                               child: Container(
                                 padding: EdgeInsets.only(left: 20,right: 20),
