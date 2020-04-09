@@ -15,20 +15,27 @@ class edit_noti extends StatefulWidget {
 class _edit_noti extends State<edit_noti> with TickerProviderStateMixin{
   final _db = Firestore.instance;
   final _auth = FirebaseAuth.instance;
-  TextEditingController minDay = TextEditingController(text: '1');
   bool onlyExpire = true;
+  bool beforeExpire = true;
   LoadingProgress _loadingProgress;
   AnimationController _animationController;
   bool isLoading = true;
+  List<TextEditingController> minDays = [TextEditingController(text: '1')];
 
   Future saveData()async{
     setState(() {
       isLoading = true;
     });
     FirebaseUser user = await _auth.currentUser();
+    List<String> minDayList = [];
+    for(int i=0; i<minDays.length; i++){
+      minDayList.add(minDays[i].text);
+    }
+
     Map<String, dynamic> dataToSave = {
       'only_expire': onlyExpire,
-      'min_day': minDay.text.toString()
+      'before_expire': beforeExpire,
+      'min_day': minDayList
     };
 
     String docId = '';
@@ -47,12 +54,21 @@ class _edit_noti extends State<edit_noti> with TickerProviderStateMixin{
       isLoading = true;
     });
     FirebaseUser user = await _auth.currentUser();
+    List<dynamic> tmp = [];
     await _db.collection('User').where('uid', isEqualTo: user.uid).getDocuments().then((docs){
       setState(() {
         onlyExpire = docs.documents[0].data['only_expire'] == null ? true : docs.documents[0].data['only_expire'];
-        minDay.text = docs.documents[0].data['min_day'] == null ? '1' : docs.documents[0].data['min_day'];
+        beforeExpire = docs.documents[0].data['before_expire'] == null ? false : docs.documents[0].data['before_expire'];
+        tmp = docs.documents[0].data['min_day'] == null ? [] : docs.documents[0].data['min_day'];
       });
     });
+
+    minDays.clear();
+    for(int i=0; i<tmp.length; i++){
+      minDays.add(new TextEditingController(text: tmp[i]));
+    }
+
+    print(minDays);
 
     setState(() {
       isLoading = false;
@@ -149,7 +165,7 @@ class _edit_noti extends State<edit_noti> with TickerProviderStateMixin{
                             GestureDetector(
                               onTap: (){
                                 setState(() {
-                                  onlyExpire = true;
+                                  onlyExpire = !onlyExpire;
                                 });
                               },
                               child: Row(
@@ -181,7 +197,7 @@ class _edit_noti extends State<edit_noti> with TickerProviderStateMixin{
                             GestureDetector(
                               onTap: (){
                                 setState(() {
-                                  onlyExpire = false;
+                                  beforeExpire = !beforeExpire;
                                 });
                               },
                               child: Row(
@@ -190,7 +206,7 @@ class _edit_noti extends State<edit_noti> with TickerProviderStateMixin{
                                     height: 18,
                                     width: 18,
                                     decoration: BoxDecoration(
-                                        color: !onlyExpire ? Colors.red : Colors.white,
+                                        color: beforeExpire ? Colors.red : Colors.white,
                                         shape: BoxShape.circle,
                                         border: Border.all(color: Colors.red)
                                     ),
@@ -213,65 +229,110 @@ class _edit_noti extends State<edit_noti> with TickerProviderStateMixin{
                           ],
                         ),
                       ),
-                      !onlyExpire ? Container(
-                        child: Row(
-                          children: <Widget>[
-                            GestureDetector(
-                              onTap: (){
-                                setState(() {
-                                  int num = int.parse(minDay.text);
-                                  if(num > 1){
-                                    num --;
-                                  }
-                                  minDay.text = num.toString();
-                                });
-                              },
-                              child: Container(
-                                height: 40,
-                                width: 40,
-                                decoration: BoxDecoration(
-                                    color: Colors.white,
-                                  border: Border.all(color: Colors.grey)
-                                ),
-                                child: Icon(Icons.remove),
-                              ),
-                            ),
-                            Expanded(
-                                child: Container(
-                                  height: 40,
-                                  decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      border: Border.all(color: Colors.grey)
+                      beforeExpire ? Container(
+                        child: Column(
+                          children: List.generate(minDays.length, (int index){
+                            return Container(
+                              margin: EdgeInsets.only(bottom: 15),
+                              child: Row(
+                                children: <Widget>[
+                                  GestureDetector(
+                                    onTap: (){
+                                      setState(() {
+                                        int num = int.parse(minDays[index].text);
+                                        if(num > 1){
+                                          num --;
+                                        }
+                                        minDays[index].text = num.toString();
+                                      });
+                                    },
+                                    child: Container(
+                                      height: 40,
+                                      width: 40,
+                                      decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          border: Border.all(color: Colors.grey)
+                                      ),
+                                      child: Icon(Icons.remove),
+                                    ),
                                   ),
-                                  child: TextField(
-                                    controller: minDay,
-                                    textAlign: TextAlign.center,
-                                    keyboardType: TextInputType.number,
-                                    decoration: InputDecoration.collapsed(hintText: 'ใส่จำนวนวัน'),
+                                  Expanded(
+                                      child: Container(
+                                        height: 40,
+                                        decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            border: Border.all(color: Colors.grey)
+                                        ),
+                                        child: TextField(
+                                          controller: minDays[index],
+                                          textAlign: TextAlign.center,
+                                          keyboardType: TextInputType.number,
+                                          decoration: InputDecoration.collapsed(hintText: 'ใส่จำนวนวัน'),
+                                        ),
+                                      )
                                   ),
-                                )
-                            ),
-                            GestureDetector(
-                              onTap: (){
-                                setState(() {
-                                  int num = int.parse(minDay.text);
-                                  num++;
-                                  minDay.text = num.toString();
-                                });
-                              },
-                              child: Container(
-                                height: 40,
-                                width: 40,
-                                decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    border: Border.all(color: Colors.grey)
-                                ),
-                                child: Icon(Icons.add),
+                                  GestureDetector(
+                                    onTap: (){
+                                      setState(() {
+                                        int num = int.parse(minDays[index].text);
+                                        num++;
+                                        minDays[index].text = num.toString();
+                                      });
+                                    },
+                                    child: Container(
+                                      height: 40,
+                                      width: 40,
+                                      decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          border: Border.all(color: Colors.grey)
+                                      ),
+                                      child: Icon(Icons.add),
+                                    ),
+                                  ),
+                                  GestureDetector(
+                                    onTap: (){
+                                      setState(() {
+                                        minDays.removeAt(index);
+                                      });
+                                    },
+                                    child: Container(
+                                      height: 40,
+                                      width: 40,
+                                      decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          border: Border.all(color: Colors.grey)
+                                      ),
+                                      child: Icon(Icons.delete),
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ),
-                          ],
+                            );
+                          }),
                         ),
                       ):Container(),
+                      GestureDetector(
+                        onTap: (){
+                          setState(() {
+                            minDays.add(new TextEditingController(text: '1'));
+                          });
+                        },
+                        child: Container(
+                          margin: EdgeInsets.only(top: 15),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              Container(
+                                margin: EdgeInsets.only(right: 15),
+                                child: Icon(Icons.add),
+                              ),
+                              Container(
+                                child: Text("เพิ่มจำนวนวัน", style: TextStyle(fontSize: 20),),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                       GestureDetector(
                         onTap: (){
                           saveData();
