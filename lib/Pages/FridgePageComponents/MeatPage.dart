@@ -216,9 +216,7 @@ class _meat_page extends State<meat_page> with TickerProviderStateMixin{
                                     child: Column(
                                       children: <Widget>[
                                         Container(
-                                          margin: EdgeInsets.only(bottom: 10),
                                           height: 100,
-                                          color: Color(0xffFC9002),
                                           child: Row(
                                             children: <Widget>[
                                               Expanded(
@@ -234,29 +232,6 @@ class _meat_page extends State<meat_page> with TickerProviderStateMixin{
                                               ),
                                               Expanded(
                                                 flex: 2,
-<<<<<<< HEAD
-                                                child: Column(
-                                                  children: <Widget>[
-                                                    Container(
-                                                      color: Color(0xffFC9002),
-                                                      padding: EdgeInsets.only(top: 25),
-                                                      alignment: Alignment.center,
-                                                      child: Text(items[index]['num'][jdex].toString(),
-                                                        style: TextStyle(
-                                                            fontSize: 25, color: Colors.white),
-                                                      ),
-                                                    ),
-                                                    Container(
-                                                      color: Color(0xffFC9002),
-                                                      alignment: Alignment.center,
-                                                      child: Text(
-                                                          items[index]['unit'][jdex],
-                                                        style: TextStyle(
-                                                            fontSize: 19, color: Colors.white),
-                                                      ),
-                                                    ),
-                                                  ],
-=======
                                                 child: Container(
                                                   color: Color(0xffFC9002),
                                                   alignment: Alignment.center,
@@ -266,7 +241,6 @@ class _meat_page extends State<meat_page> with TickerProviderStateMixin{
                                                     style: TextStyle(
                                                         fontSize: 22, color: Colors.white),
                                                   ),
->>>>>>> master
                                                 ),
                                               ),
                                               Expanded(
@@ -276,13 +250,12 @@ class _meat_page extends State<meat_page> with TickerProviderStateMixin{
                                                       alignment: Alignment.bottomCenter,
                                                       children: <Widget>[
                                                         Container(
-                                                          padding: EdgeInsets.only(bottom : 22),
                                                           color: Color(0xffFFA733),
                                                           alignment: Alignment.center,
                                                           child: Text(
                                                             items[index]['expire'][jdex],
                                                             style: TextStyle(
-                                                                fontSize: 23,
+                                                                fontSize: 22,
                                                                 color: Colors.white),
                                                           ),
                                                         ),
@@ -364,7 +337,7 @@ class _meat_page extends State<meat_page> with TickerProviderStateMixin{
                         child: Container(
                           margin: EdgeInsets.only(bottom: 10),
                           height: 100,
-                          color: Color(0xffFC9002),
+                          color: Colors.green,
                           child: Row(
                             children: <Widget>[
                               Expanded(
@@ -380,36 +353,15 @@ class _meat_page extends State<meat_page> with TickerProviderStateMixin{
                               ),
                               Expanded(
                                 flex: 2,
-<<<<<<< HEAD
-                                child: Column(
-                                  children: <Widget>[
-                                    Container(
-                                      padding: EdgeInsets.only(top: 25),
-                                      alignment: Alignment.center,
-                                      color: Color(0xffFC9002),
-                                      child: Text(
-                                        items[index]['num'][0].toString(),
-                                        style: TextStyle(
-                                            fontSize: 25, color: Colors.white),
-                                      ),
-                                    ),
-                                    Container(
-                                      color: Color(0xffFC9002),
-                                      alignment: Alignment.center,
-                                      child: Text(
-=======
                                 child: Container(
                                   color: Color(0xffFC9002),
                                   alignment: Alignment.center,
                                   child: Text(((double.parse(items[index]['num'][0].toString())).toInt()).toString() +
                                         ' ' +
->>>>>>> master
                                         items[index]['unit'][0],
-                                        style: TextStyle(
-                                            fontSize: 19, color: Colors.white),
-                                      ),
-                                    ),
-                                  ],
+                                    style: TextStyle(
+                                        fontSize: 22, color: Colors.white),
+                                  ),
                                 ),
                               ),
                               Expanded(
@@ -419,13 +371,12 @@ class _meat_page extends State<meat_page> with TickerProviderStateMixin{
                                       alignment: Alignment.bottomCenter,
                                       children: <Widget>[
                                         Container(
-                                          padding: EdgeInsets.only(bottom : 22),
                                           color: Color(0xffFFA733),
                                           alignment: Alignment.center,
                                           child: Text(
                                             items[index]['expire'][0],
                                             style: TextStyle(
-                                                fontSize: 23,
+                                                fontSize: 22,
                                                 color: Colors.white),
                                           ),
                                         ),
