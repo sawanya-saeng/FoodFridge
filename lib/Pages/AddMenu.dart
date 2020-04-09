@@ -35,6 +35,10 @@ class _add_menu extends State<add_menu> with TickerProviderStateMixin{
     }
   ];
 
+  List<TextEditingController> sessionList = [
+    new TextEditingController()
+  ];
+
   List<Map<String, dynamic>> howToMake = [
     {
       "description": new TextEditingController()
@@ -92,6 +96,10 @@ class _add_menu extends State<add_menu> with TickerProviderStateMixin{
       howTo.add(howToMake[i]['description'].text);
     }
 
+    for(int i=0; i<sessionList.length; i++){
+      seasoning.add(sessionList[i].text);
+    }
+
     Map<String, dynamic> menuData = {
       'Name': _foodName.text,
       'Howto': howTo,
@@ -99,7 +107,7 @@ class _add_menu extends State<add_menu> with TickerProviderStateMixin{
         'Main': tmp_ingredients,
         'Optional': tmp_optionalIngredients
       },
-      'Seasoning': [],
+      'Seasoning': seasoning,
       'uid': user.uid
     };
 
@@ -617,6 +625,79 @@ class _add_menu extends State<add_menu> with TickerProviderStateMixin{
                                 ],
                               ),
                             ),
+                            Container(
+                              margin: EdgeInsets.only(top: 25, bottom: 15),
+                              padding: EdgeInsets.all(20),
+                              color: Colors.white,
+                              child: Column(
+                                  children: List.generate(sessionList.length, (index){
+                                    return Container(
+                                      margin: EdgeInsets.only(bottom: 10),
+                                      child: Column(
+                                        children: <Widget>[
+                                          Container(
+                                            margin: EdgeInsets.only(bottom: 15),
+                                            child: Row(
+                                              children: <Widget>[
+                                                Container(
+                                                  margin: EdgeInsets.only(right: 15),
+                                                  height: 25,
+                                                  width: 25,
+                                                  alignment: Alignment.center,
+                                                  decoration: BoxDecoration(
+                                                    borderRadius: BorderRadius.all(Radius.circular(7)),
+                                                    color: Color(0xffc3c3c3),
+                                                  ),
+                                                  child: Text((index+1).toString(),style: TextStyle(color: Colors.white,fontSize: 20),),
+                                                ),
+                                                Expanded(
+                                                  child: Container(
+                                                    child: TextField(
+                                                      decoration: InputDecoration.collapsed(hintText: "เพิ่มเครื่องปรุง"),
+                                                      maxLines: null,
+                                                      controller: sessionList[index],
+                                                    ),
+                                                  ),
+                                                ),
+                                                GestureDetector(
+                                                  onTap: (){
+                                                    setState(() {
+                                                      sessionList.removeAt(index);
+                                                    });
+                                                  },
+                                                  child: Container(
+                                                    child: Icon(Icons.remove),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          )
+                                        ],
+                                      ),
+                                    );
+                                  }),
+                              ),
+                            ),
+                            Container(
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: <Widget>[
+                                  Container(
+                                    child: Icon(Icons.add),
+                                  ),
+                                  GestureDetector(
+                                    onTap: (){
+                                      setState(() {
+                                        sessionList.add(new TextEditingController());
+                                      });
+                                    },
+                                    child: Container(
+                                      child: Text("เพิ่มเครื่องปรุง", style: headerText,),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                             GestureDetector(
                               onTap: (){
                                 saveMenu();
@@ -635,6 +716,7 @@ class _add_menu extends State<add_menu> with TickerProviderStateMixin{
                           ],
                         ),
                       ),
+
                     ],
                   ),
                 ),
