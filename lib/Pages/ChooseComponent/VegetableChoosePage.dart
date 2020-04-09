@@ -7,14 +7,14 @@ import 'package:intl/intl.dart';
 import 'package:taluewapp/Services/Ingredient.dart';
 import 'package:provider/provider.dart';
 
-class meat_choose_page extends StatefulWidget {
+class vegetable_choose_page extends StatefulWidget {
   @override
-  _meat_choose_page createState() => _meat_choose_page();
+  _vegetable_choose_page createState() => _vegetable_choose_page();
 }
 
 int click;
 
-class _meat_choose_page extends State<meat_choose_page> {
+class _vegetable_choose_page extends State<vegetable_choose_page> {
   FirebaseAuth _auth = FirebaseAuth.instance;
   Firestore _db = Firestore.instance;
   List<DocumentSnapshot> ingres;
