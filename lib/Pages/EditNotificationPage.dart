@@ -311,7 +311,7 @@ class _edit_noti extends State<edit_noti> with TickerProviderStateMixin{
                           }),
                         ),
                       ):Container(),
-                      GestureDetector(
+                      beforeExpire ? GestureDetector(
                         onTap: (){
                           setState(() {
                             minDays.add(new TextEditingController(text: '1'));
@@ -332,7 +332,7 @@ class _edit_noti extends State<edit_noti> with TickerProviderStateMixin{
                             ],
                           ),
                         ),
-                      ),
+                      ):Container(),
                       GestureDetector(
                         onTap: (){
                           saveData();
