@@ -86,7 +86,6 @@ class _xchoose_page extends State<xchoose_page> {
                       ),
                       GestureDetector(
                         onTap: (){
-                          print(_ingredient.getIngredients());
                           if(_ingredient.getIngredients().isEmpty){
                             showDialog(
                                 context: context,
@@ -112,7 +111,7 @@ class _xchoose_page extends State<xchoose_page> {
                                 }
                             );
                           }else{
-                            Navigator.of(context).pop(_ingredient.getIngredient());
+                            Navigator.of(context).pop(_ingredient.getIngredients());
                           }
                         },
                         child: Container(
