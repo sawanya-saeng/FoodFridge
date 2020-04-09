@@ -129,7 +129,7 @@ class _expire_page extends State<expire_page> {
                         return Container(
                           margin: EdgeInsets.only(bottom: 10),
                           height: 100,
-                          color: Colors.green,
+                          color: Color(0xffFC9002),
                           child: Row(
                             children: <Widget>[
                               Expanded(
@@ -145,17 +145,28 @@ class _expire_page extends State<expire_page> {
                               ),
                               Expanded(
                                 flex: 2,
-                                child: Container(
-                                  color: Color(0xffFFA733),
+                                child: Column(
+                                  children: <Widget>[
+                                    Container(
+                                      color: Color(0xffFC9002),
+                                      padding: EdgeInsets.only(top: 25),
+                                      alignment: Alignment.center,
+                                      child: Text(
+                                        ingres[index].data['num'].toString(),
+                                        style: TextStyle(
+                                            fontSize: 25, color: Colors.white),
+                                      ),
+                                    ),
+                                    Container(
+                                      color: Color(0xffFC9002),
 
-                                  alignment: Alignment.center,
-                                  child: Text(
-                                    ingres[index].data['num'].toString() +
-                                        ' ' +
-                                        ingres[index].data['unit'],
-                                    style: TextStyle(
-                                        fontSize: 22, color: Colors.white),
-                                  ),
+                                      alignment: Alignment.center,
+                                      child: Text(ingres[index].data['unit'],
+                                        style: TextStyle(
+                                            fontSize: 19, color: Colors.white),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                               Expanded(
@@ -167,10 +178,11 @@ class _expire_page extends State<expire_page> {
                                         Container(
                                           color: Colors.red,
                                           alignment: Alignment.center,
+                                          padding: EdgeInsets.only(bottom : 22),
                                           child: Text(
                                             '${calculateDate(format.format(ingres[index]['date'].toDate()))} วัน',
                                             style: TextStyle(
-                                                fontSize: 22,
+                                                fontSize: 23,
                                                 color: Colors.white),
                                           ),
 //                                child: Text(ingres[index].data['date'].toDate().toString()),

@@ -537,10 +537,12 @@ class _user_page extends State<user_page> with TickerProviderStateMixin{
                                   getMyMenu();
                                 },
                                 child: Container(
-                                  height: 200,
+                                  padding: EdgeInsets.only(top:30),
+                                  height: 210,
                                   child: Image.asset('assets/write.png'),
                                 ),
                               ),
+
                             ],
                           ),
                           alignment: Alignment.center,

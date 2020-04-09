@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:taluewapp/Pages/MainPage.dart';
 import 'package:taluewapp/Services/loadingScreenService.dart';
+import 'EditNotificationPage.dart';
 
 class noti_page extends StatefulWidget {
   @override
@@ -74,14 +75,36 @@ class _noti_page extends State<noti_page> with TickerProviderStateMixin{
     return isLoading ? loadingProgress.getSubWidget(context) : Container(
       child: Column(
         children: <Widget>[
-          Container(
-            height: 60,
-            alignment: Alignment.center,
-            color: Color(0xffB15B25),
-            child: Text(
-              'แจ้งเตือน',
-              style: TextStyle(color: Colors.white, fontSize: 35),
-            ),
+          Stack(
+            alignment: Alignment.centerRight,
+            children: <Widget>[
+              Container(
+                height: 60,
+                alignment: Alignment.center,
+                color: Color(0xffB15B25),
+                child: Text(
+                  'การแจ้งเตือน',
+                  style: TextStyle(color: Colors.white, fontSize: 35),
+                ),
+              ),
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(context,
+                      MaterialPageRoute(
+                          builder: (context) {
+                            return edit_noti();
+                          }));
+                },
+                child: Container(
+                  padding: EdgeInsets.only(right: 10),
+                  child: Icon(
+                    Icons.settings,
+                    size: 30,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
           ),
           Expanded(
             child: Container(

@@ -245,8 +245,9 @@ class _meat_choose_page extends State<meat_choose_page> {
                               });
                             },
                             child: Container(
+                              margin: EdgeInsets.only(bottom: 2),
                               height: 100,
-                              color: Colors.green,
+                              color: Color(0xffFC9002),
                               child: Row(
                                 children: <Widget>[
                                   Expanded(
@@ -285,17 +286,30 @@ class _meat_choose_page extends State<meat_choose_page> {
                                   ),
                                   Expanded(
                                     flex: 2,
-                                    child: Container(
-                                      color: Color(0xffFC9002),
-                                      alignment: Alignment.center,
-                                      child: Text(
-                                        calculatedItems[index]['num'][0].toString() +
-                                            ' ' +
-                                            calculatedItems[index]['unit'][0],
-                                        style: TextStyle(
-                                            fontSize: 21, color: Colors.white),
-                                      ),
+                                    child: Column(
+                                      children: <Widget>[
+                                        Container(
+                                          padding: EdgeInsets.only(top: 25),
+                                          color: Color(0xffFC9002),
+                                          alignment: Alignment.center,
+                                          child: Text(
+                                            calculatedItems[index]['num'][0].toString(),
+                                            style: TextStyle(
+                                                fontSize: 25, color: Colors.white),
+                                          ),
+                                        ),
+                                        Container(
+                                          color: Color(0xffFC9002),
+                                          alignment: Alignment.center,
+                                          child: Text(
+                                           calculatedItems[index]['unit'][0],
+                                            style: TextStyle(
+                                                fontSize: 19, color: Colors.white),
+                                          ),
+                                        ),
+                                      ],
                                     ),
+
                                   ),
                                   Expanded(
                                     flex: 2,

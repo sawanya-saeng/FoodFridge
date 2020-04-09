@@ -100,6 +100,7 @@ class _edit_user extends State<edit_user> {
                     Navigator.of(context).pop();
                   },
                   child: Container(
+                    padding: EdgeInsets.only(left: 10),
                     child: Icon(
                       Icons.arrow_back_ios,
                       color: Colors.white,

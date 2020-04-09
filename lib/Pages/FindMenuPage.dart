@@ -62,15 +62,30 @@ class _findmenu_page extends State<findmenu_page> {
   double toGrum(double num, String unit) {
     double base=1;
 
-    if(unit == "กิโล"){
-      base = 1000;
-    }
     if(unit == "ฟอง"){
       base = 50;
     }
-    if(unit == "ช้อนโต๊"){
+    if(unit == "ช้อนโต๊ะ"){
       base = 12.5;
     }
+    if(unit == "กิโลกรัม"){
+      base = 1000;
+    }
+    if(unit == "ช้อนชา") {
+      base = 5;
+    }
+      if(unit == "มิลลิิลิตร"){
+        base = 1.03;
+      }
+      if(unit == "ถ้วยตวง"){
+        base = 240;
+      }
+      if(unit == "ลูก"){
+        base = 67;
+      }
+      if(unit == "เม็ด"){
+        base = 2;
+      }
 
     return num*base;
   }
