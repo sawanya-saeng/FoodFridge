@@ -223,6 +223,10 @@ class _findmenu_page extends State<findmenu_page> {
         }
       }
     }
+    print('cando');
+    print(canDo);
+    print('maybe');
+    print(maybeDo);
   }
 
   Future loadMenuFromManual()async{
@@ -336,9 +340,9 @@ class _findmenu_page extends State<findmenu_page> {
             }
           }
 
-          if(!isHas){
-            continue;
-          }
+//          if(!isHas){
+//            continue;
+//          }
 
           setState(() {
             maybeDo.add({
@@ -350,9 +354,9 @@ class _findmenu_page extends State<findmenu_page> {
             });
           });
         }else{
-          if(!checkMainIngredients(haveMainIngredients[i], _ingredient.getIngredient()['name'])){
-            continue;
-          }
+//          if(!checkMainIngredients(haveMainIngredients[i], _ingredient.getIngredient()['name'])){
+//            continue;
+//          }
 
           setState(() {
             canDo.add(allMenu[i].documentID);
@@ -362,6 +366,10 @@ class _findmenu_page extends State<findmenu_page> {
 
       }
     }
+    print('cando');
+    print(canDo);
+    print('maybe');
+    print(maybeDo);
   }
 
   bool isHasfalse(dynamic a){
