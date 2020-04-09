@@ -237,7 +237,7 @@ class _veget_page extends State<veget_page> with TickerProviderStateMixin{
                                                     child: Container(
                                                       color: Color(0xffFC9002),
                                                       alignment: Alignment.center,
-                                                      child: Text(items[index]['num'][jdex].toString()+
+                                                      child: Text(((double.parse(items[index]['num'][jdex].toString())).toInt()).toString() +
                                                           ' ' +
                                                           items[index]['unit'][jdex],
                                                         style: TextStyle(
@@ -363,8 +363,7 @@ class _veget_page extends State<veget_page> with TickerProviderStateMixin{
                                   child: Container(
                                     color: Color(0xffFC9002),
                                     alignment: Alignment.center,
-                                    child: Text(
-                                      items[index]['num'][0].toString() +
+                                    child: Text(((double.parse(items[index]['num'][0].toString())).toInt()).toString() +
                                           ' ' +
                                           items[index]['unit'][0],
                                       style: TextStyle(

@@ -178,7 +178,7 @@ class _howto_page extends State<howto_page> with TickerProviderStateMixin{
             ),
             FlatButton(
               onPressed: (){
-                if(int.parse(_text.text) > 1){
+                if(int.parse(_text.text) >= 1){
                   isConfirm = true;
                 }
                 Navigator.of(context).pop();

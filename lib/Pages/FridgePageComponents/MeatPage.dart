@@ -235,7 +235,7 @@ class _meat_page extends State<meat_page> with TickerProviderStateMixin{
                                                 child: Container(
                                                   color: Color(0xffFC9002),
                                                   alignment: Alignment.center,
-                                                  child: Text(items[index]['num'][jdex].toString()+
+                                                  child: Text(((double.parse(items[index]['num'][jdex].toString())).toInt()).toString()+
                                                       ' ' +
                                                       items[index]['unit'][jdex],
                                                     style: TextStyle(
@@ -284,11 +284,6 @@ class _meat_page extends State<meat_page> with TickerProviderStateMixin{
                                   onTap: (){
                                     setState(() {
                                       expandList[index] = !expandList[index];
-//                                        if(expandList[index]){
-//                                          _scrollController.animateTo(_scrollController.position.pixels + 100, duration: Duration(milliseconds: 300), curve: Curves.ease);
-//                                        }else{
-//                                          _scrollController.animateTo(_scrollController.position.pixels - 100, duration: Duration(milliseconds: 300), curve: Curves.ease);
-//                                        }
                                     });
                                   },
                                   child: Container(
@@ -361,8 +356,7 @@ class _meat_page extends State<meat_page> with TickerProviderStateMixin{
                                 child: Container(
                                   color: Color(0xffFC9002),
                                   alignment: Alignment.center,
-                                  child: Text(
-                                    items[index]['num'][0].toString() +
+                                  child: Text(((double.parse(items[index]['num'][0].toString())).toInt()).toString() +
                                         ' ' +
                                         items[index]['unit'][0],
                                     style: TextStyle(
