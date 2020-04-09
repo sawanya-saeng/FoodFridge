@@ -5,29 +5,75 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:taluewapp/Pages/MainPage.dart';
+import 'package:taluewapp/Services/loadingScreenService.dart';
 
 class edit_noti extends StatefulWidget {
   @override
   _edit_noti createState() => _edit_noti();
 }
 
-class _edit_noti extends State<edit_noti> {
+class _edit_noti extends State<edit_noti> with TickerProviderStateMixin{
   final _db = Firestore.instance;
-  final _storageRef = FirebaseStorage.instance;
   final _auth = FirebaseAuth.instance;
+  TextEditingController minDay = TextEditingController(text: '1');
+  bool onlyExpire = true;
+  LoadingProgress _loadingProgress;
+  AnimationController _animationController;
+  bool isLoading = true;
 
+  Future saveData()async{
+    setState(() {
+      isLoading = true;
+    });
+    FirebaseUser user = await _auth.currentUser();
+    Map<String, dynamic> dataToSave = {
+      'only_expire': onlyExpire,
+      'min_day': minDay.text.toString()
+    };
+
+    String docId = '';
+    await _db.collection('User').where('uid', isEqualTo: user.uid).getDocuments().then((docs){
+      docId = docs.documents[0].documentID;
+    });
+
+    await _db.collection('User').document(docId).updateData(dataToSave);
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+  Future loadData()async{
+    setState(() {
+      isLoading = true;
+    });
+    FirebaseUser user = await _auth.currentUser();
+    await _db.collection('User').where('uid', isEqualTo: user.uid).getDocuments().then((docs){
+      setState(() {
+        onlyExpire = docs.documents[0].data['only_expire'] == null ? true : docs.documents[0].data['only_expire'];
+        minDay.text = docs.documents[0].data['min_day'] == null ? '1' : docs.documents[0].data['min_day'];
+      });
+    });
+
+    setState(() {
+      isLoading = false;
+    });
+  }
 
   @override
   void initState() {
+    isLoading = true;
+    _animationController = AnimationController(vsync: this, duration: Duration(seconds: 10));
+    _loadingProgress = LoadingProgress(_animationController);
     // TODO: implement initState
     super.initState();
+    loadData();
   }
 
   @override
   Widget build(BuildContext context) {
     double _safeTop = MediaQuery.of(context).padding.top;
     TextStyle bigText = TextStyle(fontSize: 20, color: Color(0xffa5a5a5));
-    return Scaffold(
+    return isLoading ? _loadingProgress.getWidget(context) : Scaffold(
       body: Container(
         color: Color(0xffededed),
         child: Column(
@@ -68,7 +114,6 @@ class _edit_noti extends State<edit_noti> {
                 ),
               ],
             ),
-
             Expanded(
               child: Padding(
                 padding:
@@ -89,39 +134,43 @@ class _edit_noti extends State<edit_noti> {
                           ],
                         ),
                       ),
-
                       Container(
                         child: Text(
                           ' ',
                           style: TextStyle(fontSize: 10),
                         ),
                       ),
-
                       Container(
                         padding: EdgeInsets.only(left: 20,right: 20),
                         child:
                         Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
-                            Row(
-                              children: <Widget>[
-                                Container(
-                                  height: 18,
-                                  width: 18,
-                                  decoration: BoxDecoration(
-                                      color:  Colors.red,
-                                      shape: BoxShape.circle,
-                                      border: Border.all(color: Colors.red)
+                            GestureDetector(
+                              onTap: (){
+                                setState(() {
+                                  onlyExpire = true;
+                                });
+                              },
+                              child: Row(
+                                children: <Widget>[
+                                  Container(
+                                    height: 18,
+                                    width: 18,
+                                    decoration: BoxDecoration(
+                                        color: onlyExpire ? Colors.red : Colors.white,
+                                        shape: BoxShape.circle,
+                                        border: Border.all(color: Colors.red)
+                                    ),
                                   ),
-                                ),
-                                Container(
-                                  child: Text(
-                                    ' แจ้งเตือนเฉพาะวันทีี่หมดอายุแล้ว',
-                                    style: TextStyle(fontSize: 19),
+                                  Container(
+                                    child: Text(
+                                      ' แจ้งเตือนเฉพาะวันทีี่หมดอายุแล้ว',
+                                      style: TextStyle(fontSize: 19),
+                                    ),
                                   ),
-                                ),
-                              ],
-
+                                ],
+                              ),
                             ),
                             Container(
                               child: Text(
@@ -129,27 +178,31 @@ class _edit_noti extends State<edit_noti> {
                                 style: TextStyle(fontSize: 5),
                               ),
                             ),
-
-
-                            Row(
-                              children: <Widget>[
-                                Container(
-                                  height: 18,
-                                  width: 18,
-                                  decoration: BoxDecoration(
-                                      color:  Colors.white,
-                                      shape: BoxShape.circle,
-                                      border: Border.all(color: Colors.red)
+                            GestureDetector(
+                              onTap: (){
+                                setState(() {
+                                  onlyExpire = false;
+                                });
+                              },
+                              child: Row(
+                                children: <Widget>[
+                                  Container(
+                                    height: 18,
+                                    width: 18,
+                                    decoration: BoxDecoration(
+                                        color: !onlyExpire ? Colors.red : Colors.white,
+                                        shape: BoxShape.circle,
+                                        border: Border.all(color: Colors.red)
+                                    ),
                                   ),
-                                ),
-                                Container(
-                                  child: Text(
-                                    ' แจ้งเตือนก่อนวันหมดอายุ',
-                                    style: TextStyle(fontSize: 19),
+                                  Container(
+                                    child: Text(
+                                      ' แจ้งเตือนก่อนวันหมดอายุ',
+                                      style: TextStyle(fontSize: 19),
+                                    ),
                                   ),
-                                ),
-                              ],
-
+                                ],
+                              ),
                             ),
                             Container(
                               child: Text(
@@ -160,13 +213,68 @@ class _edit_noti extends State<edit_noti> {
                           ],
                         ),
                       ),
-
-
-
-
+                      !onlyExpire ? Container(
+                        child: Row(
+                          children: <Widget>[
+                            GestureDetector(
+                              onTap: (){
+                                setState(() {
+                                  int num = int.parse(minDay.text);
+                                  if(num > 1){
+                                    num --;
+                                  }
+                                  minDay.text = num.toString();
+                                });
+                              },
+                              child: Container(
+                                height: 40,
+                                width: 40,
+                                decoration: BoxDecoration(
+                                    color: Colors.white,
+                                  border: Border.all(color: Colors.grey)
+                                ),
+                                child: Icon(Icons.remove),
+                              ),
+                            ),
+                            Expanded(
+                                child: Container(
+                                  height: 40,
+                                  decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      border: Border.all(color: Colors.grey)
+                                  ),
+                                  child: TextField(
+                                    controller: minDay,
+                                    textAlign: TextAlign.center,
+                                    keyboardType: TextInputType.number,
+                                    decoration: InputDecoration.collapsed(hintText: 'ใส่จำนวนวัน'),
+                                  ),
+                                )
+                            ),
+                            GestureDetector(
+                              onTap: (){
+                                setState(() {
+                                  int num = int.parse(minDay.text);
+                                  num++;
+                                  minDay.text = num.toString();
+                                });
+                              },
+                              child: Container(
+                                height: 40,
+                                width: 40,
+                                decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    border: Border.all(color: Colors.grey)
+                                ),
+                                child: Icon(Icons.add),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ):Container(),
                       GestureDetector(
                         onTap: (){
-
+                          saveData();
                         },
                         child: Container(
                           margin: EdgeInsets.only(top: 20,bottom: 20),
