@@ -22,6 +22,8 @@ class _water_choose_page extends State<water_choose_page> {
   bool isLoaded = false;
   Ingredient _ingredient;
   final format = DateFormat('yyyy-MM-dd');
+  List<Map<String, dynamic>> items = [];
+  List<Map<String, dynamic>> calculatedItems = [];
 
   Future getMeat() async {
     FirebaseUser user = await _auth.currentUser();
@@ -34,8 +36,109 @@ class _water_choose_page extends State<water_choose_page> {
       tmp = docs.documents;
       setState(() {
         ingres = tmp;
+        items.clear();
+        for(int i=0; i<ingres.length; i++){
+          bool isHas = checkMember(ingres[i].data['name'])['isHas'];
+          int index = checkMember(ingres[i].data['name'])['index'];
+          if(isHas){
+            items[index]['id'].add(ingres[i].documentID);
+            items[index]['num'].add(ingres[i].data['num']);
+            items[index]['expire'].add(ingres[i]['date'] == null ? 'ไม่มีกำหนด':'${calculateDate(format.format(ingres[i]['date'].toDate()))} วัน');
+            items[index]['unit'].add(ingres[i].data['unit']);
+            items[index]['date'].add(ingres[i].data['date']);
+          }else{
+            items.add({
+              'id': [ingres[i].documentID],
+              'name': ingres[i].data['name'],
+              'num': [ingres[i].data['num']],
+              'expire': [ingres[i].data['date'] == null ? 'ไม่มีกำหนด':'${calculateDate(format.format(ingres[i].data['date'].toDate()))} วัน'],
+              'unit': [ingres[i].data['unit']],
+              'date': [ingres[i].data['date']]
+            });
+          }
+        }
+
+        for(int i=0; i<items.length; i++){
+          if(items[i]['num'].length > 1){
+            double weightSum = 0;
+            Timestamp latestDate;
+            int min = calculateDate(format.format(items[i]['date'][0].toDate()));
+            for(int j=0;j<items[i]['num'].length;j++){
+              double otherWeight = double.parse(items[i]['num'][j].toString());
+              if(items[i]['unit'][0] != items[i]['unit'][j]){
+                otherWeight = toGrum(double.parse(items[i]['num'][j].toString()), items[i]['unit'][0]);
+              }
+              weightSum += otherWeight;
+            }
+
+            for(int j=0;j<items[i]['date'].length;j++){
+              if(items[i]['date'][j] == null){
+                continue;
+              }
+              if(min >= calculateDate(format.format(items[i]['date'][j].toDate()))){
+                min = calculateDate(format.format(items[i]['date'][j].toDate()));
+                latestDate = items[i]['date'][j];
+              }
+            }
+
+            items[i]['num'] = [weightSum];
+            items[i]['date'] = [latestDate];
+          }
+          calculatedItems.add(items[i]);
+        }
+
+        print(calculatedItems);
       });
     });
+  }
+
+  double toGrum(double num, String unit) {
+    double base=1;
+
+    if(unit == "กิโล"){
+      base = 1000;
+    }
+    if(unit == "ฟอง"){
+      base = 50;
+    }
+    if(unit == "ช้อนโต๊"){
+      base = 12.5;
+    }
+
+    return num*base;
+  }
+
+  Map<String, dynamic> checkMember(String value){
+    for(int i=0; i<items.length; i++){
+      if(items[i]['name'] == value){
+        return {
+          'isHas': true,
+          'index': i
+        };
+      }
+    }
+    return {
+      'isHas': false,
+      'index': null
+    };
+  }
+
+  Map<String, String> ingredientToFind = {};
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getMeat();
+  }
+
+  @override
+  void didChangeDependencies(){
+    super.didChangeDependencies();
+    if(!isLoaded){
+      _ingredient = Provider.of<Ingredient>(context);
+      isLoaded = true;
+    }
   }
 
   calculateDate(String date1){
@@ -57,24 +160,6 @@ class _water_choose_page extends State<water_choose_page> {
     int diff = date.differenceValue(date: DateTime(int.parse(dateList[0]), int.parse(dateList[1]), int.parse(dateList[2])+1), type: DateType.day);
 
     return diff;
-  }
-
-  Map<String, String> ingredientToFind = {};
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    getMeat();
-  }
-
-  @override
-  void didChangeDependencies(){
-    super.didChangeDependencies();
-    if(!isLoaded){
-      _ingredient = Provider.of<Ingredient>(context);
-      isLoaded = true;
-    }
   }
 
   @override
@@ -145,23 +230,24 @@ class _water_choose_page extends State<water_choose_page> {
                 child: Container(
                     child: ListView.builder(
                         padding: EdgeInsets.zero,
-                        itemCount: ingres == null ? 0 : ingres.length,
+                        itemCount: calculatedItems == null ? 0 : calculatedItems.length,
                         itemBuilder: (BuildContext context, int index) {
                           return GestureDetector(
                             onTap: (){
                               setState(() {
                                 ingredientToFind.clear();
                                 ingredientToFind.addAll({
-                                  'name': ingres[index]['name'],
-                                  'num': ingres[index]['num'],
-                                  'unit': ingres[index]['unit']
+                                  'name': calculatedItems[index]['name'],
+                                  'num': calculatedItems[index]['num'][0].toString(),
+                                  'unit': calculatedItems[index]['unit'][0]
                                 });
                                 _ingredient.setIngredient(ingredientToFind);
                               });
                             },
                             child: Container(
+                              margin: EdgeInsets.only(bottom: 2),
                               height: 100,
-                              color: Colors.green,
+                              color: Color(0xffFC9002),
                               child: Row(
                                 children: <Widget>[
                                   Expanded(
@@ -180,7 +266,7 @@ class _water_choose_page extends State<water_choose_page> {
                                                   height: 18,
                                                   width: 18,
                                                   decoration: BoxDecoration(
-                                                      color: ingredientToFind['name'] == ingres[index]['name'] ? Colors.red : Colors.white,
+                                                      color: ingredientToFind['name'] == calculatedItems[index]['name'] ? Colors.red : Colors.white,
                                                       shape: BoxShape.circle,
                                                       border: Border.all(color: Colors.red)
                                                   ),
@@ -190,7 +276,7 @@ class _water_choose_page extends State<water_choose_page> {
                                           ),
                                           Container(
                                             child: Text(
-                                              ingres[index].data['name'],
+                                              calculatedItems[index]['name'],
                                               style: TextStyle(fontSize: 25),
                                             ),
                                           ),
@@ -200,17 +286,30 @@ class _water_choose_page extends State<water_choose_page> {
                                   ),
                                   Expanded(
                                     flex: 2,
-                                    child: Container(
-                                      color: Color(0xffFC9002),
-                                      alignment: Alignment.center,
-                                      child: Text(
-                                        ingres[index].data['num'].toString() +
-                                            ' ' +
-                                            ingres[index].data['unit'],
-                                        style: TextStyle(
-                                            fontSize: 21, color: Colors.white),
-                                      ),
+                                    child: Column(
+                                      children: <Widget>[
+                                        Container(
+                                          padding: EdgeInsets.only(top: 25),
+                                          color: Color(0xffFC9002),
+                                          alignment: Alignment.center,
+                                          child: Text(
+                                            ((double.parse(calculatedItems[index]['num'][0].toString())).toInt()).toString(),
+                                            style: TextStyle(
+                                                fontSize: 25, color: Colors.white),
+                                          ),
+                                        ),
+                                        Container(
+                                          color: Color(0xffFC9002),
+                                          alignment: Alignment.center,
+                                          child: Text(
+                                            calculatedItems[index]['unit'][0],
+                                            style: TextStyle(
+                                                fontSize: 19, color: Colors.white),
+                                          ),
+                                        ),
+                                      ],
                                     ),
+
                                   ),
                                   Expanded(
                                     flex: 2,
@@ -222,24 +321,22 @@ class _water_choose_page extends State<water_choose_page> {
                                               color: Color(0xffFFA733),
                                               alignment: Alignment.center,
                                               child: Text(
-                                                ingres[index].data['date'] == null ? 'ไม่มีกำหนด':'${calculateDate(format.format(ingres[index]['date'].toDate()))} วัน',
+                                                calculatedItems[index]['date'][0] == null ? 'ไม่มีกำหนด':'${calculateDate(format.format(calculatedItems[index]['date'][0].toDate()))} วัน',
                                                 style: TextStyle(
                                                     fontSize: 21,
                                                     color: Colors.white),
                                               ),
                                             ),
-                                            GestureDetector(
-                                              child: Container(
-                                                alignment: Alignment.center,
-                                                height: 30,
-                                                child: Text(
-                                                  ingres[index].data['date'] == null ? 'ไม่มีกำหนด':'${ingres[index].data['date'].toDate().day.toString()}/${ingres[index].data['date'].toDate().month.toString()}/${ingres[index].data['date'].toDate().year.toString()}',
-                                                  style: TextStyle(
-                                                      fontSize: 15,
-                                                      color: Colors.white),
-                                                ),
-                                                color: Color(0xffFC9002),
+                                            Container(
+                                              alignment: Alignment.center,
+                                              height: 30,
+                                              child: Text(
+                                                calculatedItems[index]['date'][0] == null ? 'ไม่มีกำหนด':'${calculatedItems[index]['date'][0].toDate().day.toString()}/${calculatedItems[index]['date'][0].toDate().month.toString()}/${calculatedItems[index]['date'][0].toDate().year.toString()}',
+                                                style: TextStyle(
+                                                    fontSize: 15,
+                                                    color: Colors.white),
                                               ),
+                                              color: Color(0xffFC9002),
                                             ),
                                           ]),
                                     ),

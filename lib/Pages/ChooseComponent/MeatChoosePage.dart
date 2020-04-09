@@ -293,7 +293,7 @@ class _meat_choose_page extends State<meat_choose_page> {
                                           color: Color(0xffFC9002),
                                           alignment: Alignment.center,
                                           child: Text(
-                                            calculatedItems[index]['num'][0].toString(),
+                                            ((double.parse(calculatedItems[index]['num'][0].toString())).toInt()).toString(),
                                             style: TextStyle(
                                                 fontSize: 25, color: Colors.white),
                                           ),
