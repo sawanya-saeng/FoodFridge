@@ -7,14 +7,14 @@ import 'package:intl/intl.dart';
 import 'package:taluewapp/Services/Ingredient.dart';
 import 'package:provider/provider.dart';
 
-class vegetable_choose_page extends StatefulWidget {
+class meat_choose_page extends StatefulWidget {
   @override
-  _vegetable_choose_page createState() => _vegetable_choose_page();
+  _meat_choose_page createState() => _meat_choose_page();
 }
 
 int click;
 
-class _vegetable_choose_page extends State<vegetable_choose_page> {
+class _meat_choose_page extends State<meat_choose_page> {
   FirebaseAuth _auth = FirebaseAuth.instance;
   Firestore _db = Firestore.instance;
   List<DocumentSnapshot> ingres;
@@ -22,11 +22,8 @@ class _vegetable_choose_page extends State<vegetable_choose_page> {
   bool isLoaded = false;
   Ingredient _ingredient;
   final format = DateFormat('yyyy-MM-dd');
-
   List<Map<String, dynamic>> items = [];
   List<Map<String, dynamic>> calculatedItems = [];
-
-
 
   Future getMeat() async {
     FirebaseUser user = await _auth.currentUser();
@@ -233,16 +230,16 @@ class _vegetable_choose_page extends State<vegetable_choose_page> {
                 child: Container(
                     child: ListView.builder(
                         padding: EdgeInsets.zero,
-                        itemCount: ingres == null ? 0 : ingres.length,
+                        itemCount: calculatedItems == null ? 0 : calculatedItems.length,
                         itemBuilder: (BuildContext context, int index) {
                           return GestureDetector(
                             onTap: (){
                               setState(() {
                                 ingredientToFind.clear();
                                 ingredientToFind.addAll({
-                                  'name': ingres[index]['name'],
-                                  'num': ingres[index]['num'],
-                                  'unit': ingres[index]['unit']
+                                  'name': calculatedItems[index]['name'],
+                                  'num': calculatedItems[index]['num'][0].toString(),
+                                  'unit': calculatedItems[index]['unit'][0]
                                 });
                                 _ingredient.setIngredient(ingredientToFind);
                               });
@@ -298,7 +295,7 @@ class _vegetable_choose_page extends State<vegetable_choose_page> {
                                           child: Text(
                                             ((double.parse(calculatedItems[index]['num'][0].toString())).toInt()).toString(),
                                             style: TextStyle(
-                                                fontSize: 26, color: Colors.white),
+                                                fontSize: 25, color: Colors.white),
                                           ),
                                         ),
                                         Container(
@@ -324,27 +321,22 @@ class _vegetable_choose_page extends State<vegetable_choose_page> {
                                               color: Color(0xffFFA733),
                                               alignment: Alignment.center,
                                               child: Text(
-                                                ingres[index].data['date'] == null ? 'ไม่มีกำหนด':'${calculateDate(format.format(ingres[index]['date'].toDate()))} วัน',
+                                                calculatedItems[index]['date'][0] == null ? 'ไม่มีกำหนด':'${calculateDate(format.format(calculatedItems[index]['date'][0].toDate()))} วัน',
                                                 style: TextStyle(
                                                     fontSize: 21,
                                                     color: Colors.white),
                                               ),
                                             ),
-                                            GestureDetector(
-                                              onTap: (){
-                                                calculateDate(ingres[index].data['date'].toDate());
-                                              },
-                                              child: Container(
-                                                alignment: Alignment.center,
-                                                height: 30,
-                                                child: Text(
-                                                  ingres[index].data['date'] == null ? 'ไม่มีกำหนด':'${ingres[index].data['date'].toDate().day.toString()}/${ingres[index].data['date'].toDate().month.toString()}/${ingres[index].data['date'].toDate().year.toString()}',
-                                                  style: TextStyle(
-                                                      fontSize: 15,
-                                                      color: Colors.white),
-                                                ),
-                                                color: Color(0xffFC9002),
+                                            Container(
+                                              alignment: Alignment.center,
+                                              height: 30,
+                                              child: Text(
+                                                calculatedItems[index]['date'][0] == null ? 'ไม่มีกำหนด':'${calculatedItems[index]['date'][0].toDate().day.toString()}/${calculatedItems[index]['date'][0].toDate().month.toString()}/${calculatedItems[index]['date'][0].toDate().year.toString()}',
+                                                style: TextStyle(
+                                                    fontSize: 15,
+                                                    color: Colors.white),
                                               ),
+                                              color: Color(0xffFC9002),
                                             ),
                                           ]),
                                     ),
