@@ -254,7 +254,7 @@ class _add_page extends State<add_page> {
                                   unitValue = value;
                                 });
                               },
-                            items: <String>['กรัม', 'กิโลกรัม', 'ฟอง', 'ช้อนโต๊ะ', 'ช้อนชา' , 'มิลลิลิตร' , 'ถ้วยตวง', 'ลูก' , 'เม็ด'].map<DropdownMenuItem<String>>((String value){
+                            items: <String>['กรัม', 'กิโลกรัม', 'ขีด' , 'ฟอง', 'ช้อนโต๊ะ', 'ช้อนชา' , 'มิลลิลิตร' , 'ถ้วยตวง', 'ลูก'].map<DropdownMenuItem<String>>((String value){
                                 return DropdownMenuItem<String>(value: value, child: Text(value),);
                               }).toList(),
                             )

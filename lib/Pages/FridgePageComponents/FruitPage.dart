@@ -219,6 +219,7 @@ class _fruit_page extends State<fruit_page> with TickerProviderStateMixin{
                                           children: <Widget>[
                                             Container(
                                               height: 100,
+                                              color: Color(0xffFC9002),
                                               child: Row(
                                                 children: <Widget>[
                                                   Expanded(
@@ -234,15 +235,26 @@ class _fruit_page extends State<fruit_page> with TickerProviderStateMixin{
                                                   ),
                                                   Expanded(
                                                     flex: 2,
-                                                    child: Container(
-                                                      color: Color(0xffFC9002),
-                                                      alignment: Alignment.center,
-                                                      child: Text(((double.parse(items[index]['num'][jdex].toString())).toInt()).toString() +
-                                                          ' ' +
-                                                          items[index]['unit'][jdex],
-                                                        style: TextStyle(
-                                                            fontSize: 22, color: Colors.white),
-                                                      ),
+                                                    child: Column(
+                                                      children: <Widget>[
+                                                        Container(
+                                                          padding: EdgeInsets.only(top: 25),
+                                                          color: Color(0xffFC9002),
+                                                          alignment: Alignment.center,
+                                                          child: Text(((double.parse(items[index]['num'][jdex].toString())).toInt()).toString(),
+                                                            style: TextStyle(
+                                                                fontSize: 25, color: Colors.white),
+                                                          ),
+                                                        ),
+                                                        Container(
+                                                          color: Color(0xffFC9002),
+                                                          alignment: Alignment.center,
+                                                          child: Text(items[index]['unit'][jdex],
+                                                            style: TextStyle(
+                                                                fontSize: 19, color: Colors.white),
+                                                          ),
+                                                        ),
+                                                      ],
                                                     ),
                                                   ),
                                                   Expanded(
@@ -254,10 +266,11 @@ class _fruit_page extends State<fruit_page> with TickerProviderStateMixin{
                                                             Container(
                                                               color: Color(0xffFFA733),
                                                               alignment: Alignment.center,
+                                                              padding: EdgeInsets.only(bottom : 22),
                                                               child: Text(
                                                                 items[index]['expire'][jdex],
                                                                 style: TextStyle(
-                                                                    fontSize: 22,
+                                                                    fontSize: 23,
                                                                     color: Colors.white),
                                                               ),
                                                             ),
@@ -344,7 +357,7 @@ class _fruit_page extends State<fruit_page> with TickerProviderStateMixin{
                           child: Container(
                             margin: EdgeInsets.only(bottom: 10),
                             height: 100,
-                            color: Colors.green,
+                            color: Color(0xffFC9002),
                             child: Row(
                               children: <Widget>[
                                 Expanded(
@@ -360,15 +373,26 @@ class _fruit_page extends State<fruit_page> with TickerProviderStateMixin{
                                 ),
                                 Expanded(
                                   flex: 2,
-                                  child: Container(
-                                    color: Color(0xffFC9002),
-                                    alignment: Alignment.center,
-                                    child: Text(((double.parse(items[index]['num'][0].toString())).toInt()).toString() +
-                                          ' ' +
-                                          items[index]['unit'][0],
-                                      style: TextStyle(
-                                          fontSize: 22, color: Colors.white),
-                                    ),
+                                  child: Column(
+                                    children: <Widget>[
+                                      Container(
+                                        padding: EdgeInsets.only(top: 25),
+                                        color: Color(0xffFC9002),
+                                        alignment: Alignment.center,
+                                        child: Text(((double.parse(items[index]['num'][0].toString())).toInt()).toString(),
+                                          style: TextStyle(
+                                              fontSize: 25, color: Colors.white),
+                                        ),
+                                      ),
+                                      Container(
+                                        color: Color(0xffFC9002),
+                                        alignment: Alignment.center,
+                                        child: Text(items[index]['unit'][0],
+                                          style: TextStyle(
+                                              fontSize: 19, color: Colors.white),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                                 Expanded(
@@ -380,10 +404,11 @@ class _fruit_page extends State<fruit_page> with TickerProviderStateMixin{
                                           Container(
                                             color: Color(0xffFFA733),
                                             alignment: Alignment.center,
+                                            padding: EdgeInsets.only(bottom : 22),
                                             child: Text(
                                               items[index]['expire'][0],
                                               style: TextStyle(
-                                                  fontSize: 22,
+                                                  fontSize: 23,
                                                   color: Colors.white),
                                             ),
                                           ),

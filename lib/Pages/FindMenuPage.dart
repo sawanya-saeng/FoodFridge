@@ -83,9 +83,12 @@ class _findmenu_page extends State<findmenu_page> {
       if(unit == "ลูก"){
         base = 67;
       }
-      if(unit == "เม็ด"){
-        base = 2;
+      if(unit == "ขีด"){
+        base = 100;
       }
+      if(unit == "เม็ด"){
+      base = 100;
+     }
 
     return num*base;
   }

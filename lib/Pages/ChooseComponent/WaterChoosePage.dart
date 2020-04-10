@@ -320,10 +320,11 @@ class _water_choose_page extends State<water_choose_page> {
                                             Container(
                                               color: Color(0xffFFA733),
                                               alignment: Alignment.center,
+                                              padding: EdgeInsets.only(bottom : 22),
                                               child: Text(
                                                 calculatedItems[index]['date'][0] == null ? 'ไม่มีกำหนด':'${calculateDate(format.format(calculatedItems[index]['date'][0].toDate()))} วัน',
                                                 style: TextStyle(
-                                                    fontSize: 21,
+                                                    fontSize: 23,
                                                     color: Colors.white),
                                               ),
                                             ),

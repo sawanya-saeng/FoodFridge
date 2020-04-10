@@ -289,7 +289,7 @@ class _xmeat_choose_page extends State<xmeat_choose_page> {
                             },
                             child: Container(
                               height: 100,
-                              color: Colors.green,
+                              color: Color(0xffFC9002),
                               child: Row(
                                 children: <Widget>[
                                   Expanded(
@@ -330,16 +330,27 @@ class _xmeat_choose_page extends State<xmeat_choose_page> {
                                   ),
                                   Expanded(
                                     flex: 2,
-                                    child: Container(
-                                      color: Color(0xffFC9002),
-                                      alignment: Alignment.center,
-                                      child: Text(
-                                        ((double.parse(calculatedItems[index]['num'][0].toString())).toInt()).toString() +
-                                            ' ' +
-                                            calculatedItems[index]['unit'][0],
-                                        style: TextStyle(
-                                            fontSize: 21, color: Colors.white),
-                                      ),
+                                    child: Column(
+                                      children: <Widget>[
+                                        Container(
+                                          color: Color(0xffFC9002),
+                                          alignment: Alignment.center,
+                                          padding: EdgeInsets.only(top: 25),
+                                          child: Text(
+                                            ((double.parse(calculatedItems[index]['num'][0].toString())).toInt()).toString(),
+                                            style: TextStyle(
+                                                fontSize: 25, color: Colors.white),
+                                          ),
+                                        ),
+                                        Container(
+                                          color: Color(0xffFC9002),
+                                          alignment: Alignment.center,
+                                          child: Text(calculatedItems[index]['unit'][0],
+                                            style: TextStyle(
+                                                fontSize: 19, color: Colors.white),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                   Expanded(
@@ -351,10 +362,11 @@ class _xmeat_choose_page extends State<xmeat_choose_page> {
                                             Container(
                                               color: Color(0xffFFA733),
                                               alignment: Alignment.center,
+                                              padding: EdgeInsets.only(bottom : 22),
                                               child: Text(
                                                 calculatedItems[index]['date'][0] == null ? 'ไม่มีกำหนด':'${calculateDate(format.format(calculatedItems[index]['date'][0].toDate()))} วัน',
                                                 style: TextStyle(
-                                                    fontSize: 22,
+                                                    fontSize: 23,
                                                     color: Colors.white),
                                               ),
                                             ),
